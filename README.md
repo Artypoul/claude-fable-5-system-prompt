@@ -101,7 +101,7 @@ The repository retains the source material that the adaptation is based on:
 - [Source analysis](system-prompt/analysis/)
 - [Archive highlights](highlights/surprising-revelations.md)
 
-These files are reference and provenance material. They are not additional runtime instructions for Codex. The original archive's attribution and licensing context remains in the preserved files and [LICENSE](LICENSE).
+These files are reference and provenance material. They are not additional runtime instructions for Codex. The preserved source archive was originally curated and extracted by [Sayan Chowdhury](https://github.com/saynchowdhury); its attribution and licensing context remains in the preserved files and [LICENSE](LICENSE).
 
 ## Contributing
 
