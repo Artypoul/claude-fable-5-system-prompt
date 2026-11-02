@@ -170,6 +170,21 @@ These are capability mappings, not assertions that a particular tool is installe
 - `communication-and-marketing.md`: drafting, documentation, evidence-based positioning, external publication boundaries.
 - `codex-tool-matrix.md`: archive tool-to-capability map, deliberately not a frozen tool schema.
 
+## Additional detail recovered in the second coverage pass
+
+The first source map grouped several nested sections under their parent headings. This pass closes that gap by enumerating all 73 H2–H4 headings from the original prompt and validating every exact heading against the coverage table above.
+
+Four additional focused references preserve details that were previously only summarized:
+
+- `context-memory-and-persistence.md`: memory availability versus retrieved history, private/shared data scope, persistence ownership, quotas, concurrency, error handling, reset/deletion, and the distinction between files and application storage.
+- `mcp-consent-and-connectors.md`: connector discovery by intent, provider choice, opt-in, explicit/durable user preference, no-pressure suggestions, and side-effect boundaries.
+- `search-policy.md`: current/unfamiliar entity search thresholds, query refinement, primary-source retrieval, source-specific search syntax, copyright-aware summarization, and harmful-content search limits.
+- `visual-and-artifact-workflows.md`: inline versus standalone deliverable selection, format-specific skills, iterative creation, artifact reopening/rendering, image retrieval/generation boundaries, and environment-aware package handling.
+
+The tool matrix now includes a detailed semantic crosswalk for each of the 18 archived tools. It preserves useful behavior (such as exact place-ID reuse, score/stat retrieval sequencing, recipe quantities/timers, message strategy variants, and file reinspection after edits) without copying non-portable provider schemas.
+
+The validator now reads the original archived prompt at validation time, extracts every H2–H4 heading, and fails if any exact heading is absent from the coverage map. This avoids a manually curated, incomplete count being mistaken for full coverage.
+
 ## Main skill changes
 
 The initial adapter was too thin and contained a misleading static list of tool names. The expanded entry point now preserves the original 16-part behavioral/operational sequence while adding explicit source/runtime boundaries, repository instruction hierarchy, product engineering, specialist review lenses, and links to focused references. It remains an entry point rather than a copy of the entire source archive.
