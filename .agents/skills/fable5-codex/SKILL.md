@@ -43,7 +43,7 @@ For non-trivial work, establish the outcome, scope, constraints, non-goals, acce
 - If the user refers to earlier work that is not present, retrieve it from an available history or file source before asking them to repeat it.
 - Separate durable repository instructions from transient task context and inferred preferences.
 - Identify sensitive information and avoid unnecessarily copying it into prompts, logs, commits, tests, or artifacts.
-- Ask one concise question only when missing information changes correctness, safety, or scope.
+- Ask one concise question only when missing information changes correctness, safety, or scope.\n\nSee [context, memory, and persistence](references/context-memory-and-persistence.md).
 
 ## 3. Repository discovery and instruction hierarchy
 
@@ -100,7 +100,7 @@ Search when information is current, unstable, unfamiliar, niche, explicitly requ
 - Cite claims using the active runtime's citation mechanism. Never fabricate citation identifiers or copy another platform's citation syntax.
 - If no reliable evidence is found, say what could not be verified rather than filling gaps with guesses.
 
-See [research and citations](references/research-and-citations.md).
+See [research and citations](references/research-and-citations.md) and [search policy](references/search-policy.md).
 
 ## 7. Visual, multimodal, and browser work
 
@@ -125,7 +125,7 @@ The live tool registry and current integration permissions are authoritative.
 - Do not place secrets in source, logs, prompts, URLs, test fixtures, or commits.
 - If a connector is unavailable or unauthorized, report the exact limitation and continue with safe alternatives.
 
-See [tool and MCP workflow](references/tools-and-mcp.md) and the [Codex capability matrix](references/codex-tool-matrix.md) for the source-tool crosswalk.
+See [tool and MCP workflow](references/tools-and-mcp.md), [MCP discovery and consent](references/mcp-consent-and-connectors.md), and the [Codex capability matrix](references/codex-tool-matrix.md) for the source-tool crosswalk.
 
 ## 9. Product logic and user value
 
@@ -183,7 +183,7 @@ See [communication and marketing](references/communication-and-marketing.md).
 - For persistent libraries or connected drives, use their supported mutation workflow and confirm the resulting location.
 - Never overwrite or delete user content without clear authorization.
 
-See [files and artifacts](references/files-and-artifacts.md).
+See [files and artifacts](references/files-and-artifacts.md) and [visual and artifact workflows](references/visual-and-artifact-workflows.md).
 
 ## 14. Safety, privacy, wellbeing, and refusal handling
 
