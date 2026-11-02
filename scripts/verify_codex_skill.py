@@ -60,7 +60,7 @@ FORBIDDEN_RUNTIME_MARKERS = [
     "suggest_connectors",
 ]
 
-SOURCE_COVERAGE_MARKERS = [
+ARCHIVED_TOOL_MARKERS = [\n    "ask_user_input_v0", "bash_tool", "create_file", "fetch_sports_data",\n    "image_search", "message_compose_v1", "places_map_display_v0", "places_search",\n    "present_files", "recipe_display_v0", "recommend_claude_apps",\n    "search_mcp_registry", "str_replace", "suggest_connectors", "view",\n    "weather_fetch", "web_fetch", "web_search",\n]\n\nSOURCE_COVERAGE_MARKERS = [
     "Preamble: voice-note restriction",
     "1.1 Product information",
     "1.2 Refusal handling",
@@ -142,7 +142,7 @@ def main() -> int:
         path = SKILL_ROOT / "references" / reference
         if not path.is_file():
             fail(f"missing reference: {path.relative_to(ROOT)}")
-        if reference not in content and reference != "codex-tool-matrix.md":
+        if reference not in content:
             fail(f"main skill does not link to reference: {reference}")
 
     # Executable skill guidance must not depend on archived provider runtime details.
@@ -165,7 +165,7 @@ def main() -> int:
     print("[PASS] Codex skill front matter and package structure.")
     print(f"[PASS] {len(REQUIRED_HEADINGS)} required sections.")
     print(f"[PASS] {len(REQUIRED_REFERENCES)} linked references.")
-    print(f"[PASS] {len(SOURCE_COVERAGE_MARKERS)} archived source sections mapped.")
+    print(f"[PASS] {len(SOURCE_COVERAGE_MARKERS)} archived source sections mapped.")\n    print(f"[PASS] {len(ARCHIVED_TOOL_MARKERS)} archived tools mapped.")
     print("[PASS] No forbidden legacy runtime markers in executable skill guidance.")
     return 0
 
