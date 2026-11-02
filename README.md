@@ -1,256 +1,118 @@
 <div align="center">
 
-# Claude Fable 5 System Prompt
+# Fable 5 Codex Skill
 
-### The Complete Leaked System Prompt from Anthropic's Most Intelligent Model
+### Адаптированный source-based skill Fable 5 для OpenAI Codex
 
-![Claude Fable 5 Hero Banner](assets/fable5-hero.png)
+![Fable 5 Codex Skill](assets/fable5-hero.png)
 
-*Curated & Extracted by **[Sayan Chowdhury](https://github.com/saynchowdhury)***
+[![Codex Skill](https://img.shields.io/badge/Codex-skill-412991)](.agents/skills/fable5-codex/SKILL.md)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)](https://www.python.org/)
+[![Validation](https://github.com/Artypoul/claude-fable-5-system-prompt/actions/workflows/codex-skill-validation.yml/badge.svg)](https://github.com/Artypoul/claude-fable-5-system-prompt/actions/workflows/codex-skill-validation.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[![Last Updated](https://img.shields.io/badge/Updated-June%202026-blue)]()
-[![Prompt Length](https://img.shields.io/badge/Prompt-~1580%20lines-orange)]()
-[![License](https://img.shields.io/badge/License-MIT-green)]()
-[![Stars](https://img.shields.io/github/stars/saynchowdhury/claude-fable-5-system-prompt?style=social)]()
-[![Views](https://api.visitorbadge.io/api/VisitorHit?user=saynchowdhury&repo=claude-fable-5-system-prompt&label=views&countColor=%23222222&labelColor=%23555555)]()
-[![Live Views](https://visitor-badge.laobi.icu/badge?page_id=saynchowdhury.claude-fable-5-system-prompt&left_text=live%20views)](https://github.com/saynchowdhury/claude-fable-5-system-prompt)
-
-<br/>
-
-[![Share on X](https://img.shields.io/badge/Share-000000?style=flat&logo=x&logoColor=white)](https://twitter.com/intent/tweet?text=The%20complete%20Claude%20Fable%205%20system%20prompt%20has%20been%20leaked%20—%20revealing%20a%20new%20Mythos%20model%20tier%20above%20Opus%2C%2022%2B%20tools%2C%20and%20%22Claudeception%22%20(API%20inside%20Artifacts).%20Full%20analysis%3A&url=https://github.com/saynchowdhury/claude-fable-5-system-prompt)
-[![Share on LinkedIn](https://img.shields.io/badge/Share-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/sharing/share-offsite/?url=https://github.com/saynchowdhury/claude-fable-5-system-prompt)
-[![Share on Reddit](https://img.shields.io/badge/Share-FF4500?style=flat&logo=reddit&logoColor=white)](https://reddit.com/submit?url=https://github.com/saynchowdhury/claude-fable-5-system-prompt&title=The%20complete%20Claude%20Fable%205%20system%20prompt)
-[![Share on Hacker News](https://img.shields.io/badge/Share-FF6600?style=flat&logo=ycombinator&logoColor=white)](https://news.ycombinator.com/submitlink?u=https://github.com/saynchowdhury/claude-fable-5-system-prompt&t=The%20complete%20Claude%20Fable%205%20system%20prompt)
-[![Connect on LinkedIn](https://img.shields.io/badge/Connect_with_Author-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sayanchowdhuryai/)
-
-*The complete Claude Fable 5 (Mythos-class) system prompt archive. Discover Anthropic's agentic AI rules, tools, and secrets.*
-
-[Key Revelations](#key-revelations) | [Full Prompt](system-prompt/full-system-prompt.md) | [Analysis](system-prompt/analysis/key-findings.md) | [Fable 5 vs Opus 4.8](system-prompt/analysis/fable5-vs-opus-comparison.md) | [Highlights](highlights/surprising-revelations.md)
+*Community-maintained adaptation of the Fable 5 workflow for Codex. The historical source archive is retained for provenance and comparison.*
 
 </div>
 
 ---
 
-## What Is This?
+## What this repository is
 
-This repository contains the **complete system prompt** (~1,580 lines, ~120KB) for **Claude Fable 5**, Anthropic's most capable generally-available AI model as of June 2026. The prompt was extracted from a live claude.ai session and reveals the inner architecture, behavioral guidelines, tool definitions, and safety frameworks that govern how Claude Fable 5 thinks, responds, and interacts.
+This repository packages a **source-based Fable 5 skill for OpenAI Codex**. It adapts the original sixteen-section structure into a reusable workflow for:
 
-This is the most detailed look yet into how Anthropic engineers its flagship model's behavior.
+- coding and implementation;
+- code review, debugging and testing;
+- research and evidence-based answers;
+- product decisions and business rules;
+- files, artifacts and delivery;
+- GitHub and repository handoff.
 
-## Codex adaptation
+The active entry point is [.agents/skills/fable5-codex/SKILL.md](.agents/skills/fable5-codex/SKILL.md). The skill is backed by a canonical source-faithful port, engineering supplements, a traceability record, a deterministic validator and regression tests.
 
-The Codex port uses the original archive as its primary structure, not merely a source of ideas. Its entry point follows the original sixteen sections, and its canonical reference retains all 73 nested headings with individual source-block decisions. The historical files and attribution remain unchanged.
+This is **workflow guidance for Codex**, not a system prompt, model identity, hidden API, credential, permission grant or replacement for the active system and developer instructions. The skill cannot give Codex tools or access that the host has not provided.
 
-- [Skill entry point](.agents/skills/fable5-codex/SKILL.md): original section order and task-specific reading routes.
-- [Source-based port](.agents/skills/fable5-codex/references/source-faithful-port.md): adapted bodies, conditions, examples and eighteen tool-capability descriptions.
-- [Engineering supplement](.agents/skills/fable5-codex/references/engineering-workflow.md): coding, product, review and delivery methods added to, not substituted for, the source.
-- [Changes and traceability](CODEX_ADAPTATION_CHANGES.md): source provenance, deliberate substitutions, schema disposition and 538 source-block mappings with real target-body fingerprints.
-- [Validator](scripts/verify_codex_skill.py) and [regression tests](tests/test_codex_port.py): source-integrity, structure, links, metadata, rule mapping and negative mutation checks.
+## Install and use
 
-The package follows the [Codex skill format](https://learn.chatgpt.com/docs/build-skills). Use the repository's `.agents/skills/fable5-codex` directory, or install that entire directory into a supported skill location. In a Codex interface that supports explicit skill mentions, invoke `$fable5-codex`; verify discovery in the actual client. No tool namespace, hidden credential, model identity or network configuration is granted by this skill.
+Copy the complete [.agents/skills/fable5-codex](.agents/skills/fable5-codex) directory into a supported Codex skill location. If the Codex client supports explicit skill mentions, invoke it as `$fable5-codex`.
+
+Before using the skill in a project:
+
+1. read the repository's applicable `AGENTS.md` and local instructions;
+2. inspect the current branch, working tree and affected paths;
+3. load only the source-based sections and engineering references relevant to the task;
+4. preserve unrelated work and verify the actual result.
+
+The skill follows the host's current permissions, tool schemas, safety rules, network policy and filesystem boundaries.
+
+## What is adapted
+
+The Codex port preserves the source archive's sixteen-section order while replacing provider-specific assumptions with Codex-compatible guidance:
+
+- [Skill entry point](.agents/skills/fable5-codex/SKILL.md) — routing, boundaries and the sixteen sections.
+- [Source-faithful port](.agents/skills/fable5-codex/references/source-faithful-port.md) — adapted rules, examples, conditions and source mappings.
+- [Engineering workflow](.agents/skills/fable5-codex/references/engineering-workflow.md) — implementation, review, testing and delivery practices.
+- [Changes and traceability](CODEX_ADAPTATION_CHANGES.md) — provenance, substitutions and source-block fingerprints.
+- [Codex tool matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — supplementary capability mapping; it is not a live tool registry.
+
+The source archive remains useful for comparison, but the adapted skill is the primary deliverable in this repository.
+
+## Repository structure
+
+~~~text
+claude-fable-5-system-prompt/
+├── .agents/skills/fable5-codex/
+│   ├── SKILL.md
+│   └── references/                  ← source port and engineering supplements
+├── CODEX_ADAPTATION_CHANGES.md      ← provenance and traceability
+├── system-prompt/                   ← historical source archive and analysis
+├── highlights/                      ← historical archive highlights
+├── scripts/
+│   ├── verify_codex_skill.py        ← structural and traceability validator
+│   └── verify_signatures.py         ← source archive integrity check
+├── tests/
+│   └── test_codex_port.py           ← regression tests for the Codex port
+└── .github/workflows/
+    └── codex-skill-validation.yml   ← CI validation
+~~~
+
+## Validate the port
 
 Run from the repository root with Python 3.10 or newer:
 
-```bash
+~~~bash
 python3 -m py_compile scripts/verify_codex_skill.py
 python3 scripts/verify_codex_skill.py
 python3 -m unittest discover -s tests -v
 python3 scripts/verify_signatures.py
 git diff --check
-```
+~~~
 
-[GitHub Actions](.github/workflows/codex-skill-validation.yml) runs the checks on the exact PR head. The original signature script checks attribution names; separate pinned blob hashes and a git comparison check that the archive is unchanged. Structural checks do not prove semantic equivalence or model behaviour; the change list documents the two manual review passes and remaining limits.
+The validator checks source-file pins, front matter, section order, local links, source-to-target mappings and body fingerprints. The regression tests include negative mutations for structural and traceability failures. These checks do not prove semantic equivalence, model behaviour or that a particular Codex client will discover a skill; validate discovery in the target client.
 
----
+The [GitHub Actions workflow](.github/workflows/codex-skill-validation.yml) runs the same repository checks on changes to the port.
 
-## Key Revelations
+## Historical source archive
 
-### Mythos-Class: A New Model Tier Above Opus
+The repository retains the source material that the adaptation is based on:
 
-Claude Fable 5 belongs to an entirely new **"Mythos-class"** model tier that sits **above Claude Opus** in capability. The prompt confirms:
+- [Full source archive](system-prompt/full-system-prompt.md)
+- [Archived tool definitions](system-prompt/tool-definitions.md)
+- [Source analysis](system-prompt/analysis/)
+- [Archive highlights](highlights/surprising-revelations.md)
 
-> *"This iteration of Claude is Claude Fable 5, the first model in Anthropic's new Claude 5 family and part of a new Mythos-class model tier that sits above Claude Opus in capability."*
+These files are reference and provenance material. They are not additional runtime instructions for Codex. The original archive's attribution and licensing context remains in the preserved files and [LICENSE](LICENSE).
 
-- **Claude Fable 5** and **Claude Mythos 5** share the same underlying model
-- **Claude Mythos 5** is available without safety measures to **approved organizations only**
-- Model strings: `claude-fable-5`, `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001`
+## Contributing
 
-### The Full Claude Product Ecosystem
+Changes to the active skill should include an update to the relevant traceability records and regression coverage when behaviour or structure changes. Keep the source archive separate from the Codex adaptation.
 
-The prompt reveals a surprisingly expansive product lineup:
-
-| Product | Description |
-|---------|-------------|
-| **Claude Code** | Agentic coding tool (CLI, desktop, mobile) |
-| **Claude Cowork** | Agentic knowledge-work desktop app for non-developers |
-| **Claude in Chrome** | Browsing agent |
-| **Claude in Excel** | Spreadsheet agent |
-| **Claude in PowerPoint** | Slides agent |
-
-Claude Cowork can use all of the above as **tools** — making it a meta-agent that orchestrates other Claude agents.
-
-### "Claudeception" — API Inside Artifacts
-
-Claude can make **Anthropic API calls from within Artifacts**, creating AI-powered interactive applications. The prompt uses Sonnet 4 as the internal model:
-
-```javascript
-model: "claude-sonnet-4-20250514" // Always use Sonnet 4
-```
-
-This means Claude can build applications that call Claude — a recursive AI architecture.
-
-### 22+ Tools in the Arsenal
-
-The prompt defines an extensive toolset including: `web_search`, `web_fetch`, `bash_tool`, `create_file`, `str_replace`, `image_search`, `places_search`, `places_map_display_v0`, `recipe_display_v0`, `ask_user_input_v0`, `message_compose_v1`, `suggest_connectors`, `search_mcp_registry`, `recommend_claude_apps`, `fetch_sports_data`, `weather_fetch`, `present_files`, and more.
-
-### Aggressive Copyright Compliance
-
-The prompt contains an extremely detailed copyright enforcement system with hard limits:
-- **15+ words** from any single source = **SEVERE VIOLATION**
-- **ONE quote per source MAXIMUM** — after one quote, that source is "CLOSED"
-- **Default to paraphrasing** — quotes should be "rare exceptions"
-- Never reproduce song lyrics, poems, or haikus in any form
-
-### Self-Harm & Mental Health: Unprecedented Depth
-
-The prompt includes remarkably nuanced mental health guidelines:
-- No substitution techniques that mimic self-harm (ice cubes, rubber bands, sour candy)
-- No causal narratives for disordered eating the user hasn't made themselves
-- Acknowledge bad experiences with crisis services without totalizing the system
-- Never foster over-reliance on Claude or encourage continued engagement
-
-### Knowledge Cutoff: End of January 2026
-
-Claude's reliable knowledge cutoff is confirmed as **end of January 2026**, with the current date set to **June 9, 2026**.
-
----
-
-## Repository Structure
-
-```
-claude-fable-5-system-prompt/
-├── README.md                              ← You are here
-├── LICENSE                                ← MIT License
-├── system-prompt/
-│   ├── full-system-prompt.md              ← Complete formatted system prompt
-│   ├── tool-definitions.md                ← All 22+ tool schemas extracted
-│   └── analysis/
-│       ├── key-findings.md                ← Top discoveries and insights
-│       ├── model-architecture.md          ← What we learn about the model stack
-│       ├── behavioral-guidelines.md       ← Deep dive into behavior engineering
-│       └── fable5-vs-opus-comparison.md   ← Mythos-class vs Opus-class comparison
-├── highlights/
-│   └── surprising-revelations.md          ← Most shocking/viral findings
-├── scripts/
-│   └── verify_signatures.py               ← Curation integrity validator
-└── assets/
-    └── fable5-hero.png                    ← Banner image asset
-```
-
----
-
-## Table of Contents — System Prompt
-
-| Section | Description |
-|---------|-------------|
-| [`claude_behavior`](system-prompt/full-system-prompt.md#claude_behavior) | Core behavioral rules, product info, tone, formatting |
-| [`memory_system`](system-prompt/full-system-prompt.md#memory_system) | Cross-session memory access |
-| [`persistent_storage_for_artifacts`](system-prompt/full-system-prompt.md#persistent_storage_for_artifacts) | Key-value storage API for artifacts |
-| [`mcp_app_suggestions`](system-prompt/full-system-prompt.md#mcp_app_suggestions) | MCP connector/app suggestion system |
-| [`computer_use`](system-prompt/full-system-prompt.md#computer_use) | Skills, file handling, artifact creation |
-| [`search_instructions`](system-prompt/full-system-prompt.md#search_instructions) | Web search behaviors and copyright compliance |
-| [`using_image_search_tool`](system-prompt/full-system-prompt.md#using_image_search_tool) | Image search guidelines |
-| [`Tool Definitions`](system-prompt/tool-definitions.md) | Complete schemas for all tools |
-| [`anthropic_api_in_artifacts`](system-prompt/full-system-prompt.md#anthropic_api_in_artifacts) | "Claudeception" — API-in-artifact system |
-| [`citation_instructions`](system-prompt/full-system-prompt.md#citation_instructions) | Citation format and rules |
-| [`network_configuration`](system-prompt/full-system-prompt.md#network_configuration) | Allowed domains and egress rules |
-
----
-
-## How to Use This Repo
-
-**Read the full prompt:** Start with [`system-prompt/full-system-prompt.md`](system-prompt/full-system-prompt.md) for the complete, formatted system prompt with section anchors.
-
-**Quick highlights:** Jump to [`highlights/surprising-revelations.md`](highlights/surprising-revelations.md) for the most interesting findings.
-
-**Deep analysis:** The [`system-prompt/analysis/`](system-prompt/analysis) directory contains breakdowns of the model architecture, behavioral engineering, and a detailed [Fable 5 vs Opus 4.8 Comparison](system-prompt/analysis/fable5-vs-opus-comparison.md).
-
-**Verify Integrity:** Run the signature checker script to verify that your clone's content and curation attributions are original:
-```bash
-python scripts/verify_signatures.py
-```
-
----
-
-## Why This Matters
-
-System prompts are the invisible architecture behind AI behavior. This prompt reveals:
-
-1. **How Anthropic engineers personality** — from warm tone requirements to anti-bullet-point philosophy
-2. **The Mythos tier system** — a previously unknown model hierarchy above Opus
-3. **Recursive AI architecture** — Claude calling Claude inside Artifacts
-4. **Unprecedented safety nuance** — mental health guidelines more detailed than most clinical protocols
-5. **The agentic future** — Cowork as a meta-agent orchestrating Claude Code, Chrome, Excel, and PowerPoint
-
-This is a primary source document for understanding how frontier AI models are shaped.
-
-## Fun Quirks & Valuable Learnings
-
-Beyond the architecture, the prompt reveals some hilarious and fascinating rules that govern Claude's personality:
-
-- **"Claudeception"**: Fable 5 is explicitly allowed to use the Anthropic API (via Sonnet 4) *from within* the interactive artifacts it generates.
-- **The Anti-Bullet-Point Crusade**: The prompt aggressively bans Claude from using bullet points or bold text in standard prose, noting it wants to avoid looking like stereotypical "AI slop." It even notes: *"Claude never uses bullet points when declining a task; the additional care helps soften the blow."*
-- **No Sycophantic Gratitude**: Claude is explicitly told to *never* thank the user just for reaching out, and to never beg the user to keep talking.
-- **Military-Grade Copyright**: More than 15 words quoted from a single source is defined as a "SEVERE VIOLATION". The prompt includes a 5-step checklist Claude must run before quoting text.
-- **Clinical Nuance**: It forbids suggesting "rubber bands or ice cubes" as self-harm substitutes, noting (like a graduate psychology textbook) that sensory substitutions reinforce neural pathways rather than breaking them.
-
-For the full list of deep dives, see [`highlights/surprising-revelations.md`](highlights/surprising-revelations.md).
-
----
-
-## Community & Contributing
-
-We want to make this repository the premier research hub for Anthropic's Mythos-class models.
-Found a novel jailbreak, a behavioral quirk, or want to add an interactive tool? 
-
-Please check our [Contributing Guidelines](CONTRIBUTING.md) and open an Issue using our templates, or submit a PR with your analysis. We actively welcome community discussions!
-
-### Contributors
-[![Contributors](https://contrib.rocks/image?repo=saynchowdhury/claude-fable-5-system-prompt)](https://github.com/saynchowdhury/claude-fable-5-system-prompt/graphs/contributors)
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.
 
 ## Disclaimer
 
-This repository is for **educational and research purposes**. The system prompt was extracted from a publicly accessible claude.ai session. All rights to the original content belong to Anthropic. This repo does not claim ownership of Anthropic's intellectual property.
-
----
+This is a community adaptation for educational, research and engineering use. It does not claim to reproduce a provider's private runtime configuration, guarantee a model's behaviour or grant access to undocumented capabilities. Follow the active Codex, repository and project instructions for every task.
 
 ## License
 
-MIT — See [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-
-## Why Star This Repo? ⭐
-
-Unlike static text files, this repository is **living documentation**. By starring it, you get:
-- Real-time updates when Anthropic pushes changes to the Mythos system prompts.
-- Community-driven analysis and insights into frontier AI behavior.
-- JSON schemas and tool structures you can reverse-engineer for your own AI agents.
-
----
-
-<div align="center">
-
-**If you found this interesting, consider starring the repo!**
-
-[![Star History Chart](https://api.star-history.com/svg?repos=saynchowdhury/claude-fable-5-system-prompt&type=Date)](https://star-history.com/#saynchowdhury/claude-fable-5-system-prompt&Date)
-
-
-
-*This repository is curated and maintained by **[Sayan Chowdhury](https://github.com/saynchowdhury)**. All rights to the original system prompt text are owned by Anthropic, PBC.*
-
-</div>
+MIT. See [LICENSE](LICENSE).
