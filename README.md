@@ -39,13 +39,13 @@ This is the most detailed look yet into how Anthropic engineers its flagship mod
 
 ## Codex adaptation
 
-The repository now contains a full Codex-native adaptation of the reusable workflow principles in the Fable 5 archive. The historical Claude/Fable source remains unchanged and attributed; the Codex skill is a separate, discoverable Agent Skill.
+The repository contains a Codex-native adaptation of the reusable workflow principles in the Fable 5 archive. The historical Claude/Fable source remains unchanged and attributed; the Codex skill is a separate, discoverable Agent Skill.
 
-- [Codex skill](.agents/skills/fable5-codex/SKILL.md) — full entry point with 16 adapted sections covering behavior, context, repository work, skills, coding, research, tools, product engineering, safety, verification, and GitHub delivery.
-- [Codex references](.agents/skills/fable5-codex/references/) — focused guides for coding, debugging, review, testing/CI, product engineering, research/citations, MCP/tools, safety, files/artifacts, and communication/marketing.
-- [Codex capability matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — maps archived tool capabilities to categories that must be discovered in the live Codex registry; it does not freeze tool schemas.
-- [Complete adaptation change log](CODEX_ADAPTATION_CHANGES.md) — maps every source section and all 18 archived tool entries to their Codex treatment, including intentional omissions and replacements.
-- [Codex skill validator](scripts/verify_codex_skill.py) — validates front matter, section structure, references, source coverage, and legacy-runtime boundaries.
+- [Codex skill](.agents/skills/fable5-codex/SKILL.md) — 16 adapted sections covering behavior, context, repository work, skills, coding, research, tools, product engineering, safety, verification, and GitHub delivery.
+- [Codex references](.agents/skills/fable5-codex/references/) — 15 focused guides for coding, debugging, review, testing/CI, product engineering, research, MCP consent, memory/persistence, safety, files, visuals, and communication.
+- [Codex capability matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — maps all 18 archived tool intents to current capability categories and preserves their transferable semantics without freezing schemas.
+- [Complete adaptation change log](CODEX_ADAPTATION_CHANGES.md) — maps all 73 original H2–H4 headings and all 18 archived tool entries, including intentional exclusions and replacements.
+- [Codex skill validator](scripts/verify_codex_skill.py) — reads the original archive dynamically and checks every source heading, references, metadata, and legacy-runtime boundaries.
 
 The skill follows the current [Codex skills documentation](https://developers.openai.com/codex/skills) and [Agent Skills specification](https://agentskills.io/specification). Tool availability is runtime-dependent: the live registry, permissions, repository instructions, and current host documentation remain authoritative. The archived system prompt is research material, not Codex policy.
 
