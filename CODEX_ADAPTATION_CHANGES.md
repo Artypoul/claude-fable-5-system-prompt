@@ -53,6 +53,87 @@ The source inventory is the archived `system-prompt/full-system-prompt.md` (16 n
 | 15. Filesystem configuration | Replaced | Inspect actual workspace and permissions; no archived fixed paths or read-only mount assumptions |
 | 16. Thinking mode | Replaced | Plan effort proportionally to task complexity and use only controls actually available in the current session |
 
+
+## Exhaustive heading-level source coverage
+
+The table below is generated from every H2–H4 heading in the archived `system-prompt/full-system-prompt.md` (excluding only the table-of-contents heading). This is intentionally more granular than the 16-section summary above: every source subsection is accounted for, including storage API semantics, MCP opt-in, file/artifact workflow, search sub-rules, and the 18 archived tool definitions.
+
+| Exact source heading | Codex treatment |
+| --- | --- |
+| `Preamble: Voice Note Restriction` | Excluded: Claude-interface-only restriction; follow actual Codex host and user request. |
+| `1. Claude Behavior` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.1 Product Information` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.2 Refusal Handling` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.3 Legal and Financial Advice` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.4 Tone and Formatting` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.4.1 Lists and Bullets` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.5 User Wellbeing` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.6 Anthropic Reminders` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.7 Evenhandedness` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.8 Responding to Mistakes and Criticism` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `1.9 Knowledge Cutoff` | SKILL.md §1 and references/safety-and-privacy.md or references/research-and-citations.md; provider facts/runtime replaced with live docs. |
+| `2. Memory System` | SKILL.md §2 and references/context-memory-and-persistence.md. |
+| `3. Persistent Storage for Artifacts` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `3.1 Storage API` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `3.2 Usage Examples` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `3.3 Key Design Pattern` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `3.4 Data Scope` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `3.5 Error Handling` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `3.6 Limitations` | references/context-memory-and-persistence.md; storage API, limits, sharing, errors and concurrency must come from the actual backend. |
+| `4. MCP App Suggestions` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `4.1 Connector Directory First` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `4.2 After Search` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `4.3 Third-Party MCP App Tools Need Opt-In` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `4.4 When to Call a Third-Party MCP App Tool Directly` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `4.5 What Not to Do` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `4.6 What This Should Feel Like` | references/mcp-consent-and-connectors.md and references/tools-and-mcp.md; preserve connector discovery, opt-in, user choice and no-pressure rules. |
+| `5. Computer Use` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.1 Skills` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.2 File Creation Advice` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.3 High-Level Computer Use Explanation` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.4 File Handling Rules` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.5 Producing Outputs` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.6 Sharing Files` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.7 Artifact Usage Criteria` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.8 Package Management` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.9 Examples` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `5.10 Additional Skills Reminder` | SKILL.md §§4, 5, 7, 13; references/visual-and-artifact-workflows.md and references/files-and-artifacts.md. |
+| `6. Search Instructions` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `6.1 Core Search Behaviors` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `6.2 Search Usage Guidelines` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `6.3 Critical Copyright Compliance` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `6.4 Search Examples` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `6.5 Harmful Content Safety` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `6.6 Critical Reminders` | SKILL.md §6 and references/search-policy.md, references/research-and-citations.md; no fixed query syntax, call quotas, cutoff or quote thresholds. |
+| `7. Using Image Search Tool` | SKILL.md §7 and references/visual-and-artifact-workflows.md; use current image retrieval only when appropriate. |
+| `8. Tool Definitions (Full Descriptions and Parameter Schemas)` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.1 ask_user_input_v0` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.2 bash_tool` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.3 create_file` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.4 fetch_sports_data` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.5 image_search` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.6 message_compose_v1` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.7 places_map_display_v0` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.8 places_search` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.9 present_files` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.10 recipe_display_v0` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.11 recommend_claude_apps` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.12 search_mcp_registry` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.13 str_replace` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.14 suggest_connectors` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.15 view` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.16 weather_fetch` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.17 web_fetch` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `8.18 web_search` | references/codex-tool-matrix.md; all archived tool intents mapped, schemas and names deliberately not copied. |
+| `9. Identity Preamble` | Excluded: Claude identity and provider product claims are not Codex instructions. |
+| `10. Anthropic API in Artifacts ("Claudeception")` | Excluded: Anthropic API/Claudeception runtime; use documented APIs/SDKs only when the current environment exposes them. |
+| `11. Citation Instructions` | SKILL.md §12 and references/research-and-citations.md; use host-native citations, never archived tags. |
+| `12. User Context` | SKILL.md §2 and references/context-memory-and-persistence.md; use actual authorized location/context sources, not injected placeholders. |
+| `13. Available Skills` | SKILL.md §4; discover current installed skills dynamically. |
+| `14. Network Configuration` | SKILL.md §§5, 8; inspect current network/environment policy; no archived allowlist. |
+| `15. Filesystem Configuration` | SKILL.md §§3, 5, 13; inspect actual filesystem and permissions; no fixed paths. |
+| `16. Thinking Mode` | SKILL.md §§1, 5, 15; scale reasoning and planning to task risk and available controls. |
+
 ## Archived tool inventory mapping
 
 All 18 entries from `system-prompt/tool-definitions.md` are accounted for in `.agents/skills/fable5-codex/references/codex-tool-matrix.md`:
