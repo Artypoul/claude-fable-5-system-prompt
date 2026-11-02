@@ -1,29 +1,45 @@
-# Codex tool matrix
+# Codex capability matrix
 
-This reference maps the stable workflow categories from the Fable 5 archive to the current Codex runtime. Tool names and connector schemas can change; the live registry and current skills are always authoritative.
+This matrix translates the *workflow intent* of the historical Fable 5 tool catalogue into capability categories. It is not an API reference. Codex tools vary by host, client, configuration, permissions, and installed connectors. Discover the current registry and inspect each selected tool's live description/schema before use.
 
-| Workflow need | Codex family | Use it for | Guardrails |
-| --- | --- | --- | --- |
-| Orchestration | functions.exec | Batch independent calls and compose results | Keep dependent mutations sequential; do not print secrets or large opaque payloads |
-| Shell execution | functions.exec_command, functions.write_stdin | Read the workspace, run bounded commands, inspect test output | Use the task workspace; avoid destructive commands unless authorized |
-| Focused editing | functions.apply_patch | Small, reviewable repository edits | Preserve unrelated changes and review the resulting diff |
-| Skill discovery | skills__list, skills__read | Discover and load relevant skills | Read before writing when a skill applies |
-| Current web information | mcp__codex_apps__search_service_web_run | Search and open current sources | Use primary sources for technical claims; cite retrieved sources |
-| GitHub | mcp__codex_apps__github_* | Read repositories and PRs, create branches/files/commits/PRs | Inspect current head and use the target branch explicitly |
-| Browser interaction | mcp__cua_repl | Direct interaction with a requested or authenticated web UI | Do not use it for ordinary information lookup |
-| Generated images | image_gen__imagegen | Create or edit raster visuals | Preserve transparency only when requested; inspect source images before editing |
-| Local image inspection | view_image | Inspect images already on disk | Use only when visual inspection is needed |
-| Parallel review | collaboration.* | Independent audit, review, or research | Avoid parallel writes to the same file or branch |
-| Durable files | openai-library:library | Save user-facing artifacts durably | Read the Library skill before using it |
+| Archived Fable 5 capability | Codex-side capability to discover | Adaptation rule |
+| --- | --- | --- |
+| User preference elicitation | Conversational clarification or supported interactive input | Ask only for a material missing constraint; do not force a questionnaire |
+| Shell execution | Current shell/command execution surface | Inspect environment; use bounded, reviewable commands |
+| File creation and editing | Workspace/file tools or shell/editor | Verify exact paths and inspect resulting files |
+| Sports data | Current sports data connector or authoritative live source | Fetch current event data; do not guess fixtures or scores |
+| Image search | Current image search/retrieval capability | Use only when imagery materially helps and the request is appropriate |
+| Message composition | Drafting/writing experience | Draft only; sending requires explicit authorization |
+| Places search and maps | Local-business/place search and supported map/directions capability | Use structured place results; never invent locations or route metrics |
+| File presentation | Supported artifact/file delivery surface | Verify created artifact and exact destination |
+| Recipe presentation | Structured recipe or ordinary text output | Preserve quantities, units, timing, and food-safety context |
+| App recommendations | Current plugin/connector discovery | Search available integrations; user chooses before partner actions where required |
+| MCP registry | Live tool/connector discovery | Use current registry results, never archived IDs |
+| Text replacement | Current patch/editing tool | Read immediately before edit; review diff after |
+| File/image viewing | Current file reader or image viewer | Choose by file type; inspect scans visually when needed |
+| Weather | Current weather utility/data source | Resolve requested location and current time correctly |
+| Web fetch/search | Current search and page retrieval | Read sources; cite with the host's citation format |
+| Provider API in generated artifacts | Documented API/SDK or connected service, if actually available | Never assume ambient credentials or hidden proxy authentication |
+| Legacy citation tags | Current citation mechanism | Do not emit legacy syntax or fabricate source IDs |
+| Fixed filesystem/network configuration | Environment inspection and current host docs | Never copy archived paths or allowlists into Codex |
 
-## Decision pattern
+## Stable workflow families
 
-1. Identify the user's outcome and the smallest tool family that can complete it.
-2. Prefer a purpose-built connector or skill over browser automation.
-3. Use read-only calls to establish facts before mutations.
-4. For mutations, keep the sequence explicit and inspect the returned state.
-5. Report the tool result, not an assumption about what should have happened.
+| Need | How to choose |
+| --- | --- |
+| Repository inspection/editing | Use the current workspace, shell, and patch tools actually exposed |
+| Skills | Use the current skill registry and read relevant skill files |
+| GitHub | Use the connected GitHub integration or authorized git workflow available in the session |
+| Web research | Use the current search/fetch service and cite retrieved sources |
+| Browser/computer interaction | Use only when direct UI interaction is necessary |
+| Parallel work | Use collaboration/subagent tools only if the current tool registry exposes them |
+| Durable artifacts | Use the supported Library, Drive, or file-delivery workflow after reading its instructions |
 
-## GitHub write sequence
+## Safe invocation sequence
 
-Read repository metadata and target head, create a branch, write or update files sequentially, inspect the branch diff, run available checks, then create the pull request. Do not issue concurrent updates to the same path. Do not merge automatically.
+1. Discover the capability in the live registry.
+2. Read its description and schema; verify permissions and required arguments.
+3. Establish facts with read-only calls.
+4. Perform authorized mutations sequentially, using returned IDs/version tokens.
+5. Re-read the resulting state and report observed outcomes.
+6. If the tool is unavailable, state that limitation instead of inventing a substitute.
