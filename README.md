@@ -37,6 +37,17 @@ This repository contains the **complete system prompt** (~1,580 lines, ~120KB) f
 
 This is the most detailed look yet into how Anthropic engineers its flagship model's behavior.
 
+## Codex adaptation
+
+The original system-prompt files remain a historical Claude/Fable archive. The repository now also includes a Codex-native skill layer that keeps the useful workflow ideas while using the current Codex runtime and repository conventions:
+
+- [Codex skill](.agents/skills/fable5-codex/SKILL.md) — the discoverable skill entry point.
+- [Codex tool matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — a compact mapping to current tool families.
+- [Codex adaptation change list](CODEX_ADAPTATION_CHANGES.md) — the exact scope, rationale, and intentional non-changes.
+- [Codex skill validator](scripts/verify_codex_skill.py) — checks the front matter, section scaffold, reference link, and runtime-neutrality markers.
+
+Use the Codex skill as workflow guidance only. The live Codex system, developer instructions, user request, repository instructions, available skills, and tool registry remain authoritative.
+
 ---
 
 ## Key Revelations
