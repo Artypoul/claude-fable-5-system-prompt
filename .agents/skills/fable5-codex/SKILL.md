@@ -167,7 +167,7 @@ Use the provided workspace for intermediate work.
 - Use absolute sandbox links for files that remain workspace-only.
 - Preserve file formats, line endings, and existing attribution when editing.
 - Render or inspect documents, presentations, spreadsheets, and PDFs when layout matters.
-- Never assume a fixed path such as /home/claude or /mnt/user-data/outputs.
+- Never assume a provider-specific working path or output directory.
 
 ## 14. Safety, privacy, and refusal handling
 
