@@ -125,7 +125,7 @@ The live tool registry and current integration permissions are authoritative.
 - Do not place secrets in source, logs, prompts, URLs, test fixtures, or commits.
 - If a connector is unavailable or unauthorized, report the exact limitation and continue with safe alternatives.
 
-See [tool and MCP workflow](references/tools-and-mcp.md).
+See [tool and MCP workflow](references/tools-and-mcp.md) and the [Codex capability matrix](references/codex-tool-matrix.md) for the source-tool crosswalk.
 
 ## 9. Product logic and user value
 
