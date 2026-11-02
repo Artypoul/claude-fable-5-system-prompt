@@ -37,6 +37,30 @@ This repository contains the **complete system prompt** (~1,580 lines, ~120KB) f
 
 This is the most detailed look yet into how Anthropic engineers its flagship model's behavior.
 
+## Codex adaptation
+
+The Codex port uses the original archive as its primary structure, not merely a source of ideas. Its entry point follows the original sixteen sections, and its canonical reference retains all 73 nested headings with individual source-block decisions. The historical files and attribution remain unchanged.
+
+- [Skill entry point](.agents/skills/fable5-codex/SKILL.md): original section order and task-specific reading routes.
+- [Source-based port](.agents/skills/fable5-codex/references/source-faithful-port.md): adapted bodies, conditions, examples and eighteen tool-capability descriptions.
+- [Engineering supplement](.agents/skills/fable5-codex/references/engineering-workflow.md): coding, product, review and delivery methods added to, not substituted for, the source.
+- [Changes and traceability](CODEX_ADAPTATION_CHANGES.md): source provenance, deliberate substitutions, schema disposition and 538 source-block mappings with real target-body fingerprints.
+- [Validator](scripts/verify_codex_skill.py) and [regression tests](tests/test_codex_port.py): source-integrity, structure, links, metadata, rule mapping and negative mutation checks.
+
+The package follows the [Codex skill format](https://learn.chatgpt.com/docs/build-skills). Use the repository's `.agents/skills/fable5-codex` directory, or install that entire directory into a supported skill location. In a Codex interface that supports explicit skill mentions, invoke `$fable5-codex`; verify discovery in the actual client. No tool namespace, hidden credential, model identity or network configuration is granted by this skill.
+
+Run from the repository root with Python 3.10 or newer:
+
+```bash
+python3 -m py_compile scripts/verify_codex_skill.py
+python3 scripts/verify_codex_skill.py
+python3 -m unittest discover -s tests -v
+python3 scripts/verify_signatures.py
+git diff --check
+```
+
+[GitHub Actions](.github/workflows/codex-skill-validation.yml) runs the checks on the exact PR head. The original signature script checks attribution names; separate pinned blob hashes and a git comparison check that the archive is unchanged. Structural checks do not prove semantic equivalence or model behaviour; the change list documents the two manual review passes and remaining limits.
+
 ---
 
 ## Key Revelations
