@@ -1,0 +1,54 @@
+name: Codex skill validation
+
+on:
+  pull_request:
+  push:
+    branches: [main, codex/adapt-fable5-skill]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codex-skill-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record exact validation input
+        run: |
+          mkdir -p "$RUNNER_TEMP/codex-validation"
+          git rev-parse HEAD > "$RUNNER_TEMP/codex-validation/head.txt"
+          git archive HEAD -o "$RUNNER_TEMP/codex-validation/source.tar"
+      - name: Validate syntax and skill package
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 -m py_compile scripts/verify_codex_skill.py
+          python3 scripts/verify_codex_skill.py | tee "$RUNNER_TEMP/codex-validation/skill.txt"
+      - name: Run regression tests when present
+        run: |
+          if [ -d tests ]; then
+            python3 -m unittest discover -s tests -v
+          fi
+      - name: Verify archive preservation and whitespace
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_signatures.py | tee "$RUNNER_TEMP/codex-validation/attribution.txt"
+          git diff --exit-code 9b00248c2f0dd60c12a718853580a5ec44a9edf0 HEAD -- system-prompt highlights LICENSE CONTRIBUTING.md scripts/verify_signatures.py
+          git diff --check 9b00248c2f0dd60c12a718853580a5ec44a9edf0 HEAD
+      - name: Upload reproducible validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: codex-validation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/codex-validation/
+          if-no-files-found: error
+          retention-days: 7
