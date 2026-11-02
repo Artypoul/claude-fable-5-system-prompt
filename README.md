@@ -39,14 +39,21 @@ This is the most detailed look yet into how Anthropic engineers its flagship mod
 
 ## Codex adaptation
 
-The original system-prompt files remain a historical Claude/Fable archive. The repository now also includes a Codex-native skill layer that keeps the useful workflow ideas while using the current Codex runtime and repository conventions:
+The repository now contains a full Codex-native adaptation of the reusable workflow principles in the Fable 5 archive. The historical Claude/Fable source remains unchanged and attributed; the Codex skill is a separate, discoverable Agent Skill.
 
-- [Codex skill](.agents/skills/fable5-codex/SKILL.md) — the discoverable skill entry point.
-- [Codex tool matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — a compact mapping to current tool families.
-- [Codex adaptation change list](CODEX_ADAPTATION_CHANGES.md) — the exact scope, rationale, and intentional non-changes.
-- [Codex skill validator](scripts/verify_codex_skill.py) — checks the front matter, section scaffold, reference link, and runtime-neutrality markers.
+- [Codex skill](.agents/skills/fable5-codex/SKILL.md) — full entry point with 16 adapted sections covering behavior, context, repository work, skills, coding, research, tools, product engineering, safety, verification, and GitHub delivery.
+- [Codex references](.agents/skills/fable5-codex/references/) — focused guides for coding, debugging, review, testing/CI, product engineering, research/citations, MCP/tools, safety, files/artifacts, and communication/marketing.
+- [Codex capability matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — maps archived tool capabilities to categories that must be discovered in the live Codex registry; it does not freeze tool schemas.
+- [Complete adaptation change log](CODEX_ADAPTATION_CHANGES.md) — maps every source section and all 18 archived tool entries to their Codex treatment, including intentional omissions and replacements.
+- [Codex skill validator](scripts/verify_codex_skill.py) — validates front matter, section structure, references, source coverage, and legacy-runtime boundaries.
 
-Use the Codex skill as workflow guidance only. The live Codex system, developer instructions, user request, repository instructions, available skills, and tool registry remain authoritative.
+The skill follows the current [Codex skills documentation](https://developers.openai.com/codex/skills) and [Agent Skills specification](https://agentskills.io/specification). Tool availability is runtime-dependent: the live registry, permissions, repository instructions, and current host documentation remain authoritative. The archived system prompt is research material, not Codex policy.
+
+Run the structural validator with:
+
+~~~bash
+python scripts/verify_codex_skill.py
+~~~
 
 ---
 
