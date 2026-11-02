@@ -39,21 +39,27 @@ This is the most detailed look yet into how Anthropic engineers its flagship mod
 
 ## Codex adaptation
 
-The repository contains a Codex-native adaptation of the reusable workflow principles in the Fable 5 archive. The historical Claude/Fable source remains unchanged and attributed; the Codex skill is a separate, discoverable Agent Skill.
+The Codex port uses the original archive as its primary structure, not merely a source of ideas. Its entry point follows the original sixteen sections, and its canonical reference retains all 73 nested headings with individual source-block decisions. The historical files and attribution remain unchanged.
 
-- [Codex skill](.agents/skills/fable5-codex/SKILL.md) — 16 adapted sections covering behavior, context, repository work, skills, coding, research, tools, product engineering, safety, verification, and GitHub delivery.
-- [Codex references](.agents/skills/fable5-codex/references/) — 15 focused guides for coding, debugging, review, testing/CI, product engineering, research, MCP consent, memory/persistence, safety, files, visuals, and communication.
-- [Codex capability matrix](.agents/skills/fable5-codex/references/codex-tool-matrix.md) — maps all 18 archived tool intents to current capability categories and preserves their transferable semantics without freezing schemas.
-- [Complete adaptation change log](CODEX_ADAPTATION_CHANGES.md) — maps all 73 original H2–H4 headings and all 18 archived tool entries, including intentional exclusions and replacements.
-- [Codex skill validator](scripts/verify_codex_skill.py) — reads the original archive dynamically and checks every source heading, references, metadata, and legacy-runtime boundaries.
+- [Skill entry point](.agents/skills/fable5-codex/SKILL.md): original section order and task-specific reading routes.
+- [Source-based port](.agents/skills/fable5-codex/references/source-faithful-port.md): adapted bodies, conditions, examples and eighteen tool-capability descriptions.
+- [Engineering supplement](.agents/skills/fable5-codex/references/engineering-workflow.md): coding, product, review and delivery methods added to, not substituted for, the source.
+- [Changes and traceability](CODEX_ADAPTATION_CHANGES.md): source provenance, deliberate substitutions, schema disposition and 538 source-block mappings with real target-body fingerprints.
+- [Validator](scripts/verify_codex_skill.py) and [regression tests](tests/test_codex_port.py): source-integrity, structure, links, metadata, rule mapping and negative mutation checks.
 
-The skill follows the current [Codex skills documentation](https://developers.openai.com/codex/skills) and [Agent Skills specification](https://agentskills.io/specification). Tool availability is runtime-dependent: the live registry, permissions, repository instructions, and current host documentation remain authoritative. The archived system prompt is research material, not Codex policy.
+The package follows the [Codex skill format](https://learn.chatgpt.com/docs/build-skills). Use the repository's `.agents/skills/fable5-codex` directory, or install that entire directory into a supported skill location. In a Codex interface that supports explicit skill mentions, invoke `$fable5-codex`; verify discovery in the actual client. No tool namespace, hidden credential, model identity or network configuration is granted by this skill.
 
-Run the structural validator with:
+Run from the repository root with Python 3.10 or newer:
 
-~~~bash
-python scripts/verify_codex_skill.py
-~~~
+```bash
+python3 -m py_compile scripts/verify_codex_skill.py
+python3 scripts/verify_codex_skill.py
+python3 -m unittest discover -s tests -v
+python3 scripts/verify_signatures.py
+git diff --check
+```
+
+[GitHub Actions](.github/workflows/codex-skill-validation.yml) runs the checks on the exact PR head. The original signature script checks attribution names; separate pinned blob hashes and a git comparison check that the archive is unchanged. Structural checks do not prove semantic equivalence or model behaviour; the change list documents the two manual review passes and remaining limits.
 
 ---
 

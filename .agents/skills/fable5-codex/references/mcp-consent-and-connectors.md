@@ -6,7 +6,9 @@ When the user asks to work with personal, company, or external-service data, ins
 ## Preserve user choice
 A user asking for an outcome has not necessarily selected a third-party provider. Do not silently choose a commercial partner when provider choice is material. Present relevant connector options and let the user choose when the host requires opt-in or the provider is not already authorized.
 
-Direct invocation is appropriate only when the user explicitly names the service, has just selected it, or has given a clear durable preference—and only if the connector is actually connected and authorized. Follow the host's current consent and invocation rules.
+For a consumer-provider choice, direct invocation is appropriate when the user explicitly names the service, has just selected it, or has given a clear durable preference—and only if the connector is actually connected and authorized. Follow the host's current consent and invocation rules.
+
+For an already connected internal-data tool that fits an authorized request, follow the host's direct-use routing rules without an unnecessary provider picker. A general request to search email or project records need not name the integration again.
 
 ## Suggestion quality
 - Suggest only integrations relevant to the task.
