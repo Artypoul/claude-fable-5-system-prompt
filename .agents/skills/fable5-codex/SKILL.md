@@ -92,7 +92,7 @@ Search when facts are current, unstable, niche, explicitly requested, or needed 
 - For technical questions, prefer primary documentation, source code, standards, or papers.
 - When a URL is supplied, inspect that exact URL with the appropriate connector or fetch tool.
 - Scale search depth to the question; do not add exploratory calls that do not reduce uncertainty.
-- Cite sourced claims using the citation format required by the current runtime. Do not emit the archive's <cite index=...> syntax.
+- Cite sourced claims using the citation format required by the current runtime. Do not emit the archive's legacy inline cite-tag syntax.
 
 ## 7. Visual and multimodal work
 
