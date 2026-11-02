@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the Codex-native skill package and its source coverage map."""
+"""Validate the Codex-native skill package and its coverage of the archived source."""
 
 from __future__ import annotations
 
@@ -9,8 +9,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = ROOT / ".agents" / "skills" / "fable5-codex"
 SKILL = SKILL_ROOT / "SKILL.md"
-MATRIX = SKILL_ROOT / "references" / "codex-tool-matrix.md"
+REFERENCES = SKILL_ROOT / "references"
+MATRIX = REFERENCES / "codex-tool-matrix.md"
 CHANGELOG = ROOT / "CODEX_ADAPTATION_CHANGES.md"
+SOURCE = ROOT / "system-prompt" / "full-system-prompt.md"
 
 REQUIRED_HEADINGS = [
     "## 1. Operating identity and behavior",
@@ -43,9 +45,21 @@ REQUIRED_REFERENCES = [
     "files-and-artifacts.md",
     "communication-and-marketing.md",
     "codex-tool-matrix.md",
+    "context-memory-and-persistence.md",
+    "mcp-consent-and-connectors.md",
+    "search-policy.md",
+    "visual-and-artifact-workflows.md",
 ]
 
-FORBIDDEN_RUNTIME_MARKERS = [
+ARCHIVED_TOOL_MARKERS = [
+    "ask_user_input_v0", "bash_tool", "create_file", "fetch_sports_data",
+    "image_search", "message_compose_v1", "places_map_display_v0", "places_search",
+    "present_files", "recipe_display_v0", "recommend_claude_apps",
+    "search_mcp_registry", "str_replace", "suggest_connectors", "view",
+    "weather_fetch", "web_fetch", "web_search",
+]
+
+LEGACY_RUNTIME_MARKERS = [
     "/home/claude",
     "/mnt/user-data",
     "api.anthropic.com",
@@ -60,54 +74,11 @@ FORBIDDEN_RUNTIME_MARKERS = [
     "suggest_connectors",
 ]
 
-ARCHIVED_TOOL_MARKERS = [\n    "ask_user_input_v0", "bash_tool", "create_file", "fetch_sports_data",\n    "image_search", "message_compose_v1", "places_map_display_v0", "places_search",\n    "present_files", "recipe_display_v0", "recommend_claude_apps",\n    "search_mcp_registry", "str_replace", "suggest_connectors", "view",\n    "weather_fetch", "web_fetch", "web_search",\n]\n\nSOURCE_COVERAGE_MARKERS = [
-    "Preamble: voice-note restriction",
-    "1.1 Product information",
-    "1.2 Refusal handling",
-    "1.3 Legal and financial advice",
-    "1.4 Tone and formatting",
-    "1.4.1 Lists and bullets",
-    "1.5 User wellbeing",
-    "1.6 Provider runtime reminders",
-    "1.7 Evenhandedness",
-    "1.8 Mistakes and criticism",
-    "1.9 Knowledge cutoff",
-    "2. Memory system",
-    "3. Persistent artifact storage",
-    "4. MCP app suggestions",
-    "5.1 Skills",
-    "5.2 File creation advice",
-    "5.3 Computer-use environment",
-    "5.4 File handling",
-    "5.5 Producing outputs",
-    "5.6 Sharing files",
-    "5.7 Artifact usage criteria",
-    "5.8 Package management",
-    "5.9 Examples",
-    "5.10 Additional skill reminder",
-    "6.1 Core search behaviors",
-    "6.2 Search usage",
-    "6.3 Copyright compliance",
-    "6.4 Search examples",
-    "6.5 Harmful-content search",
-    "6.6 Critical reminders",
-    "7. Image search",
-    "8. Tool definitions",
-    "9. Identity preamble",
-    "10. Provider API inside artifacts",
-    "11. Citation instructions",
-    "12. User context injection",
-    "13. Available skills catalogue",
-    "14. Network configuration",
-    "15. Filesystem configuration",
-    "16. Thinking mode",
-]
-
 def fail(message: str) -> None:
     raise SystemExit(f"[FAIL] {message}")
 
 def main() -> int:
-    for path in (SKILL, MATRIX, CHANGELOG):
+    for path in (SKILL, MATRIX, CHANGELOG, SOURCE):
         if not path.is_file():
             fail(f"missing required file: {path.relative_to(ROOT)}")
 
@@ -134,25 +105,34 @@ def main() -> int:
             fail(f"missing required section: {heading}")
 
     changelog = CHANGELOG.read_text(encoding="utf-8")
-    for marker in SOURCE_COVERAGE_MARKERS:
-        if marker.lower() not in changelog.lower():
-            fail(f"source section missing from adaptation coverage map: {marker}")
+    source = SOURCE.read_text(encoding="utf-8")
+    source_headings = [
+        match.group(1).strip()
+        for match in re.finditer(r"(?m)^#{2,4}\s+(.+?)\s*$", source)
+        if match.group(1).strip() != "Table of Contents"
+    ]
+    for heading in source_headings:
+        if f"`{heading}`" not in changelog:
+            fail(f"source heading missing from exhaustive coverage map: {heading}")
+
+    for tool_name in ARCHIVED_TOOL_MARKERS:
+        if tool_name not in changelog:
+            fail(f"archived tool missing from source mapping: {tool_name}")
 
     for reference in REQUIRED_REFERENCES:
-        path = SKILL_ROOT / "references" / reference
+        path = REFERENCES / reference
         if not path.is_file():
             fail(f"missing reference: {path.relative_to(ROOT)}")
         if reference not in content:
             fail(f"main skill does not link to reference: {reference}")
 
-    # Executable skill guidance must not depend on archived provider runtime details.
     executable_docs = [SKILL] + [
-        path for path in (SKILL_ROOT / "references").glob("*.md")
+        path for path in REFERENCES.glob("*.md")
         if path.name != "codex-tool-matrix.md"
     ]
     for path in executable_docs:
         text = path.read_text(encoding="utf-8").lower()
-        for marker in FORBIDDEN_RUNTIME_MARKERS:
+        for marker in LEGACY_RUNTIME_MARKERS:
             if marker.lower() in text:
                 fail(f"{path.relative_to(ROOT)} contains legacy runtime marker: {marker}")
 
@@ -163,10 +143,11 @@ def main() -> int:
         fail("tool matrix must require live capability discovery")
 
     print("[PASS] Codex skill front matter and package structure.")
-    print(f"[PASS] {len(REQUIRED_HEADINGS)} required sections.")
-    print(f"[PASS] {len(REQUIRED_REFERENCES)} linked references.")
-    print(f"[PASS] {len(SOURCE_COVERAGE_MARKERS)} archived source sections mapped.")\n    print(f"[PASS] {len(ARCHIVED_TOOL_MARKERS)} archived tools mapped.")
-    print("[PASS] No forbidden legacy runtime markers in executable skill guidance.")
+    print(f"[PASS] {len(REQUIRED_HEADINGS)} required skill sections.")
+    print(f"[PASS] {len(REQUIRED_REFERENCES)} required and linked references.")
+    print(f"[PASS] {len(source_headings)} exact source headings mapped.")
+    print(f"[PASS] {len(ARCHIVED_TOOL_MARKERS)} archived tools mapped.")
+    print("[PASS] No forbidden legacy runtime markers in executable guidance.")
     return 0
 
 if __name__ == "__main__":
