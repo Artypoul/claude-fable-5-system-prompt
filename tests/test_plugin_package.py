@@ -51,6 +51,42 @@ class PluginPackageTests(unittest.TestCase):
             self.assertTrue((installed / 'CODEX_ADAPTATION_CHANGES.md').is_file())
             manifest = json.loads((installed / '.codex-plugin/plugin.json').read_text())
             self.assertEqual(installed_skill.parent, (installed / manifest['skills']).resolve())
+            self.assertTrue((installed / '.mcp.json').is_file())
+            self.assertTrue((installed / 'mcp/dist/server.mjs').is_file())
+            self.assertTrue((installed / 'mcp/dist/THIRD_PARTY_LICENSES.txt').is_file())
+            self.assertFalse((installed / 'mcp/node_modules').exists())
+
+    def test_stale_mcp_bundle_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            work = Path(temp)
+            build(work / 'plugin.zip')
+            with ZipFile(work / 'plugin.zip') as archive:
+                archive.extractall(work / 'unpacked')
+            installed = work / 'unpacked/fable5-codex'
+            source = installed / 'mcp/src/search.mjs'
+            source.write_bytes(source.read_bytes() + b'\n// unbuilt change\n')
+            with self.assertRaisesRegex(ValueError, 'MCP build is stale'):
+                validate_plugin(installed)
+
+    def test_mcp_launch_and_bundle_tampering_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            work = Path(temp)
+            build(work / 'plugin.zip')
+            with ZipFile(work / 'plugin.zip') as archive:
+                archive.extractall(work / 'unpacked')
+            installed = work / 'unpacked/fable5-codex'
+            config = installed / '.mcp.json'
+            original = config.read_bytes()
+            data = json.loads(original)
+            data['mcpServers']['fable5_skills']['args'] = ['../unregistered-server.mjs']
+            config.write_text(json.dumps(data), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'MCP launch configuration'):
+                validate_plugin(installed)
+            config.write_bytes(original)
+            bundle = installed / 'mcp/dist/server.mjs'
+            bundle.write_bytes(bundle.read_bytes() + b'\n// modified artifact\n')
+            with self.assertRaisesRegex(ValueError, 'MCP build is stale'):
+                validate_plugin(installed)
 
 
 if __name__ == '__main__':

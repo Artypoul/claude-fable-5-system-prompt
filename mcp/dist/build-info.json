@@ -1,0 +1,15 @@
+{
+  "inputs": {
+    "build.mjs": "d3c072f71688839d44133970e975a76c82f0bcbf06921067a0aa6652b07c4354",
+    "package.json": "22f36182e8f97ad3f353e98abd2d8956c05ec30592811261a3fc06cf6b49f4e7",
+    "package-lock.json": "65e2c57d1ef788d8b25f476de769568e47bcc97a7b52798ccecd5607178c1793",
+    "src/catalog.mjs": "808644adc032ced8f910cf6bda059d2bc02aed8baccdb91dbe8f3504a381ee0f",
+    "src/main.mjs": "2a151aa436c228b60a7aac4b3c6cedff329d18d5d47b5c547db3ffb2a0634b7a",
+    "src/search.mjs": "1e68d642ae24305f5ee408b0fa180d185345a424fe6179b17ae4387f96405376",
+    "src/server.mjs": "b7e679baefe89631353ba2b1fe463691aaf3f775af56fd628d6f8b5c61ccba49"
+  },
+  "outputs": {
+    "dist/server.mjs": "c770330aaeddb644b9b2db0371de499e0b3ceae02adc63a40bc8f9c8e5500acd",
+    "dist/THIRD_PARTY_LICENSES.txt": "b97152193f43e32e86874bf72592e0854948b6d7b86a13f81dd0f7ec96520a91"
+  }
+}

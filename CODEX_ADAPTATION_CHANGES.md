@@ -1,5 +1,22 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.2.0 — callable installed-skill search and reading
+
+The plugin now bundles a real local stdio MCP server with `search_skills` and
+`read_skill`. It uses the current enabled catalogue from Codex `skills/list`
+for an explicit project cwd, rather than scanning obsolete plugin cache copies.
+Search is lexical over names/descriptions; reads are bounded registered-file
+operations by opaque ID. This adds executable capability beyond the workflow
+port without claiming to implement other archived services or native activation.
+
+The official MCP SDK is bundled with source, lockfile, build fingerprints and
+third-party license notices. Node.js 20+ and compatible Codex CLI remain external
+requirements. Protocol tests use a real SDK client; source-contract tests use
+a redacted native response; live smoke tests remain distinct from CI fixtures.
+The upstream archive and canonical source mappings are unchanged. The skill
+entry point, tool reference and capability-gap description now document this
+actual MCP capability; their change requires fresh behavioral evidence.
+
 ## 1.1.1 — complete review fixes and strengthen behavioral evidence
 
 All four findings from the 1.1.0 review are addressed. Connector misses now

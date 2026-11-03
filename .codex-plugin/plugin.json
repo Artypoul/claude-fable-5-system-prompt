@@ -1,16 +1,17 @@
 {
   "name": "fable5-codex",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Complete source-based Fable 5 workflow for Codex, with engineering references and source traceability.",
   "author": { "name": "Artypoul" },
   "repository": "https://github.com/Artypoul/claude-fable-5-system-prompt",
   "license": "MIT",
   "keywords": ["workflow", "code-review", "research", "skills", "fable5"],
   "skills": "./.agents/skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Fable 5 Codex",
     "shortDescription": "Complete Fable 5 workflow, references and traceability",
-    "longDescription": "Source-based Fable 5 baseline for simple and complex tasks, unconditional skill discovery before computer work, mandatory sports retrieval, and explicit capability gaps. Includes the unchanged original archive, traceability ledger and behavioral evaluation scenarios. Uses the host's actual tools and permissions.",
+    "longDescription": "Source-based Fable 5 baseline with local MCP tools to search enabled Codex skills and read registered SKILL.md files. Includes engineering references, the unchanged original archive, traceability ledger and behavioral evaluation. Requires Node.js 20+ and Codex CLI on PATH. Uses the host's actual tools and permissions.",
     "developerName": "Artypoul",
     "category": "Productivity",
     "defaultPrompt": ["Use $fable5-codex:fable5-codex for this task, loading the relevant source-based sections and engineering references."]

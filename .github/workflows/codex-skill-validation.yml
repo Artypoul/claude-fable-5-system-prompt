@@ -37,6 +37,15 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s tests -v 2>&1 | tee "$RUNNER_TEMP/codex-validation/tests.txt"
+      - name: Verify MCP protocol and reproducible bundle
+        working-directory: mcp
+        run: |
+          set -euo pipefail
+          node --version
+          npm ci --ignore-scripts
+          npm run build
+          npm test 2>&1 | tee "$RUNNER_TEMP/codex-validation/mcp-tests.txt"
+          git diff --exit-code -- dist/
       - name: Build installable plugin
         run: |
           set -euo pipefail

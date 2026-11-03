@@ -10,6 +10,18 @@ Inspect the live tool registry and the selected tool's description/schema. Tool 
 4. Browser/computer automation when direct interaction is required.
 5. Ask for access or clarification only when the missing permission/resource blocks progress.
 
+## Bundled installed-skill tools
+The plugin's local server exposes `search_skills` and `read_skill`; inspect the
+host's namespaced schemas before calling. Both require the current project's
+absolute `cwd`, not the plugin's installation directory. Search is lexical over
+enabled skill metadata returned by Codex; use an empty query and all pages to
+browse the catalogue. Compare `catalog_sha256` across pages and restart if it
+changes. An incomplete catalogue or runtime failure must remain visible.
+Read a returned ID in the same project to retrieve bounded SKILL.md text. These
+tools do not install skills, run commands, search the web, widen permissions or
+force native skill activation. Use the host's supplied catalogue/file-reading
+surface if the local MCP runtime is unavailable, and disclose that limitation.
+
 ## MCP and connector safety
 - Discover a connector by capability; do not guess IDs or server names.
 - Respect explicit opt-in and per-action authorization.

@@ -1,8 +1,9 @@
 # Capability gaps and verification
 
 This package supplies instructions, source mappings, evaluation scenarios and
-packaging tools. It does not bundle an MCP server, application backend, hosted
-widget renderer or credentials. The upstream archive describes a provider's
+packaging tools, plus a local read-only MCP server for installed-skill search
+and registered SKILL.md reading. It does not bundle an application backend,
+hosted widget renderer or credentials. The upstream archive describes a provider's
 environment; it does not contain the server implementations needed to reproduce
 that environment. Installing this plugin is not proof those services exist.
 
@@ -20,6 +21,7 @@ needed. Never present a mockup or a proposed action as an executed operation.
 | Source capability | Supplied here | External requirement and acceptance check |
 | --- | --- | --- |
 | Baseline behaviour and skill-first routing | Instructions for simple and complex tasks | Host must actually load the skill; verify it in the live catalogue. Installation cannot force system-prompt priority or every-turn injection. Explicit invocation is available when implicit selection is uncertain. |
+| Installed-skill search and reading | Bundled `search_skills` and `read_skill` MCP tools using Codex's enabled catalogue | Node.js 20+ and compatible Codex CLI on PATH. Verify tools/list, a real search and a registered-file read. Tool text is not proof of native skill activation. Other archived tool families still require their own implementations. |
 | Web/image search, weather and sports | Selection, ordering and evidence rules | Host tools or authorized data providers. Verify fresh retrieval, supported leagues, game IDs, game statistics and standings separately; do not substitute scores for missing statistics. |
 | Files, shell execution and file presentation | Workflow and verification rules | Actual reader/editor/shell and a supported delivery destination. Verify file creation and accessibility. |
 | Connector discovery and selection | Discovery, provider-choice and consent workflow | Host directory, connection UI and authorized account integrations. Test a discovery hit, a miss, connected direct use and authentication failure. |

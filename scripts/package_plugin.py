@@ -6,6 +6,7 @@ Only explicit repository directories are exported; VCS, caches and user files
 outside these paths are never included.
 """
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -14,9 +15,9 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from verify_codex_skill import ROOT, require, validate
 
 DIRECTORIES = ('.agents', '.codex-plugin', '.github', 'assets', 'highlights',
-               'scripts', 'system-prompt', 'tests')
+               'scripts', 'system-prompt', 'tests', 'mcp', 'docs')
 FILES = ('.gitignore', '.gitattributes', 'README.md', 'LICENSE', 'CONTRIBUTING.md',
-         'CODEX_ADAPTATION_CHANGES.md', 'PLUGIN.md')
+         'CODEX_ADAPTATION_CHANGES.md', 'PLUGIN.md', '.mcp.json', 'MCP.md')
 
 
 def validate_plugin(root=ROOT):
@@ -28,6 +29,21 @@ def validate_plugin(root=ROOT):
             'plugin version must be major.minor.patch')
     require(manifest['skills'] == './.agents/skills/', 'plugin must load the original skill directory')
     require((root / manifest['skills'] / 'fable5-codex/SKILL.md').is_file(), 'skill entry point missing')
+    require(manifest.get('mcpServers') == './.mcp.json', 'plugin must declare its MCP configuration')
+    mcp = json.loads((root / '.mcp.json').read_text(encoding='utf-8'))
+    require(mcp == {'mcpServers': {'fable5_skills': {'command': 'node',
+            'args': ['mcp/dist/server.mjs'], 'cwd': './'}}}, 'unexpected MCP launch configuration')
+    build_info = json.loads((root / 'mcp/dist/build-info.json').read_text(encoding='utf-8'))
+    expected_inputs = {'build.mjs', 'package.json', 'package-lock.json'} | {
+        p.relative_to(root / 'mcp').as_posix() for p in (root / 'mcp/src').glob('*.mjs')}
+    require(set(build_info['inputs']) == expected_inputs, 'MCP build input inventory differs')
+    require(set(build_info['outputs']) == {'dist/server.mjs', 'dist/THIRD_PARTY_LICENSES.txt'},
+            'MCP build output inventory differs')
+    for name, digest in (build_info['inputs'] | build_info['outputs']).items():
+        file = root / 'mcp' / name
+        require(file.resolve().is_relative_to((root / 'mcp').resolve()), 'MCP build path escapes package')
+        require(hashlib.sha256(file.read_bytes()).hexdigest() == digest,
+                f'MCP build is stale or modified: {name}; rerun npm run build in mcp/')
     marketplace = json.loads((root / '.agents/plugins/marketplace.json').read_text(encoding='utf-8'))
     require(marketplace['name'] == 'fable5', 'unexpected marketplace name')
     require(len(marketplace['plugins']) == 1, 'unexpected marketplace entries')
@@ -42,7 +58,8 @@ def build(output, root=ROOT):
     paths = [root / name for name in FILES]
     for name in DIRECTORIES:
         paths.extend(p for p in (root / name).rglob('*') if p.is_file()
-                     and '__pycache__' not in p.parts and p.suffix not in {'.pyc', '.pyo'})
+                     and not {'__pycache__', 'node_modules'}.intersection(p.parts)
+                     and p.suffix not in {'.pyc', '.pyo'})
     paths = sorted(paths)
     for path in paths:
         require(path.is_file(), f'missing package input: {path}')

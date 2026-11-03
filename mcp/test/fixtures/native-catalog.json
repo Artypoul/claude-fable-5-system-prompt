@@ -1,0 +1,27 @@
+{
+  "_provenance": "Captured from Codex 0.165.0-alpha.1.2 skills/list; identifiers, paths and content redacted; optional fields omitted",
+  "data": [
+    {
+      "cwd": "__PROJECT__",
+      "skills": [
+        {
+          "name": "redacted-skill-0",
+          "description": "Redacted skill description",
+          "path": "__SKILL_PATH_0__",
+          "enabled": true,
+          "scope": "repo",
+          "pluginId": null
+        },
+        {
+          "name": "redacted-skill-1",
+          "description": "Redacted skill description",
+          "path": "__SKILL_PATH_1__",
+          "enabled": true,
+          "scope": "user",
+          "pluginId": "sample@marketplace"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

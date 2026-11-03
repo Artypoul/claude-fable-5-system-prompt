@@ -1,14 +1,19 @@
 # Fable 5 Codex plugin
 
-Version 1.1.1 retains the 1.1.0 baseline, skill-first, sports and elicitation
+Version 1.2.0 adds local read-only MCP tools `search_skills` and `read_skill`.
+They use the enabled Codex catalogue for an explicitly supplied project.
+Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
+See [MCP setup, contracts and verification](MCP.md).
+
+The skill retains the baseline, skill-first, sports and elicitation
 restorations, and requires browser continuation after connector misses and
 item-by-item image placement where the host supports it. The
 unchanged upstream archive remains available for comparison. The supported Codex compatibility manifest at
 `.codex-plugin/plugin.json` points directly to `./.agents/skills/`.
 The complete archive, source mappings, license, assets, validators and tests are
-included for inspection. No new MCP backend or executable search service is
-introduced by packaging; tool discovery and search routing remain exactly as
-defined by the active skill. See the [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)
+included for inspection. The bundled MCP server supplies installed-skill search
+and registered SKILL.md reading. Other archived tool families still require
+their own implementations. See the [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)
 for explicit dependencies and verification requirements. This is a workflow port,
 not a claim of complete runtime equivalence with the source provider.
 

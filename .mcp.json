@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "fable5_skills": {
+      "command": "node",
+      "args": ["mcp/dist/server.mjs"],
+      "cwd": "./"
+    }
+  }
+}
