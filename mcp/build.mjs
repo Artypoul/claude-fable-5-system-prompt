@@ -50,7 +50,11 @@ for (const name of packages) {
   const metadata = JSON.parse(
     await fs.readFile(path.join(directory, "package.json"), "utf8"),
   );
-  const license = await fs.readFile(path.join(directory, "LICENSE"), "utf8");
+  const licenseName = (await fs.readdir(directory)).find((name) =>
+    /^licen[sc]e(?:\.(?:txt|md))?$/i.test(name),
+  );
+  if (!licenseName) throw new Error("License notice missing: " + name);
+  const license = await fs.readFile(path.join(directory, licenseName), "utf8");
   notices.push(`${name} ${metadata.version}\n${license}`);
 }
 await fs.writeFile(

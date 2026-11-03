@@ -1,6 +1,6 @@
 {
   "inputs": {
-    "build.mjs": "484c09f6521a6ca5458e6a1e6a236855d03b511201255ad073acfe8e4f26c595",
+    "build.mjs": "5f17cd65c484d793b4a6de63505d9227affdc40c2a7e8274df5773181287c42a",
     "package.json": "a050c30b8125448d831f208cfd7b66b2f0d0371214f9ed48bf28b61fb2a7f8eb",
     "package-lock.json": "65e2c57d1ef788d8b25f476de769568e47bcc97a7b52798ccecd5607178c1793",
     "src/catalog.mjs": "808644adc032ced8f910cf6bda059d2bc02aed8baccdb91dbe8f3504a381ee0f",
