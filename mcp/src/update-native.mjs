@@ -1,12 +1,19 @@
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { Client } from "@modelcontextprotocol/client";
 import {
   StdioClientTransport,
   getDefaultEnvironment,
 } from "@modelcontextprotocol/client/stdio";
-import { inventory, equal, digest, UpdateError } from "./update-core.mjs";
+import {
+  inventory,
+  copyPackage,
+  equal,
+  digest,
+  UpdateError,
+} from "./update-core.mjs";
 import { fetchNativeCatalog } from "./catalog.mjs";
 
 export const DEFAULT_IDENTITY = {
@@ -31,7 +38,8 @@ export async function command(
     });
     let stdout = "",
       size = 0,
-      finished = false;
+      finished = false,
+      diagnostics = "";
     const finish = (error, value) => {
       if (finished) return;
       finished = true;
@@ -68,12 +76,20 @@ export async function command(
         );
       } else stdout += data;
     });
-    child.stderr.on("data", () => {});
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (data) => {
+      diagnostics = (diagnostics + data).slice(-16384);
+    });
     child.on("close", (code) =>
       finish(
         code !== 0
           ? new UpdateError(
-              code === null && mutation ? "UNCERTAIN" : "COMMAND_FAILED",
+              code === null && mutation
+                ? "UNCERTAIN"
+                : /failed to back up plugin cache entry/i.test(diagnostics) &&
+                    /os error (?:5|32|33)/.test(diagnostics)
+                  ? "CACHE_BUSY"
+                  : "COMMAND_FAILED",
               "Native command failed.",
             )
           : null,
@@ -614,7 +630,40 @@ export class NativeBackend {
     } catch (error) {
       if (["UNCERTAIN", "SETTINGS_CONFLICT"].includes(error.code)) throw error;
       const folder = path.join(backup, "package");
-      installed = await this.installSource(folder, null);
+      try {
+        installed = await this.installSource(folder, null);
+      } catch (localError) {
+        if (localError.code !== "CACHE_BUSY") throw localError;
+        // Windows can retain the old version directory as a live MCP process cwd.
+        // Install identical code in a fresh native version slot; never kill that process.
+        const recovery = path.join(backup, "recovery-" + randomUUID());
+        await copyPackage(folder, recovery, before.files);
+        const file = path.join(recovery, ".codex-plugin/plugin.json");
+        const manifest = JSON.parse(await fs.readFile(file, "utf8"));
+        manifest.version =
+          before.version.split("+")[0] +
+          "+recovery." +
+          randomUUID().replaceAll("-", "");
+        await fs.writeFile(file, JSON.stringify(manifest, null, 2) + "\n");
+        const files = await inventory(recovery);
+        installed = await this.installSource(recovery, null);
+        if (installed.version !== manifest.version)
+          throw new UpdateError(
+            "RESTORE_FAILED",
+            "Recovery version slot differs.",
+          );
+        settings = { ...this.owned.marketplace };
+        sourceMode = "local_recovery";
+        await this.setSettings(before, settings);
+        return {
+          ...installed,
+          version: before.version,
+          installedVersion: manifest.version,
+          files,
+          sourceMode,
+          sourceSettings: settings,
+        };
+      }
       settings = { ...this.owned.marketplace };
       sourceMode = "local_backup";
     }

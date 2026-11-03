@@ -248,14 +248,19 @@ export async function runUpdate(
       );
       await loadBackup(backup, backend.identity);
       const restored = await backend.restore(before, backup);
-      await backend.health(restored, project, before.files);
+      await backend.health(restored, project, restored.files || before.files);
       await backend.assertSettings(before, restored.sourceSettings);
       state.phase = "rolled_back";
       state.restore_source = restored.sourceMode;
+      state.restored_installed_version =
+        restored.installedVersion || before.version;
       await journal(path.join(backup, "transaction.json"), state);
       return {
         status: "rolled_back",
         version: before.version,
+        ...(restored.installedVersion
+          ? { installed_version: restored.installedVersion }
+          : {}),
         error_code: state.error_code,
         source: restored.sourceMode,
         backup,
@@ -316,15 +321,24 @@ export async function runRollback(backend, { backup, project }) {
       () => {},
     );
     const restored = await backend.restore(state.before, backup);
-    await backend.health(restored, project, state.before.files);
+    await backend.health(
+      restored,
+      project,
+      restored.files || state.before.files,
+    );
     await backend.assertSettings(state.before, restored.sourceSettings);
     state.phase = "rolled_back";
     state.restore_source = restored.sourceMode;
+    state.restored_installed_version =
+      restored.installedVersion || state.before.version;
     await writeJson(path.join(backup, "transaction.json"), state);
     await release();
     return {
       status: "rolled_back",
       version: state.before.version,
+      ...(restored.installedVersion
+        ? { installed_version: restored.installedVersion }
+        : {}),
       source: restored.sourceMode,
       backup,
     };
