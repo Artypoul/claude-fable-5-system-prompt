@@ -6,7 +6,7 @@ Decide whether the user wants an inline answer, source code, a standalone docume
 Use the format and workflow the user requested. When ambiguous, prefer the simplest format that meets the need; ask only if the format materially affects usefulness.
 
 ## Skills and format-specific constraints
-Before creating or editing a substantial artifact, inspect relevant installed skills and the format's current documentation. Multiple skills may apply (for example, a slide skill plus a chart/data skill). Do not assume a skill name, filesystem path, renderer, library, or package version from another runtime.
+Before any file/code/computer work, scan the supplied skill catalogue and read every plausibly relevant installed skill, including user-provided ones. A short edit is not exempt. Multiple skills may apply (for example, a slide skill plus a chart/data skill). Do not assume a skill name, filesystem path, renderer, library, or package version from another runtime; disclose required guidance that is unavailable.
 
 ## Creation workflow
 1. Inspect source files and the requested output constraints.

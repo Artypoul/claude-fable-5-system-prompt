@@ -1,6 +1,6 @@
 ---
 name: fable5-codex
-description: Use when the user explicitly requests the Fable 5 Codex workflow, or when multi-step repository work combines implementation, review, research, product decisions, or artifact delivery. Do not impose the full workflow on a simple factual answer or one-step edit.
+description: Use when answering user requests with the Fable 5 baseline, including simple factual questions, one-step edits, code execution, research and artifact delivery, or when the user explicitly requests Fable 5. Scale the engineering workflow to the task while retaining the baseline requirements.
 ---
 
 # Fable 5 — source-based Codex skill
@@ -12,6 +12,12 @@ This is community workflow guidance, not a system prompt, model identity or perm
 ## How to read this skill
 
 Read the applicable source-based sections before acting, using the linked anchors to locate them. Do not load unrelated specialist manuals or every reference for a small task. The canonical port is primary within this package; engineering references are additions. Neither can override current system/developer instructions, the user's authorized request or applicable project constraints.
+
+The baseline applies to simple answers and one-step tasks too. A short answer does not require a repository plan, but it still follows the relevant tone, sourcing, tool-selection and skill-discovery rules. Only the engineering supplements scale down for small tasks. Plugin discovery depends on the host; installation alone cannot inject a system prompt into every conversation.
+
+Before any file/code/computer work, first scan the supplied skill catalogue and read every plausibly relevant skill, including user-provided skills, before executing or changing anything. Use the host's discovery/read tools to perform this prerequisite; do not invent a registry API. If a required skill is unavailable, identify the gap and follow supported alternatives explicitly.
+
+Read [capability gaps and verification](references/capability-gaps.md) before promising persistent storage, authenticated AI calls, specialized widgets or specialist workflows. That reference distinguishes guidance supplied by this package from capabilities supplied by the host and from integrations that still need implementation.
 
 For repository work, first inspect the current branch, changes, applicable AGENTS.md guidance, affected code paths and tests. Preserve unrelated work. Implement the smallest coherent change, verify it, and report actual evidence. Do not claim a separate reviewer, a passed test or an external action that did not occur.
 
@@ -41,7 +47,7 @@ Read [connector discovery and consent, 4.1–4.6](references/source-faithful-por
 
 ## 5. Computer Use
 
-Read relevant installed skills before covered execution or edits. Inspect the real environment, attachments and repository. Keep originals, intermediate work and final deliverables distinct; create and verify requested files. Choose the user's format, not a hard-coded renderer or line-count rule. Reopen/render artifacts where necessary, and follow the project's actual package manager and dependencies.
+Before any computer work, scan the skill catalogue and read all plausibly relevant skills first, even for a one-step edit or command. Inspect the real environment, attachments and repository. Keep originals, intermediate work and final deliverables distinct; create and verify requested files. Choose the user's format, not a hard-coded renderer or line-count rule. Reopen/render artifacts where necessary, and follow the project's actual package manager and dependencies.
 
 Read [computer and artifact workflow, 5.1–5.10](references/source-faithful-port.md#f5-section-5). Use the engineering supplements below for implementation, debugging, testing and PR handoff.
 
@@ -60,6 +66,8 @@ Read [image retrieval](references/source-faithful-port.md#f5-section-7).
 ## 8. Tool Definitions
 
 Discover actual callable tools and inspect their current schema, permissions and output contract. The eighteen source tool families have individually adapted descriptions; archived names and JSON schemas are not executable Codex APIs. Keep dependent writes sequential, use returned IDs/version tokens, and verify outcomes.
+
+For a live game or one completed within 24 hours, retrieve its score and then game statistics using the returned game ID before answering. Broad league results require both scores and standings. Use supported sports tools ahead of generic web search; if statistics or standings are unavailable, disclose the specific missing capability and give only the supported partial result.
 
 Read [all eighteen tool adaptations, 8.1–8.18](references/source-faithful-port.md#f5-section-8). The [capability matrix](references/codex-tool-matrix.md) is supplementary provenance, not a tool registry.
 

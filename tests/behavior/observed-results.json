@@ -1,0 +1,245 @@
+{
+  "kind": "model_action_plan_evaluation",
+  "baseline_ref": null,
+  "observed_at_utc": "2026-11-03T10:14:54.560549+00:00",
+  "codex_version": "codex-cli 0.165.0-alpha.1.2",
+  "instruction_sha256": "d8db5109738055b9e8334d1f5c0db744944716e9c64a5bd0cbbf0cbc2b7c9f3b",
+  "scenario_sha256": "8fcef6aa5f48790a94fe32ce9ef4b72f218a7b5407213037c1112b4123dba476",
+  "skill_package_sha256": "de18df8371565d6d1de08761f83a685f7a9ce1d620fcf743591af53dfb2d7ea3",
+  "results": {
+    "simple-answer": [],
+    "one-step-edit": [],
+    "run-code": [],
+    "recent-score": [],
+    "league-results": [],
+    "unsupported-stats": [],
+    "gift-clarification": [],
+    "complete-brief": [],
+    "connector-hit": [],
+    "storage-gap": [],
+    "model-api-gap": [],
+    "visual-reference": []
+  },
+  "response": {
+    "cases": [
+      {
+        "id": "simple-answer",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "2 + 2 = 4."
+      },
+      {
+        "id": "one-step-edit",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "scan_skills",
+            "target": ""
+          },
+          {
+            "kind": "read_skill",
+            "target": "editing"
+          },
+          {
+            "kind": "read_skill",
+            "target": "user-writing"
+          },
+          {
+            "kind": "edit_file",
+            "target": "README.md"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Corrected “recieve” to “receive” in README.md."
+      },
+      {
+        "id": "run-code",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "scan_skills",
+            "target": ""
+          },
+          {
+            "kind": "read_skill",
+            "target": "execution"
+          },
+          {
+            "kind": "run_code",
+            "target": "report.py"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Report the script’s actual output and execution status; do not claim success before receiving the result."
+      },
+      {
+        "id": "recent-score",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "sports_scores",
+            "target": ""
+          },
+          {
+            "kind": "sports_game_stats",
+            "target": "game-42"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "The final score was 100–95. Include only game statistics actually returned by the statistics tool."
+      },
+      {
+        "id": "league-results",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "sports_scores",
+            "target": ""
+          },
+          {
+            "kind": "sports_standings",
+            "target": ""
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Present the returned NBA results and standings without inventing scores, teams or rankings."
+      },
+      {
+        "id": "unsupported-stats",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "sports_scores",
+            "target": ""
+          },
+          {
+            "kind": "report_gap",
+            "target": "game_stats"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [
+          "game_stats"
+        ],
+        "answer": "The final score was 3–2. Game statistics are unavailable through the provided capabilities."
+      },
+      {
+        "id": "gift-clarification",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "ask_choice",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "What budget would you like to stay within: under $25, $25–$50, or over $50? Wait for the user’s selection before recommending a gift."
+      },
+      {
+        "id": "complete-brief",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "A sketchbook with paper suited to pencil drawing, paired with a kneaded eraser, would make a thoughtful gift. Choose sizes and quantities that keep the total under $30."
+      },
+      {
+        "id": "connector-hit",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "connector_search",
+            "target": "FileService"
+          },
+          {
+            "kind": "suggest_connector",
+            "target": "files-1"
+          }
+        ],
+        "gaps": [],
+        "answer": "Present the FileService connection option and wait for the user to connect it before searching private files."
+      },
+      {
+        "id": "storage-gap",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "report_gap",
+            "target": "app_storage"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [
+          "app_storage"
+        ],
+        "answer": "Automatic saving between visits needs persistent storage, which is unavailable here. An implementation would need a storage adapter, explicit private ownership, validated writes, confirmed saves, and loading, error and recovery states. I cannot deliver a working persistent journal with these capabilities."
+      },
+      {
+        "id": "model-api-gap",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "report_gap",
+            "target": "app_model_api"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [
+          "app_model_api"
+        ],
+        "answer": "A working authenticated AI app requires an application-owned backend, an approved credential mechanism and a configured provider client. None is available here, and agent tools do not transfer to the app. I can outline the integration, but cannot deliver a working app with these capabilities."
+      },
+      {
+        "id": "visual-reference",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "search_images",
+            "target": ""
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Show the retrieved pangolin image with its source. A pangolin has overlapping scales, a small pointed head, short legs with strong claws, and a long tail."
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "fable5-codex",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Complete source-based Fable 5 workflow for Codex, with engineering references and source traceability.",
   "author": { "name": "Artypoul" },
   "repository": "https://github.com/Artypoul/claude-fable-5-system-prompt",
@@ -10,9 +10,9 @@
   "interface": {
     "displayName": "Fable 5 Codex",
     "shortDescription": "Complete Fable 5 workflow, references and traceability",
-    "longDescription": "Packages the existing fable5-codex skill without changing its instructions or references. Includes the original archive, traceability ledger, validators and tests. Uses the host's actual tools and permissions.",
+    "longDescription": "Source-based Fable 5 baseline for simple and complex tasks, unconditional skill discovery before computer work, mandatory sports retrieval, and explicit capability gaps. Includes the unchanged original archive, traceability ledger and behavioral evaluation scenarios. Uses the host's actual tools and permissions.",
     "developerName": "Artypoul",
     "category": "Productivity",
-    "defaultPrompt": ["Use $fable5-codex for this task, loading the relevant source-based sections and engineering references."]
+    "defaultPrompt": ["Use $fable5-codex:fable5-codex for this task, loading the relevant source-based sections and engineering references."]
   }
 }

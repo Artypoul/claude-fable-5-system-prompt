@@ -53,6 +53,11 @@ See [Plugin packaging and installation](PLUGIN.md) for verification, ZIP builds
 and migration from the earlier local installation. Standalone skill installation
 below is still supported.
 
+Version 1.1.0 restores the source's baseline for simple tasks, unconditional
+skill-first checks and mandatory sports retrieval. See [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)
+for services the host must supply and [behavioral checks](PLUGIN.md#behavioral-checks)
+for deterministic tests and separate model-based action-plan evaluation.
+
 Copy the complete [.agents/skills/fable5-codex](.agents/skills/fable5-codex) directory into a supported Codex skill location. If the Codex client supports explicit skill mentions, invoke it as `$fable5-codex`.
 
 Before using the skill in a project:

@@ -1,5 +1,29 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.1.0 — restore operational requirements
+
+This release restores the baseline for simple answers and one-step work while
+keeping engineering ceremony proportional. It restores unconditional catalogue
+scanning and all plausibly relevant skill reads before computer work, mandatory
+score-then-statistics retrieval for live/recent games, scores plus standings for
+broad league results, interactive elicitation when a suitable tool exists,
+presentation of connector discovery hits, and useful image retrieval. The
+e-commerce partner-selection restriction is retained subject to higher-priority
+host routing rules. Missing capabilities must be disclosed, not simulated.
+
+The upstream archive is unchanged. Seven canonical bodies were strengthened;
+their existing source spans and anchors remain in place, and only their ledger
+fingerprints are refreshed. Engineering supplements were reconciled with the
+restored requirements. A new capability-gap reference lists application storage,
+AI authentication, widgets, specialist skills and host-loading dependencies.
+
+The 12 scenario fixtures are source-derived behavior contracts. Deterministic
+tests exercise the action-plan checker with valid and invalid traces; they are
+not model tests. `scripts/evaluate_behavior.py --run-model` separately obtains
+model-produced plans, hides expected outcomes from the model and records the
+instruction fingerprint and results. It does not execute live backends. No
+blanket claim of semantic or runtime equivalence is made.
+
 ## Source of truth
 
 The source is the user's original fork at `9b00248c2f0dd60c12a718853580a5ec44a9edf0`. GitHub comparison confirmed that the upstream `KalarisLabs/claude-fable-5-system-prompt` main branch is identical to that commit. Its archived files, curation attribution, LICENSE, CONTRIBUTING.md and original signature checker remain unchanged. This establishes repository provenance, **not independent authentication of the claimed leaked system prompt**.
@@ -282,12 +306,12 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | F5-4-02 | P:372-372 | adapt | consent | f5-4-02 | 985095e415ad9b5af9f07782c7222f8cdf38eaf5ba8ff1721e166a10175a0b37 |
 | F5-4.1-01 | P:377-377 | adapt | consent | f5-4-1-01 | 8407fe857635e6e759d7a25198d642123ec293c3db612a8999bb2ba5eac42246 |
 | F5-4.1-02 | P:379-379 | adapt | consent | f5-4-1-02 | a9c0f09949eaaab77cbf5b50872866dec0dd14755aa2a764bcdfb5bb4dbf5696 |
-| F5-4.2-01 | P:384-384 | adapt | consent | f5-4-2-01 | 9e8d07a432fca355e3f23000e419414633104b0c25059a07328a6ad7e1a31ce8 |
+| F5-4.2-01 | P:384-384 | adapt | consent | f5-4-2-01 | ec4378a08b3a1133530983af9c3dcdf9c4d79cca7fc02173380f991530abe481 |
 | F5-4.2-02 | P:385-385 | adapt | consent | f5-4-2-02 | 640c8a031f0deaaebf55666be0612ad5f3778d96b8c14b8b7eea1bc89e1f805c |
 | F5-4.2-03 | P:386-386 | adapt | consent | f5-4-2-03 | 50c7466b8c75339837fa7f51bd5c9f847181be3a0b46ed6b8e46998d1e6dd639 |
 | F5-4.3-01 | P:391-391 | adapt | consent | f5-4-3-01 | 4cc1c69ddecfb64bcfa78e920cc930a80eaeac62f1941f2ea1545760fb758525 |
 | F5-4.3-02 | P:393-393 | adapt | consent | f5-4-3-02 | 1c2d090534c63f1967b75c80f7151003d367c8d9c1df841d3ef198fbf0dc3ac0 |
-| F5-4.3-03 | P:395-395 | adapt | consent | f5-4-3-03 | 637e0200595f26a514479dd5a9929c4f103154e8ef10906637365fbfa61fa66a |
+| F5-4.3-03 | P:395-395 | adapt | consent | f5-4-3-03 | 5b7a51711b3d0746ab347c30fb9e6fbdf4821ad8182f12df0ad8d3ebf75efaa2 |
 | F5-4.4-01 | P:400-400 | adapt | consent | f5-4-4-01 | fea1f32ffaeed016451ef47ac01a5eaf7d446f85c4a819cdb257921b8c181468 |
 | F5-4.4-02 | P:402-402 | adapt | consent | f5-4-4-02 | 54218d85ab2aab6b550b9811671482cdeddae15bc2a3fc04324149bb5537f3ba |
 | F5-4.4-03 | P:403-403 | adapt | consent | f5-4-4-03 | 1f265512788254d3ca1ee660e2a669d662192c37dbce2578a0b657499f176e67 |
@@ -300,7 +324,7 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | F5-4.6-01 | P:419-419 | preserve | preserve | f5-4-6-01 | 2b90e9a0bb9e54b2fc54c8d24b1171078359de00b540d046e27f5300a0589b5b |
 | F5-4.6-02 | P:421-421 | adapt | consent | f5-4-6-02 | e824ef3083754bdee536cd676ca1768338710bba0b0ceddb9e5368af7fab8714 |
 | F5-5.1-01 | P:431-431 | adapt | runtime | f5-5-1-01 | cc501c413710343afa0ae67988be8bd201dd741ab5709b9c4fa94d23f810b2a7 |
-| F5-5.1-02 | P:433-433 | adapt | runtime | f5-5-1-02 | 6fbbe224c8800f8ff4060654d0c986cf0a1651b0b1ca54851b01aba1040b48f8 |
+| F5-5.1-02 | P:433-433 | adapt | runtime | f5-5-1-02 | 48d8879c11de6fa2de0d796a7b78b386beab6176813c373945d2086ca7874f42 |
 | F5-5.1-03 | P:435-436 | adapt | runtime | f5-5-1-03 | c67bb86520b96376f8e30e6a345cdc98c7b358a4efae977fa798c43d0b58fc4c |
 | F5-5.1-04 | P:438-439 | adapt | runtime | f5-5-1-04 | 53b619b13fb708e2e05c5ac143e6ab2109887494e33dca2ad277d4723e38f424 |
 | F5-5.1-05 | P:441-442 | adapt | runtime | f5-5-1-05 | ef899b405bb512fb0b058e330860d9dcc78f2f25464d4318a8a35bc2744b22fb |
@@ -365,7 +389,7 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | F5-5.8-03 | P:557-557 | preserve | preserve | f5-5-8-03 | 2845565368da141036ef64e0fc6f32e8af5a548ff03f00f061f013a7f6e483ea |
 | F5-5.8-04 | P:558-558 | preserve | preserve | f5-5-8-04 | 2a36913daf4384b2362ded6f5a4be50dc91fda054223ecd19f148ef69426e9e4 |
 | F5-5.9-01 | P:563-568 | adapt | files | f5-5-9-01 | 166bdb131b77b2ff9841ddb911bfbd6e850d6368db9f87d17a9d8412e4f9d46d |
-| F5-5.10-01 | P:573-573 | replace | runtime | f5-5-10-01 | be415ba9f35e375de8541ed04e459fac491df207f333f98fe7e5fbfde23c80e2 |
+| F5-5.10-01 | P:573-573 | replace | runtime | f5-5-10-01 | eb0c09e8d7f7d28095399e82078ce1a2b21c3a8f509e041e2a6a7034ba740aa1 |
 | F5-6-01 | P:580-580 | replace | policy | f5-6-01 | 752a5c400c141c94ce8d140638aebf1284c0892d2c5036491d6289c00f1fc9e8 |
 | F5-6-02 | P:582-582 | replace | policy | f5-6-02 | f02318b86e0fe1fa123d4dc742444f34a01f78045c1181486be1e62ace86d4dd |
 | F5-6-03 | P:583-583 | replace | policy | f5-6-03 | de7197f3b91ce49528b75efa8a145a3e5869a2f709482bc081593b7d790dc9c3 |
@@ -461,7 +485,7 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | F5-6.6-13 | P:732-732 | preserve | preserve | f5-6-6-13 | 628d6d56b47fcc6e5997e2f5d8bbf7a8bb6c60deb71c115a94f37c07d109fcc9 |
 | F5-7-01 | P:739-739 | adapt | runtime | f5-7-01 | f004283c84496d0147e42230cd67b00a12162ee61a3836dbc003a619776d1f92 |
 | F5-7-02 | P:741-741 | adapt | runtime | f5-7-02 | abb32d940eae9e484dd7544785fe6db0c02c0b45285f92fd101eb58f1c95c939 |
-| F5-7-03 | P:743-743 | adapt | runtime | f5-7-03 | a8e9c13acb0c050d20328f18aa3425597658f038a947fa4e846836c3ed1d5037 |
+| F5-7-03 | P:743-743 | adapt | runtime | f5-7-03 | 9a6cb8e2e3f79346a4beb255e2541785aa5b336e12400580a67a9680d9cc0000 |
 | F5-7-04 | P:745-745 | adapt | runtime | f5-7-04 | 9281b08c46fcb3e64d83b1a929ae70d0c34f72741afc142c93ab503d1fce12ec |
 | F5-7-05 | P:747-747 | adapt | runtime | f5-7-05 | ae415ebab9a6f5f75f2c59ee14849d3da1ab87db3478f4b0e105a903307c9c8a |
 | F5-7-06 | P:748-748 | adapt | runtime | f5-7-06 | 457fb39bb91a38bb426ff4f69cbcca72ea5c926a54149cac29c2436e01b3cc05 |
@@ -489,13 +513,13 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | F5-8-02 | P:793-801 | replace | runtime | f5-8-02 | 420bc2e01ceaddea074f8c2aa2aaf2c46379ae93b084ef552550f3343f745dd8 |
 | F5-8-03 | P:803-803 | replace | runtime | f5-8-03 | e95492d2ba9b96e49ad86bc977a8db40f8d7cd1564c8f39fb13861813da81333 |
 | F5-8-04 | P:805-805 | replace | runtime | f5-8-04 | 7be5511806cc4e012a29d864803c245b6014da6b40d461e67385237d96253914 |
-| F5-8.1-01 | P:810-810 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
+| F5-8.1-01 | P:810-810 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
 | F5-8.1-02 | P:812-845 | replace | schema | f5-8-1-02 | deda3831abdeb7acf775ddcb9fd84ef3fde14091f8f9f80f60fb8831e8e34de3 |
 | F5-8.2-01 | P:850-850 | adapt | runtime | f5-8-2-01 | 7da18e3296fe2ebcaac2aae5f151309ea01289b7a95a7010a41753573b5bc621 |
 | F5-8.2-02 | P:852-862 | replace | schema | f5-8-2-02 | 3fc9adaafd72d702e8f4fa9187c2034f29b680a17ddb1527c97129284a6f3f5c |
 | F5-8.3-01 | P:867-867 | adapt | runtime | f5-8-3-01 | 8a66885733979a2f9271c337abe02a89f405a95b5a54cdebf3767bed87c851d8 |
 | F5-8.3-02 | P:869-880 | replace | schema | f5-8-3-02 | cc3fc05b3e0cfb0e4e4417957ee8517dcbc8b93d839e8acd844e4f7590e1f01e |
-| F5-8.4-01 | P:885-885 | adapt | runtime | f5-8-4-01 | 281548514f4d793aa4de595e808b65f26699e5afe28b5158811e470cad483b2d |
+| F5-8.4-01 | P:885-885 | adapt | runtime | f5-8-4-01 | 3e3c6088395f32b7897ed847f3d1877f95fc6d6bfb6a09b5be34db3a3a2629cc |
 | F5-8.4-02 | P:887-912 | replace | schema | f5-8-4-02 | d505d2e71bce1a00051098ab7d0d6dc34b8207b60cd108d5b7dc271a1565df75 |
 | F5-8.5-01 | P:917-917 | adapt | runtime | f5-8-5-01 | 692859003cabdf22c2ee3fe0dc3d47e2216914c0bcb1e0e1cf77fc84d16061da |
 | F5-8.5-02 | P:919-941 | replace | schema | f5-8-5-02 | d747e90b22b562f904034c394558bfd9f5f2ad4a4f23affcab63bd80ad849faa |
@@ -585,22 +609,22 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | F5-16-01 | P:1801-1801 | replace | attribution | f5-16-01 | 9403d596ae159a3e05705629cdf8a9ae12a4e63212e53f85fe2f0c01032abac4 |
 | F5-16-02 | P:1805-1805 | replace | attribution | f5-16-02 | f6e8975dc1f8c429cd24f63b8bf4ec3c40bdb8267b0dded6574667baa429f0a5 |
 | TD-Tool-Summary-01 | D:9-28 | adapt | runtime | f5-8-04 | 7be5511806cc4e012a29d864803c245b6014da6b40d461e67385237d96253914 |
-| TD-ask_user_input_v0-01 | D:34-34 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-02 | D:36-36 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-03 | D:38-38 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-04 | D:39-39 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-05 | D:40-40 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-06 | D:41-41 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-07 | D:42-42 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-08 | D:44-44 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-09 | D:46-46 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-10 | D:47-47 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-11 | D:48-48 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-12 | D:49-49 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-13 | D:50-50 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-14 | D:51-51 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-15 | D:52-52 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
-| TD-ask_user_input_v0-16 | D:54-54 | adapt | runtime | f5-8-1-01 | b72fca3e762facfe0f69491785068241ceabc2517299c5f6c094fb6cd6beb94e |
+| TD-ask_user_input_v0-01 | D:34-34 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-02 | D:36-36 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-03 | D:38-38 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-04 | D:39-39 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-05 | D:40-40 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-06 | D:41-41 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-07 | D:42-42 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-08 | D:44-44 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-09 | D:46-46 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-10 | D:47-47 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-11 | D:48-48 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-12 | D:49-49 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-13 | D:50-50 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-14 | D:51-51 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-15 | D:52-52 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
+| TD-ask_user_input_v0-16 | D:54-54 | adapt | runtime | f5-8-1-01 | 3684dabd55ac195fe252a7d724cc45c0004987dd1ccf55ff64c6b05e39ea7a6d |
 | TD-ask_user_input_v0-17 | D:56-56 | replace | schema | f5-8-1-02 | deda3831abdeb7acf775ddcb9fd84ef3fde14091f8f9f80f60fb8831e8e34de3 |
 | TD-ask_user_input_v0-18 | D:58-91 | replace | schema | f5-8-1-02 | deda3831abdeb7acf775ddcb9fd84ef3fde14091f8f9f80f60fb8831e8e34de3 |
 | TD-bash_tool-01 | D:97-97 | adapt | runtime | f5-8-2-01 | 7da18e3296fe2ebcaac2aae5f151309ea01289b7a95a7010a41753573b5bc621 |
@@ -609,7 +633,7 @@ These are **archived** field/constraint inventories, not callable Codex schemas.
 | TD-create_file-01 | D:117-117 | adapt | runtime | f5-8-3-01 | 8a66885733979a2f9271c337abe02a89f405a95b5a54cdebf3767bed87c851d8 |
 | TD-create_file-02 | D:119-119 | replace | schema | f5-8-3-02 | cc3fc05b3e0cfb0e4e4417957ee8517dcbc8b93d839e8acd844e4f7590e1f01e |
 | TD-create_file-03 | D:121-132 | replace | schema | f5-8-3-02 | cc3fc05b3e0cfb0e4e4417957ee8517dcbc8b93d839e8acd844e4f7590e1f01e |
-| TD-fetch_sports_data-01 | D:138-138 | adapt | runtime | f5-8-4-01 | 281548514f4d793aa4de595e808b65f26699e5afe28b5158811e470cad483b2d |
+| TD-fetch_sports_data-01 | D:138-138 | adapt | runtime | f5-8-4-01 | 3e3c6088395f32b7897ed847f3d1877f95fc6d6bfb6a09b5be34db3a3a2629cc |
 | TD-fetch_sports_data-02 | D:140-140 | replace | schema | f5-8-4-02 | d505d2e71bce1a00051098ab7d0d6dc34b8207b60cd108d5b7dc271a1565df75 |
 | TD-fetch_sports_data-03 | D:142-167 | replace | schema | f5-8-4-02 | d505d2e71bce1a00051098ab7d0d6dc34b8207b60cd108d5b7dc271a1565df75 |
 | TD-image_search-01 | D:173-173 | adapt | runtime | f5-8-5-01 | 692859003cabdf22c2ee3fe0dc3d47e2216914c0bcb1e0e1cf77fc84d16061da |
