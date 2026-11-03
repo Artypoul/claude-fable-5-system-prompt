@@ -5,7 +5,12 @@ import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { NativeBackend, command } from "../src/update-native.mjs";
-import { inventory, copyPackage, UpdateError } from "../src/update-core.mjs";
+import {
+  inventory,
+  copyPackage,
+  equal,
+  UpdateError,
+} from "../src/update-core.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 test("bundled help and invalid arguments run without Codex or node_modules", async (t) => {
@@ -83,7 +88,12 @@ test("candidate validation rejects missing build entries and tampered bundles", 
   t.after(() => fs.rm(temp, { recursive: true, force: true }));
   await copyPackage(root, temp, await inventory(root));
   const backend = new NativeBackend();
-  assert.equal((await backend.validatePackage(temp)).version, "1.3.1");
+  assert.equal(
+    (await backend.validatePackage(temp)).version,
+    JSON.parse(
+      await fs.readFile(path.join(root, ".codex-plugin/plugin.json"), "utf8"),
+    ).version,
+  );
   const infoFile = path.join(temp, "mcp/dist/build-info.json");
   const info = await fs.readFile(infoFile, "utf8"),
     changed = JSON.parse(info);
@@ -150,4 +160,130 @@ test("busy old cache uses a fresh recovery slot while preserving every other byt
     ).version,
     "1.2.0",
   );
+});
+
+async function gitFixture(t) {
+  const temp = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-git-review-"));
+  t.after(async () => {
+    const resolved = await fs.realpath(temp),
+      base = await fs.realpath(os.tmpdir());
+    assert.equal(path.dirname(resolved), base);
+    assert.ok(path.basename(resolved).startsWith("fable5-git-review-"));
+    await fs.rm(resolved, { recursive: true, force: true });
+  });
+  const market = path.join(temp, "market"),
+    cache = path.join(temp, "profile/plugins/cache/fable5/fable5-codex/1.3.1");
+  await fs.mkdir(path.join(market, ".codex-plugin"), { recursive: true });
+  await fs.writeFile(
+    path.join(market, ".codex-plugin/plugin.json"),
+    JSON.stringify({ name: "fable5-codex", version: "1.3.1" }),
+  );
+  await fs.writeFile(path.join(market, "source.txt"), "original\n");
+  await fs.writeFile(
+    path.join(market, "asset.bin"),
+    Buffer.from([0, 255, 13, 10]),
+  );
+  await command("git", ["init", "--quiet", market]);
+  await command("git", ["-C", market, "add", "."]);
+  await command("git", [
+    "-C",
+    market,
+    "-c",
+    "user.name=Review Fixture",
+    "-c",
+    "user.email=fixture@example.invalid",
+    "commit",
+    "--quiet",
+    "-m",
+    "baseline",
+  ]);
+  await copyPackage(market, cache, await inventory(market));
+  const backend = new NativeBackend();
+  backend.settings = async () => ({
+    file: path.join(temp, "profile/config.toml"),
+    plugin: { enabled: true },
+    marketplace: {
+      source_type: "git",
+      source: backend.identity.source,
+      ref: "main",
+    },
+  });
+  backend.cli = async (args) =>
+    args[0] === "list"
+      ? {
+          installed: [
+            {
+              pluginId: backend.identity.pluginId,
+              installed: true,
+              enabled: true,
+              version: "1.3.1",
+            },
+          ],
+        }
+      : { marketplaces: [{ name: "fable5", root: market }] };
+  return { temp, market, cache, backend };
+}
+
+test("clean Git package including binary blobs is accepted", async (t) => {
+  const f = await gitFixture(t),
+    before = await f.backend.inspect();
+  assert.match(before.commit, /^[a-f0-9]{40}$/);
+  assert.equal(Object.keys(before.files).length, 3);
+});
+for (const change of ["modified", "assume-unchanged", "untracked", "deleted"])
+  test(
+    "matching marketplace/cache " + change + " cannot masquerade as Git HEAD",
+    async (t) => {
+      const f = await gitFixture(t);
+      if (change === "assume-unchanged")
+        await command("git", [
+          "-C",
+          f.market,
+          "update-index",
+          "--assume-unchanged",
+          "source.txt",
+        ]);
+      for (const folder of [f.market, f.cache]) {
+        if (change === "deleted")
+          await fs.unlink(path.join(folder, "source.txt"));
+        else
+          await fs.writeFile(
+            path.join(
+              folder,
+              change === "untracked" ? "extra.txt" : "source.txt",
+            ),
+            "customized\n",
+          );
+      }
+      await assert.rejects(f.backend.inspect(), { code: "LOCAL_CHANGES" });
+    },
+  );
+
+test("legacy customized backup falls back locally when Git install succeeds with different bytes", async (t) => {
+  const f = await gitFixture(t);
+  const original = await f.backend.inspect();
+  const packageRoot = path.join(f.temp, "package");
+  await copyPackage(f.cache, packageRoot, original.files);
+  await fs.writeFile(
+    path.join(packageRoot, "source.txt"),
+    "customized snapshot\n",
+  );
+  const before = { ...original, files: await inventory(packageRoot) };
+  const sources = [];
+  f.backend.installSource = async (source, ref) => {
+    sources.push(ref ? "git" : "local");
+    f.backend.owned = {
+      marketplace: {
+        source_type: ref ? "git" : "local",
+        source,
+        ...(ref ? { ref } : {}),
+      },
+    };
+    return { version: "1.3.1", path: ref ? f.cache : packageRoot };
+  };
+  f.backend.setSettings = async () => {};
+  const restored = await f.backend.restore(before, f.temp);
+  assert.deepEqual(sources, ["git", "local"]);
+  assert.equal(restored.sourceMode, "local_backup");
+  assert.ok(equal(await inventory(restored.path), before.files));
 });

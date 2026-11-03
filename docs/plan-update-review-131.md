@@ -45,3 +45,27 @@ Edge matrix: 1/10 — байты и настройки; 2/3/5 — прежняя
 update→rollback→update; 17 — настоящие Git/CLI/MCP; 18 — красные тесты до кода;
 19/20 — fail-closed при conflict/unknown и local fallback. 4/14/15 и 21–27
 неприменимы: нет middleware, доменных сроков, миграций БД или frontend.
+
+## Реализация и повторное ручное ревью
+
+Оба P2 воспроизведены до правки: конкурентный тест показал два restore,
+четыре варианта совпадающих локальных правок были приняты, старый бэкап не
+получил local fallback. После formatter/rebuild проходят 44 Node + 54 Python.
+ZIP и source validator проходят; исходный архив, .agents/skills, MCP-поиск и
+модельная observation не менялись. Настоящая расширенная репетиция описана
+в PR отдельно от детерминированных тестов.
+
+API/совместимость: старый snapshot остаётся читаемым, Git mismatch направлен
+в существующие local/Windows recovery пути. Сохранность: claim берётся через
+exclusive create и освобождается в finally до restore; чужой новый active
+не удаляется. При зависшем claim применяется явный fail-closed. QA: семь
+первых красных регрессий стали зелёными; clean Git с бинарными blob проходит,
+modified/assume-unchanged/untracked/deleted — отказ до установки. Повторное
+ревью текущего diff тремя ручными ролями не оставило кодовых блокеров.
+
+Edge evidence: 1/10 — legacy customized backup и полное сравнение файлов;
+2/3/5 — malformed/live active и existing claim; 6/7 — неизменный target scope;
+8/13 — controlled ABA race и native конкурирующие rollback; 9/11/12/16 —
+совместимость snapshot/local recovery и native update→rollback→update;
+17 — настоящий Git, CLI/MCP в native тесте; 18 — зафиксированный красный прогон;
+19/20 — UNKNOWN/CONFLICT без слепого retry и Git mismatch → local snapshot.

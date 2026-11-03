@@ -2,6 +2,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as fs from "node:fs/promises";
+import mutableFs from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
 import os from "node:os";
 import {
@@ -249,6 +251,10 @@ test("malformed or live lock cannot be reclaimed by manual rollback", async (t) 
     );
   }
   assert.ok(!f.backend.events.includes("restore"));
+  await assert.rejects(
+    fs.stat(path.join(f.backend.backupRoot(), "recovery-claim.json")),
+    { code: "ENOENT" },
+  );
 });
 
 test("lack of disk space refuses the update before backup or mutation", async (t) => {
@@ -278,4 +284,90 @@ test("journal write failure after installation still attempts verified restorati
   assert.ok(f.backend.events.includes("restore"));
   assert.ok(f.backend.events.includes("health:1.2.0"));
   assert.ok(await fs.stat(path.join(f.backend.backupRoot(), "active.json")));
+});
+
+test("two recoveries cannot reclaim the same stale lock concurrently", async (t) => {
+  const f = await fixture(t),
+    updated = await runUpdate(f.backend, f.options);
+  const file = path.join(f.backend.backupRoot(), "active.json");
+  await fs.writeFile(
+    file,
+    JSON.stringify({ pid: 2147483647, token: "stale", backup: updated.backup }),
+  );
+  let active = 0,
+    maximum = 0,
+    calls = 0,
+    secondArrived;
+  const second = new Promise((resolve) => (secondArrived = resolve));
+  const original = mutableFs.unlink;
+  f.backend.restore = async () => {
+    active++;
+    maximum = Math.max(maximum, active);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    active--;
+    return {
+      version: "1.2.0",
+      path: f.before.path,
+      sourceMode: "local_backup",
+    };
+  };
+  // Force the old ABA race: B deletes the newly acquired A lock.
+  mutableFs.unlink = async (target) => {
+    if (target !== file) return original(target);
+    const call = ++calls;
+    if (call === 1) {
+      await Promise.race([
+        second,
+        new Promise((resolve) => setTimeout(resolve, 200)),
+      ]);
+      return original(target);
+    }
+    if (call === 2) {
+      secondArrived();
+      for (let i = 0; i < 100; i++) {
+        const owner = await fs
+          .readFile(file, "utf8")
+          .then(JSON.parse, () => null);
+        if (owner?.token && owner.token !== "stale") break;
+        await new Promise((resolve) => setTimeout(resolve, 2));
+      }
+    }
+    return original(target);
+  };
+  syncBuiltinESMExports();
+  let outcomes;
+  try {
+    outcomes = await Promise.allSettled([
+      runRollback(f.backend, { backup: updated.backup, project: f.root }),
+      runRollback(f.backend, { backup: updated.backup, project: f.root }),
+    ]);
+  } finally {
+    mutableFs.unlink = original;
+    syncBuiltinESMExports();
+  }
+  assert.equal(maximum, 1, "only one restore may enter the mutation phase");
+  assert.ok(outcomes.some((result) => result.status === "fulfilled"));
+  for (const result of outcomes)
+    if (result.status === "rejected")
+      assert.equal(result.reason.code, "UPDATE_LOCKED");
+  await assert.rejects(
+    fs.stat(path.join(f.backend.backupRoot(), "recovery-claim.json")),
+    { code: "ENOENT" },
+  );
+});
+
+test("an existing recovery claim fails closed and is never reclaimed blindly", async (t) => {
+  const f = await fixture(t),
+    updated = await runUpdate(f.backend, f.options);
+  for (const pid of [process.pid, 2147483647, undefined]) {
+    await fs.writeFile(
+      path.join(f.backend.backupRoot(), "recovery-claim.json"),
+      JSON.stringify({ pid, backup: updated.backup }),
+    );
+    await assert.rejects(
+      runRollback(f.backend, { backup: updated.backup, project: f.root }),
+      { code: "UPDATE_LOCKED" },
+    );
+  }
+  assert.ok(!f.backend.events.includes("restore"));
 });

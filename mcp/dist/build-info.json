@@ -7,13 +7,13 @@
     "src/main.mjs": "2a151aa436c228b60a7aac4b3c6cedff329d18d5d47b5c547db3ffb2a0634b7a",
     "src/search.mjs": "1e68d642ae24305f5ee408b0fa180d185345a424fe6179b17ae4387f96405376",
     "src/server.mjs": "b7e679baefe89631353ba2b1fe463691aaf3f775af56fd628d6f8b5c61ccba49",
-    "src/update-core.mjs": "d08d4d7ec7234099008809f0d8b0c3a645fd3320e59b030ae926ac187fd2dd06",
+    "src/update-core.mjs": "19b18c1fc56ce946b4dada2b23f8f07890a7b665c02b3837390b63bf5e1dcfd6",
     "src/update-main.mjs": "9cad5b7fc0529d2468d4ab612fae9ec9f7ccb9c74a4a17c69a44032a492ed576",
-    "src/update-native.mjs": "0ddcfde956f404d8ab3834e4fc6d20a4b9c3185fb0be5d1012f0ca763c8a6f51"
+    "src/update-native.mjs": "cc8bc58cb67668a8e8a1244b487af65fb38853a7cebb0c39618de648338a492c"
   },
   "outputs": {
     "dist/server.mjs": "c770330aaeddb644b9b2db0371de499e0b3ceae02adc63a40bc8f9c8e5500acd",
-    "dist/update.mjs": "9a3e8c384e75f02d7a97d4a8dba860b767fd6191bf0ee3b6be3f1d618602c970",
+    "dist/update.mjs": "1ab3d449b44766bca9ea8013a8203c749326948722a02a0d6ad0dac22f53e592",
     "dist/THIRD_PARTY_LICENSES.txt": "012b8c838c4a1c23fdbdf14b0861a0ebd19e25a0a95eae3cae38020e57024811"
   }
 }

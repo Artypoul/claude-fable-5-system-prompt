@@ -84,9 +84,9 @@ export async function copyPackage(source, target, files) {
     );
 }
 const terminal = new Set(["updated", "rolled_back", "unchanged"]);
-async function lock(root, backup = null) {
+async function lock(root, backup = null, name = "active.json") {
   await fs.mkdir(root, { recursive: true, mode: 0o700 });
-  const file = path.join(root, "active.json");
+  const file = path.join(root, name);
   try {
     const handle = await fs.open(file, "wx", 0o600);
     const token = randomUUID();
@@ -100,7 +100,9 @@ async function lock(root, backup = null) {
     if (error.code !== "EEXIST") throw error;
     throw new UpdateError(
       "UPDATE_LOCKED",
-      "Another or interrupted update exists; inspect active.json and use rollback before updating again.",
+      name === "active.json"
+        ? "Another or interrupted update exists; inspect active.json and use rollback before updating again."
+        : "Another or interrupted recovery claim exists; inspect recovery-claim.json before retrying.",
     );
   }
 }
@@ -289,32 +291,43 @@ export async function runRollback(backend, { backup, project }) {
   const state = await loadBackup(backup, backend.identity);
   const root = backend.backupRoot(state.before);
   const lockFile = path.join(root, "active.json");
+  // Only one recovery may inspect/delete a stale active lock. Updates still
+  // compete atomically for active.json and can win the subsequent acquisition.
+  const releaseClaim = await lock(root, backup, "recovery-claim.json");
+  let release;
   try {
-    const previous = JSON.parse(await fs.readFile(lockFile, "utf8"));
-    if (!Number.isInteger(previous.pid) || previous.pid <= 0)
-      throw new UpdateError(
-        "UPDATE_LOCKED",
-        "Lock has an invalid process ID; inspect it before recovery.",
-      );
-    if (path.resolve(previous.backup || "") !== path.resolve(backup))
-      throw new UpdateError("UPDATE_LOCKED", "Lock belongs to another update.");
-    let running = false;
     try {
-      process.kill(previous.pid, 0);
-      running = true;
+      const previous = JSON.parse(await fs.readFile(lockFile, "utf8"));
+      if (!Number.isInteger(previous.pid) || previous.pid <= 0)
+        throw new UpdateError(
+          "UPDATE_LOCKED",
+          "Lock has an invalid process ID; inspect it before recovery.",
+        );
+      if (path.resolve(previous.backup || "") !== path.resolve(backup))
+        throw new UpdateError(
+          "UPDATE_LOCKED",
+          "Lock belongs to another update.",
+        );
+      let running = false;
+      try {
+        process.kill(previous.pid, 0);
+        running = true;
+      } catch (error) {
+        if (error.code !== "ESRCH") running = true;
+      }
+      if (running)
+        throw new UpdateError(
+          "UPDATE_LOCKED",
+          "Update process is still running.",
+        );
+      await fs.unlink(lockFile);
     } catch (error) {
-      if (error.code !== "ESRCH") running = true;
+      if (error.code !== "ENOENT") throw error;
     }
-    if (running)
-      throw new UpdateError(
-        "UPDATE_LOCKED",
-        "Update process is still running.",
-      );
-    await fs.unlink(lockFile);
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
+    release = await lock(root, backup);
+  } finally {
+    await releaseClaim();
   }
-  const release = await lock(root, backup);
   try {
     state.phase = "rolling_back";
     await writeJson(path.join(backup, "transaction.json"), state).catch(

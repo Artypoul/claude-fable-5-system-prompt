@@ -1,6 +1,6 @@
 # Fable 5 Codex plugin
 
-Version 1.3.1 adds safe updates with verified backups and rollback.
+Version 1.3.2 adds safe updates with verified backups and rollback.
 The plugin includes local read-only MCP tools `search_skills` and `read_skill`.
 They use the enabled Codex catalogue for an explicitly supplied project.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.

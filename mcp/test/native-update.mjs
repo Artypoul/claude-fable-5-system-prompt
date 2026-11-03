@@ -169,6 +169,31 @@ try {
       },
     ],
   });
+  const clean = await backend.inspect();
+  const markets = await backend.cli(["marketplace", "list"]);
+  const checkout = markets.marketplaces.find((m) => m.name === name).root;
+  const readme = await fs.readFile(path.join(clean.path, "README.md"));
+  const settingsBefore = await backend.settings();
+  try {
+    for (const folder of [checkout, clean.path])
+      await fs.writeFile(
+        path.join(folder, "README.md"),
+        Buffer.concat([readme, Buffer.from("\nfixture local customization\n")]),
+      );
+    await assert.rejects(runUpdate(backend, { project, runner }), {
+      code: "LOCAL_CHANGES",
+    });
+    const settingsAfter = await backend.settings();
+    assert.deepEqual(settingsAfter.plugin, settingsBefore.plugin);
+    assert.deepEqual(settingsAfter.marketplace, settingsBefore.marketplace);
+  } finally {
+    for (const folder of [checkout, clean.path])
+      await fs.writeFile(path.join(folder, "README.md"), readme);
+  }
+  outputs.push({
+    scenario: "native matching local edits rejected before mutation",
+    status: "pass",
+  });
   const serverFile = path.join(repo, "mcp/dist/server.mjs"),
     sourceFile = path.join(repo, "mcp/src/main.mjs"),
     infoFile = path.join(repo, "mcp/dist/build-info.json");
@@ -228,6 +253,36 @@ try {
     status: "pass",
     version: repeated.version,
   });
+  await fs.writeFile(
+    path.join(backend.backupRoot(), "active.json"),
+    JSON.stringify({
+      pid: 2147483647,
+      token: "fixture-stale",
+      backup: good.backup,
+    }),
+    { flag: "wx" },
+  );
+  const competing = await Promise.allSettled([
+    runRollback(backend, { backup: good.backup, project }),
+    runRollback(backend, { backup: good.backup, project }),
+  ]);
+  assert.equal(
+    competing.filter(
+      (r) => r.status === "fulfilled" && r.value.status === "rolled_back",
+    ).length,
+    1,
+  );
+  assert.equal(
+    competing.filter(
+      (r) => r.status === "rejected" && r.reason.code === "UPDATE_LOCKED",
+    ).length,
+    1,
+  );
+  assert.deepEqual((await backend.settings()).plugin, policy);
+  outputs.push({
+    scenario: "native concurrent stale-lock recovery has one winner",
+    status: "pass",
+  });
   assert.deepEqual(
     withoutFixture((await userLayer()).config),
     withoutFixture(initial.config),
@@ -267,7 +322,7 @@ try {
     });
   }
   await new Promise((resolve) => server.close(resolve));
-  if (outputs.length === 4) {
+  if (outputs.length === 6) {
     const resolved = await fs.realpath(root),
       temp = await fs.realpath(os.tmpdir());
     assert.equal(path.dirname(resolved), temp);

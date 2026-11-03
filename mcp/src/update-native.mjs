@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { Client } from "@modelcontextprotocol/client";
 import {
   StdioClientTransport,
@@ -375,6 +375,7 @@ export class NativeBackend {
       commit = (
         await command(this.git, ["-C", market.root, "rev-parse", "HEAD"])
       ).trim();
+    if (commit) await this.verifyGitSnapshot(market.root, commit, files);
     this.owned = { plugin: settings.plugin, marketplace: settings.marketplace };
     return {
       path: cached,
@@ -385,6 +386,52 @@ export class NativeBackend {
       pluginSettings: settings.plugin,
       marketplaceSettings: settings.marketplace,
     };
+  }
+  async verifyGitSnapshot(folder, commit, files) {
+    const tree = await command(this.git, [
+      "-C",
+      folder,
+      "ls-tree",
+      "-r",
+      "-z",
+      "--full-tree",
+      commit,
+    ]);
+    const entries = tree
+      .split("\0")
+      .filter(Boolean)
+      .map((record) => {
+        const match =
+          /^(100644|100755) blob ([a-f0-9]{40}|[a-f0-9]{64})\t([\s\S]+)$/.exec(
+            record,
+          );
+        if (!match)
+          throw new UpdateError(
+            "UNSUPPORTED_SOURCE",
+            "Only regular Git files are supported.",
+          );
+        return { name: match[3], oid: match[2] };
+      });
+    const changed = () =>
+      new UpdateError(
+        "LOCAL_CHANGES",
+        "Installed package does not match its recorded Git commit; preserve customizations before updating.",
+      );
+    if (
+      !equal(
+        entries.map((entry) => entry.name).sort(),
+        Object.keys(files).sort(),
+      )
+    )
+      throw changed();
+    for (const { name, oid } of entries) {
+      const bytes = await fs.readFile(path.join(folder, name));
+      const object = createHash(oid.length === 40 ? "sha1" : "sha256")
+        .update(Buffer.from("blob " + bytes.length + "\0"))
+        .update(bytes)
+        .digest("hex");
+      if (object !== oid || digest(bytes) !== files[name]) throw changed();
+    }
   }
   async assertSettings(
     before,
@@ -620,6 +667,11 @@ export class NativeBackend {
           "Use the local recovery snapshot.",
         );
       installed = await this.installSource(this.identity.source, before.commit);
+      if (!equal(await inventory(installed.path), before.files))
+        throw new UpdateError(
+          "RESTORE_MISMATCH",
+          "Git copy differs from the saved package; use the verified local snapshot.",
+        );
       settings = {
         ...before.marketplaceSettings,
         source_type: "git",
