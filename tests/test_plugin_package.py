@@ -22,7 +22,8 @@ class PluginPackageTests(unittest.TestCase):
             extracted = work / 'unpacked/fable5-codex'
             path = extracted / '.codex-plugin/plugin.json'
             manifest = json.loads(path.read_text(encoding='utf-8'))
-            manifest['version'] = '1.1.0'
+            major, minor, patch = map(int, manifest['version'].split('.'))
+            manifest['version'] = f'{major}.{minor}.{patch + 1}'
             path.write_text(json.dumps(manifest), encoding='utf-8')
             build(work / 'next-release.zip', root=extracted)
             manifest['version'] = 'not-a-version'
