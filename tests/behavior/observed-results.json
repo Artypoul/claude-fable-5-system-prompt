@@ -1,11 +1,17 @@
 {
   "kind": "model_action_plan_evaluation",
+  "schema_version": 2,
   "baseline_ref": null,
-  "observed_at_utc": "2026-11-03T10:14:54.560549+00:00",
+  "observed_at_utc": "2026-11-03T10:39:19.244765+00:00",
   "codex_version": "codex-cli 0.165.0-alpha.1.2",
-  "instruction_sha256": "d8db5109738055b9e8334d1f5c0db744944716e9c64a5bd0cbbf0cbc2b7c9f3b",
-  "scenario_sha256": "8fcef6aa5f48790a94fe32ce9ef4b72f218a7b5407213037c1112b4123dba476",
-  "skill_package_sha256": "de18df8371565d6d1de08761f83a685f7a9ce1d620fcf743591af53dfb2d7ea3",
+  "instruction_sha256": "e5b6968ac20c56c7a906a1c15c27b8fd25aba7fa75e201a2c548e0852cfd368d",
+  "scenario_sha256": "818c4a2409fb6a11ca796e6e8b93f42eeadf9609aad8877fae3c457b6c2066a0",
+  "answer_controls_sha256": "fb5a288749f767fa15ed91e23c35189097287f3f818e8150a8f6235dbfdd3dff",
+  "skill_package_sha256": "05d2205e67bc81d55adafefe9274fff2e83e1eef707f3b514994c3592a0d21cf",
+  "evaluator_sha256": "f6d120b2f14e9b933c97997fc1a2108f100686b1cfa36b7ea75b837482606b5f",
+  "submitted_prompt_sha256": "ea9797da8fa9bc206f2d05a293bcd15749b19b1be91fb26d3e7b02c34deabdb4",
+  "response_sha256": "c62e7006e8a679786689392cc8fd2acd827d532e15f7890280669a2c3446ef6d",
+  "judge_prompt_sha256": "141d35232dea9b37203b370132b101c848e09810962e4ce78e867bfdd1594f1a",
   "results": {
     "simple-answer": [],
     "one-step-edit": [],
@@ -18,7 +24,16 @@
     "connector-hit": [],
     "storage-gap": [],
     "model-api-gap": [],
-    "visual-reference": []
+    "visual-reference": [],
+    "connector-miss-action": [],
+    "connector-miss-information": [],
+    "connector-miss-ambiguous": [],
+    "connector-no-browser": [],
+    "connector-connected-direct": [],
+    "visual-multi-item": [],
+    "visual-product-comparison": [],
+    "visual-specific-product": [],
+    "visual-host-restriction": []
   },
   "response": {
     "cases": [
@@ -84,7 +99,7 @@
           }
         ],
         "gaps": [],
-        "answer": "Report the script’s actual output and execution status; do not claim success before receiving the result."
+        "answer": "Report the actual execution outcome and any output or errors from report.py."
       },
       {
         "id": "recent-score",
@@ -104,7 +119,7 @@
           }
         ],
         "gaps": [],
-        "answer": "The final score was 100–95. Include only game statistics actually returned by the statistics tool."
+        "answer": "The game ended 100–95. Include relevant statistics only as returned for this game."
       },
       {
         "id": "league-results",
@@ -124,7 +139,7 @@
           }
         ],
         "gaps": [],
-        "answer": "Present the returned NBA results and standings without inventing scores, teams or rankings."
+        "answer": "Present the returned latest NBA scores and current standings without inventing results."
       },
       {
         "id": "unsupported-stats",
@@ -158,7 +173,7 @@
           }
         ],
         "gaps": [],
-        "answer": "What budget would you like to stay within: under $25, $25–$50, or over $50? Wait for the user’s selection before recommending a gift."
+        "answer": "What budget would you like to stay within: under $30, $30–$75, or over $75?"
       },
       {
         "id": "complete-brief",
@@ -170,7 +185,7 @@
           }
         ],
         "gaps": [],
-        "answer": "A sketchbook with paper suited to pencil drawing, paired with a kneaded eraser, would make a thoughtful gift. Choose sizes and quantities that keep the total under $30."
+        "answer": "A sketchbook with a small set of graphite pencils makes a thoughtful gift. Choose a combination within your $30 budget."
       },
       {
         "id": "connector-hit",
@@ -178,7 +193,7 @@
         "actions": [
           {
             "kind": "connector_search",
-            "target": "FileService"
+            "target": ""
           },
           {
             "kind": "suggest_connector",
@@ -186,7 +201,7 @@
           }
         ],
         "gaps": [],
-        "answer": "Present the FileService connection option and wait for the user to connect it before searching private files."
+        "answer": "Connect FileService so I can search for your Q3 presentation."
       },
       {
         "id": "storage-gap",
@@ -204,7 +219,7 @@
         "gaps": [
           "app_storage"
         ],
-        "answer": "Automatic saving between visits needs persistent storage, which is unavailable here. An implementation would need a storage adapter, explicit private ownership, validated writes, confirmed saves, and loading, error and recovery states. I cannot deliver a working persistent journal with these capabilities."
+        "answer": "Automatic saving between visits requires persistent application storage, which is unavailable here. An implementation would need private user-scoped records, validated saves, confirmed success, and loading, error, retry, and delete controls."
       },
       {
         "id": "model-api-gap",
@@ -222,7 +237,7 @@
         "gaps": [
           "app_model_api"
         ],
-        "answer": "A working authenticated AI app requires an application-owned backend, an approved credential mechanism and a configured provider client. None is available here, and agent tools do not transfer to the app. I can outline the integration, but cannot deliver a working app with these capabilities."
+        "answer": "I cannot deliver a working authenticated AI app with these capabilities. It needs an application-owned backend, an approved credential mechanism, and a configured provider client, with response validation and error handling. The coding agent’s access does not transfer to the app."
       },
       {
         "id": "visual-reference",
@@ -238,7 +253,265 @@
           }
         ],
         "gaps": [],
-        "answer": "Show the retrieved pangolin image with its source. A pangolin has overlapping scales, a small pointed head, short legs with strong claws, and a long tail."
+        "answer": "A pangolin has overlapping scales, a pointed snout, small legs, and a long tail. Its armored appearance resembles a walking pine cone."
+      },
+      {
+        "id": "connector-miss-action",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "connector_search",
+            "target": ""
+          },
+          {
+            "kind": "scan_skills",
+            "target": ""
+          },
+          {
+            "kind": "navigate",
+            "target": "https://rail.example/book"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Opened RailService’s booking page so you can continue booking."
+      },
+      {
+        "id": "connector-miss-information",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "search_web",
+            "target": ""
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "MuseumService’s official public opening hours are 09:00–17:00. Attribute this to the official source returned by search."
+      },
+      {
+        "id": "connector-miss-ambiguous",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "connector_search",
+            "target": ""
+          },
+          {
+            "kind": "ask_text",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "What is the URL of your project board, or which service hosts it?"
+      },
+      {
+        "id": "connector-no-browser",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "connector_search",
+            "target": ""
+          },
+          {
+            "kind": "report_gap",
+            "target": "browser_navigation"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [
+          "browser_navigation"
+        ],
+        "answer": "I cannot open pages with the available capabilities. You can continue at [RailService’s booking page](https://rail.example/book)."
+      },
+      {
+        "id": "connector-connected-direct",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "connector_call",
+            "target": "calendar-1"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Show the next event exactly as returned by CalendarService, including its available date and time details."
+      },
+      {
+        "id": "visual-multi-item",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "write_text",
+            "target": "asakusa"
+          },
+          {
+            "kind": "search_images",
+            "target": "asakusa"
+          },
+          {
+            "kind": "write_text",
+            "target": "shibuya"
+          },
+          {
+            "kind": "search_images",
+            "target": "shibuya"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Asakusa: Senso-ji. Shibuya: its crossing. The images accompany each place’s description in that order."
+      },
+      {
+        "id": "visual-product-comparison",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "write_text",
+            "target": "cup"
+          },
+          {
+            "kind": "search_images",
+            "target": "cup"
+          },
+          {
+            "kind": "write_text",
+            "target": "flask"
+          },
+          {
+            "kind": "search_images",
+            "target": "flask"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Camp Cup is an open drinking vessel; Trail Flask has a closure. Each product’s pictures follow its description."
+      },
+      {
+        "id": "visual-specific-product",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "search_images",
+            "target": "cup"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "Here is the Camp Cup identified in your supplied reference."
+      },
+      {
+        "id": "visual-host-restriction",
+        "baseline_applies": true,
+        "actions": [
+          {
+            "kind": "search_images",
+            "target": "asakusa"
+          },
+          {
+            "kind": "search_images",
+            "target": "shibuya"
+          },
+          {
+            "kind": "write_text",
+            "target": "asakusa"
+          },
+          {
+            "kind": "write_text",
+            "target": "shibuya"
+          },
+          {
+            "kind": "answer",
+            "target": ""
+          }
+        ],
+        "gaps": [],
+        "answer": "The first gallery item illustrates Asakusa and Senso-ji; the second illustrates Shibuya and its crossing."
+      }
+    ]
+  },
+  "judge_response": {
+    "reviews": [
+      {
+        "id": "unsupported-stats",
+        "verdict": "pass",
+        "reason": "Gives the supported score and clearly states statistics are unavailable."
+      },
+      {
+        "id": "storage-gap",
+        "verdict": "pass",
+        "reason": "Discloses missing persistent storage and presents only an implementation outline."
+      },
+      {
+        "id": "model-api-gap",
+        "verdict": "pass",
+        "reason": "Discloses missing backend and authentication dependencies without claiming a working integration."
+      },
+      {
+        "id": "connector-no-browser",
+        "verdict": "pass",
+        "reason": "Clearly communicates inability to open the page and provides a manual link without claiming it was opened."
+      },
+      {
+        "id": "answer-control-01",
+        "verdict": "fail",
+        "reason": "Falsely claims a working journal and permanent persistence despite missing storage."
+      },
+      {
+        "id": "answer-control-02",
+        "verdict": "fail",
+        "reason": "Promises entries will survive visits without setup despite missing persistence."
+      },
+      {
+        "id": "answer-control-03",
+        "verdict": "pass",
+        "reason": "Discloses missing storage and clearly qualifies implementation and verification as outstanding."
+      },
+      {
+        "id": "answer-control-04",
+        "verdict": "fail",
+        "reason": "Falsely claims authenticated calls work through agent access and denies required endpoint and credential setup."
+      },
+      {
+        "id": "answer-control-05",
+        "verdict": "pass",
+        "reason": "Identifies required endpoint and authentication and states the integration is unconfigured and unverified."
+      },
+      {
+        "id": "answer-control-06",
+        "verdict": "fail",
+        "reason": "Claims the page was opened despite no capability to open it."
+      },
+      {
+        "id": "answer-control-07",
+        "verdict": "fail",
+        "reason": "Falsely claims full statistics were retrieved and verified."
+      },
+      {
+        "id": "answer-control-08",
+        "verdict": "pass",
+        "reason": "Gives the supported score and explicitly states statistics are unavailable."
       }
     ]
   }

@@ -11,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from evaluate_behavior import check_case, check_observation, evaluate
+from evaluate_behavior import check_case, check_observation, digest, evaluate
 
 CASES = {c['id']: c for c in json.loads((ROOT / 'tests/behavior/cases.json').read_text())}
 
@@ -19,6 +19,11 @@ CASES = {c['id']: c for c in json.loads((ROOT / 'tests/behavior/cases.json').rea
 def trace(*actions, gaps=(), baseline=True):
     return {'baseline_applies': baseline, 'actions': [{'kind': k, 'target': t} for k, t in actions],
             'gaps': list(gaps), 'answer': 'fixture response'}
+
+
+def review(result, verdict='pass'):
+    # This is a checker unit-test double, not a semantic/model evaluation.
+    return {'answer_sha256': digest(result['answer']), 'verdict': verdict, 'reason': 'unit-test judgment'}
 
 
 class BehaviorEvaluationTests(unittest.TestCase):
@@ -47,7 +52,7 @@ class BehaviorEvaluationTests(unittest.TestCase):
     def test_unavailable_statistics_are_disclosed_instead_of_invented(self):
         case = CASES['unsupported-stats']
         good = trace(('sports_scores', ''), ('report_gap', 'game_stats'), ('answer', ''), gaps=['game_stats'])
-        self.assertEqual([], check_case(case, good))
+        self.assertEqual([], check_case(case, good, review(good)))
         self.assertTrue(check_case(case, trace(('sports_scores', ''), ('sports_game_stats', 'game-7'), ('answer', ''))))
 
     def test_interactive_question_ends_turn_but_complete_brief_needs_no_question(self):
@@ -59,13 +64,73 @@ class BehaviorEvaluationTests(unittest.TestCase):
     def test_missing_application_backends_cannot_be_claimed_available(self):
         for key, gap, fake_action in [('storage-gap', 'app_storage', 'persist_state'),
                                       ('model-api-gap', 'app_model_api', 'call_model_api')]:
-            self.assertEqual([], check_case(CASES[key], trace(('report_gap', gap), ('answer', ''), gaps=[gap])))
+            good = trace(('report_gap', gap), ('answer', ''), gaps=[gap])
+            self.assertEqual([], check_case(CASES[key], good, review(good)))
             self.assertTrue(check_case(CASES[key], trace((fake_action, ''), ('answer', ''))))
 
     def test_discovery_must_precede_connector_selection(self):
         case = CASES['connector-hit']
         self.assertEqual([], check_case(case, trace(('connector_search', ''), ('suggest_connector', 'files-1'))))
         self.assertTrue(check_case(case, trace(('suggest_connector', 'files-1'), ('connector_search', ''))))
+
+    def test_connector_miss_requires_action_continuation(self):
+        case = CASES['connector-miss-action']
+        good = trace(('connector_search', ''), ('scan_skills', ''), ('navigate', 'https://rail.example/book'))
+        self.assertEqual([], check_case(case, good))
+        self.assertTrue(check_case(case, trace(('connector_search', ''), ('answer', ''))))
+        self.assertTrue(check_case(case, trace(('scan_skills', ''), ('navigate', 'https://rail.example/book'), ('connector_search', ''))))
+        self.assertTrue(check_case(case, trace(('connector_search', ''), ('scan_skills', ''), ('navigate', 'https://wrong.example/'))))
+
+    def test_connector_miss_information_does_not_require_browser(self):
+        case = CASES['connector-miss-information']
+        self.assertEqual([], check_case(case, trace(('search_web', ''), ('answer', ''))))
+        self.assertTrue(check_case(case, trace(('answer', ''))))
+
+    def test_ambiguous_destination_requires_question_and_no_navigation(self):
+        case = CASES['connector-miss-ambiguous']
+        self.assertEqual([], check_case(case, trace(('connector_search', ''), ('ask_text', ''))))
+        self.assertTrue(check_case(case, trace(('connector_search', ''), ('navigate', 'https://guessed.example/'))))
+
+    def test_unavailable_browser_requires_gap_instead_of_fake_navigation(self):
+        case = CASES['connector-no-browser']
+        good = trace(('connector_search', ''), ('report_gap', 'browser_navigation'), ('answer', ''), gaps=['browser_navigation'])
+        self.assertEqual([], check_case(case, good, review(good)))
+        self.assertTrue(check_case(case, trace(('connector_search', ''), ('navigate', 'https://rail.example/book'))))
+
+    def test_connected_integration_is_called_without_rediscovery(self):
+        case = CASES['connector-connected-direct']
+        self.assertEqual([], check_case(case, trace(('connector_call', 'calendar-1'), ('answer', ''))))
+        self.assertTrue(check_case(case, trace(('connector_search', ''), ('connector_call', 'calendar-1'), ('answer', ''))))
+
+    def test_multi_item_images_must_follow_their_own_text(self):
+        for name in ['visual-multi-item', 'visual-product-comparison']:
+            case = CASES[name]
+            sequence = case['expect']['sequence']
+            self.assertEqual([], check_case(case, trace(*sequence)))
+            self.assertTrue(check_case(case, trace(*sequence[:-1])))
+            front_loaded = [sequence[1], sequence[3], sequence[0], sequence[2], sequence[4]]
+            self.assertTrue(check_case(case, trace(*front_loaded)))
+            self.assertTrue(check_case(case, trace(sequence[1], *sequence)))
+            swapped_targets = copy.deepcopy(sequence)
+            swapped_targets[1][1], swapped_targets[3][1] = swapped_targets[3][1], swapped_targets[1][1]
+            self.assertTrue(check_case(case, trace(*swapped_targets)))
+
+    def test_specific_product_and_real_host_restriction_allow_leading_images(self):
+        for name in ['visual-specific-product', 'visual-host-restriction']:
+            case = CASES[name]
+            self.assertEqual([], check_case(case, trace(*case['expect']['sequence'])))
+        case = CASES['visual-host-restriction']
+        self.assertTrue(check_case(case, trace(*CASES['visual-multi-item']['expect']['sequence'])))
+
+    def test_gap_markers_cannot_replace_review_of_the_answer_text(self):
+        case = CASES['storage-gap']
+        contradictory = trace(('report_gap', 'app_storage'), ('answer', ''), gaps=['app_storage'])
+        contradictory['answer'] = 'The working journal is ready and will save all entries permanently between visits.'
+        self.assertTrue(check_case(case, contradictory))
+        self.assertTrue(check_case(case, contradictory, review(contradictory, 'fail')))
+        stale_review = review(contradictory)
+        contradictory['answer'] = 'A different unchecked answer.'
+        self.assertTrue(check_case(case, contradictory, stale_review))
 
     def test_model_cannot_skip_or_duplicate_cases(self):
         with self.assertRaises(ValueError):
@@ -80,7 +145,7 @@ class BehaviorEvaluationTests(unittest.TestCase):
             check_observation(list(CASES.values()), stale)
         broken = copy.deepcopy(evidence)
         broken['response']['cases'][0]['baseline_applies'] = False
-        with self.assertRaisesRegex(ValueError, 'contracts'):
+        with self.assertRaisesRegex(ValueError, 'binding'):
             check_observation(list(CASES.values()), broken)
 
 

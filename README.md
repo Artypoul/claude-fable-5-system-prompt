@@ -53,8 +53,9 @@ See [Plugin packaging and installation](PLUGIN.md) for verification, ZIP builds
 and migration from the earlier local installation. Standalone skill installation
 below is still supported.
 
-Version 1.1.0 restores the source's baseline for simple tasks, unconditional
-skill-first checks and mandatory sports retrieval. See [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)
+Version 1.1.1 also restores browser continuation after connector misses and
+item-by-item image placement. Evaluation now freezes its inputs and separately
+reviews capability claims in proposed answers. See [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)
 for services the host must supply and [behavioral checks](PLUGIN.md#behavioral-checks)
 for deterministic tests and separate model-based action-plan evaluation.
 

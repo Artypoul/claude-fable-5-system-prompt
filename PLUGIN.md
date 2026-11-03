@@ -1,7 +1,8 @@
 # Fable 5 Codex plugin
 
-Version 1.1.0 restores source-derived baseline activation, skill-first checks,
-sports retrieval, interactive elicitation and connector/visual routing. The
+Version 1.1.1 retains the 1.1.0 baseline, skill-first, sports and elicitation
+restorations, and requires browser continuation after connector misses and
+item-by-item image placement where the host supports it. The
 unchanged upstream archive remains available for comparison. The supported Codex compatibility manifest at
 `.codex-plugin/plugin.json` points directly to `./.agents/skills/`.
 The complete archive, source mappings, license, assets, validators and tests are
@@ -20,22 +21,33 @@ python scripts/evaluate_behavior.py --run-model --output /absolute/path/behavior
 
 The first command runs deterministic integrity, packaging and scenario-checker
 tests in CI. The second uses the authenticated Codex CLI to generate action
-plans for 12 independent scenarios, using this checkout's instructions. It can
+plans for 21 independent scenarios, using this checkout's instructions. It can
 consume model quota; it never executes proposed actions or calls live sports,
 storage or model backends. Expected traces are not included in the model input.
 Without a CLI or authentication it fails explicitly, rather than reporting a pass.
-Use `--baseline-ref 20e5ad3` to evaluate the previous release against the same
-scenarios. Model output and instruction fingerprints are written to the selected
-output path; keep raw event logs outside the repository. These evaluations do
+Use `--baseline-ref 73636bd` to evaluate 1.1.0 against the same scenarios.
+A second, separate model call judges the meaning of answers in the four
+capability-gap scenarios. Eight controls include false persistence, model API,
+browser and statistics claims, plus truthful qualified answers. Expected control
+verdicts are hidden from the judge, just as expected action traces are hidden
+from the plan generator. A failed control or missing answer review prevents
+acceptance; correct gap markers cannot excuse a contradictory answer.
+Model output and instruction fingerprints are written to the selected output
+path; keep both `.plan.events.jsonl` and `.judge.events.jsonl` logs outside the
+repository. These evaluations do
 not prove reliability on every task or provide missing backend implementations.
 
 After a successful model run, copy its JSON observation (not its raw event log)
 to `tests/behavior/observed-results.json`. CI rechecks the observed plans against
-the scenarios and verifies fingerprints of the instructions, full skill package
-and scenario definitions. Changed instructions or scenarios invalidate that
-observation and require a new model run. This is replay of recorded evidence,
-not a fresh model call on each CI run; review the proposed answers as well as
-the action-order checks before accepting a new observation.
+the scenarios, answer reviews and controls. It verifies fingerprints of the
+instructions, full skill package, scenario definitions, controls and evaluator,
+plus hashes binding the actual submitted prompts and generated response.
+All inputs are frozen before calling the model. Changes during either model
+call abort the run instead of receiving new fingerprints. Changed inputs
+invalidate the observation and require a new model run. This is replay of recorded evidence,
+not a fresh model call on each CI run. The answer judge is also a model and can
+make mistakes; inspect its reasons and the proposed answers before accepting
+a new observation. Passing these fixtures is not proof of complete equivalence.
 
 ## Install from GitHub
 
@@ -105,6 +117,6 @@ marketplace. To update a ZIP-based install, replace the source with a newly
 validated extraction and rerun `codex plugin add fable5-codex@fable5`. Never edit
 the plugin cache as the source of truth.
 
-The unchanged skill and source archive are based on repository commit
-`308792abaa755ac34afcc5f9fd1b9d26718ab54b`. Packaging adds install/update metadata,
-build checks and documentation without changing the skill's runtime content.
+The initial plugin packaging was based on repository commit
+`308792abaa755ac34afcc5f9fd1b9d26718ab54b`. Subsequent skill changes are recorded
+in `CODEX_ADAPTATION_CHANGES.md`; the upstream archive remains unchanged.

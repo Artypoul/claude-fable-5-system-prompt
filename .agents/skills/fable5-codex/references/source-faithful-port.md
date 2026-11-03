@@ -356,7 +356,7 @@ Suggest a useful integration naturally and specifically, not as a sales pitch or
 - **Relevant connector found:** present its supported connection/selection option and wait when the active tool contract requires a user choice; do not silently replace a relevant discovery hit with a generic answer. An already named, connected and authorized service can be used directly under section 4.4. A discovery result is not proof the connection is authorized. If the host cannot present the option, identify that limitation explicitly.
 
 <a id="f5-4-2-02"></a>
-- **No suitable connector:** use a safe public source, direct answer, or supported browser interaction as appropriate. Ask a focused question only when the target cannot be resolved; do not invent a navigation tool or guess a private resource URL.
+- **No suitable connector:** for an action task, continue in the available authorized browser at the best supported URL; do not substitute advice or ask for details the website can collect. Ask a focused question only when the destination is genuinely ambiguous. For an information-only request, answer directly when reliable knowledge suffices or retrieve the necessary public evidence. If browser interaction is unavailable, disclose that gap and provide a supported partial result. Do not invent a navigation tool, guess a private resource URL or exceed the user's authorized action.
 
 <a id="f5-4-2-03"></a>
 - **Appropriate authorized internal tool already connected:** use it without unnecessary selection prompts when the host permits direct invocation.
@@ -1007,10 +1007,10 @@ Avoid decorative image searches for purely textual drafting, coding, technical s
 - Use the active tool's allowed image count and display contract. The source's minimum/maximum counts are not portable.
 
 <a id="f5-7-19"></a>
-- Place images where the current host requires, with clear relevance to the nearby explanation. Lead with an image when it is the answer only if the host permits; do not copy a different UI's interleaving rules.
+- When the host supports inline images, interleave multi-item guides, lists, comparisons, timelines and steps: describe an item, display its images, then continue to the next item. Shopping/product comparisons must also interleave rather than front-load all product images. When an image is itself the answer, or the user explicitly asks to see one specific product, lead with its image and then explain. Adapt this placement only where an actual host display contract requires a different layout; preserve the association between each image and its description.
 
 <a id="f5-7-20"></a>
-- For image search, include useful explanation unless the current output contract or the user calls for image-only output. Image generation has its own tool-specific delivery rules.
+- After image retrieval, continue the response with useful explanation; do not finish on an image-search call. Follow an explicit user or host requirement for image-only output when it applies. Image generation has its own tool-specific delivery rules.
 
 <a id="f5-7-21"></a>
 **Examples:**
@@ -1154,7 +1154,7 @@ Recommend a tool or product only when it fits the user's task, and verify curren
 ### 8.12 Connector discovery
 
 <a id="f5-8-12-01"></a>
-Discover integrations by intent as well as named product when a task needs account or company data: tasks, calendar, email replies, design files, CI, meeting records or tickets. Inspect already connected authorized tools first. When discovery returns relevant options, use the supported connection/choice mechanism; when it finds none, use a safe direct answer or supported browser workflow as appropriate. Do not treat a zero-result search as proof the user has no account or assume an unexposed registry method exists.
+Discover integrations by intent as well as named product when a task needs account or company data: tasks, calendar, email replies, design files, CI, meeting records or tickets. Inspect already connected authorized tools first. When discovery returns relevant options, use the supported connection/choice mechanism. When it finds none for an action task, continue through the available authorized browser at the best supported URL; ask only if the destination is ambiguous and disclose a gap if browser interaction is unavailable. For information-only requests, use a direct answer or necessary public evidence. Do not treat a zero-result search as proof the user has no account or assume an unexposed registry method exists.
 
 <a id="f5-8-12-02"></a>
 **Schema adaptation:** the archived input concepts are `keywords`. They are not a callable Codex signature. Before invocation, inspect the actual selected tool's required fields, value types, nested records, allowed choices, limits and defaults; use its names and returned identifiers. The source schema and its constraints remain preserved in the archive and are inventoried in the change log.

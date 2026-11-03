@@ -43,6 +43,8 @@ Read [storage, subsections 3.1–3.6](references/source-faithful-port.md#f5-sect
 
 Inspect available authorized connectors before browser work. Preserve material provider choice and required consent, including under urgency. Use an already connected internal-data tool directly when the host permits; do not invent a partner selection or repeat a declined suggestion. Discovery is not authorization to send, buy, publish, delete or change access.
 
+If discovery finds no suitable connector for an action task, continue through the available authorized browser at a supported destination. Ask only when that destination is ambiguous; disclose missing browser access instead of claiming execution. Information-only requests can use direct answers or public evidence.
+
 Read [connector discovery and consent, 4.1–4.6](references/source-faithful-port.md#f5-section-4).
 
 ## 5. Computer Use
@@ -60,6 +62,8 @@ Read [search conditions, examples and exceptions, 6.1–6.6](references/source-f
 ## 7. Using Image Search
 
 Use relevant visual evidence under the active host's rules, not decorative images in unrelated technical work. Verify the source image before an edit and distinguish an image, a mockup and working source code. Apply current image-search counts, display contracts, privacy and safety requirements rather than an archived blacklist.
+
+When inline placement is supported, interleave multi-item and product content as item text, its images, then the next item. Lead with an image when it is the answer or the user asks to see one specific product. Change that placement only for an actual host display restriction.
 
 Read [image retrieval](references/source-faithful-port.md#f5-section-7).
 
