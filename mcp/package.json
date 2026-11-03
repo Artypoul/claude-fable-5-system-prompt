@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test test/search.test.mjs test/catalog.test.mjs test/protocol.test.mjs",
+    "test": "node --test test/search.test.mjs test/catalog.test.mjs test/protocol.test.mjs test/update.test.mjs test/update-native.test.mjs",
     "smoke": "node smoke.mjs"
   },
   "dependencies": {

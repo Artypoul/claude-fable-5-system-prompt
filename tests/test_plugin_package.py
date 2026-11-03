@@ -53,6 +53,7 @@ class PluginPackageTests(unittest.TestCase):
             self.assertEqual(installed_skill.parent, (installed / manifest['skills']).resolve())
             self.assertTrue((installed / '.mcp.json').is_file())
             self.assertTrue((installed / 'mcp/dist/server.mjs').is_file())
+            self.assertTrue((installed / 'mcp/dist/update.mjs').is_file())
             self.assertTrue((installed / 'mcp/dist/THIRD_PARTY_LICENSES.txt').is_file())
             self.assertFalse((installed / 'mcp/node_modules').exists())
 

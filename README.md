@@ -41,19 +41,21 @@ codex plugin marketplace add Artypoul/claude-fable-5-system-prompt --ref main
 codex plugin add fable5-codex@fable5
 ~~~
 
-Update the repository snapshot and refresh the installed plugin:
+Обновление с бэкапом, проверкой и автоматическим откатом (начиная с 1.3.0):
 
 ~~~sh
-codex plugin marketplace upgrade fable5
-codex plugin add fable5-codex@fable5
+node /absolute/path/to/installed/plugin/mcp/dist/update.mjs update --project /absolute/path/to/project
 ~~~
 
 The plugin loads the same complete skill directory through its manifest.
+Переход с 1.2.0, расположение бэкапов и ручное восстановление описаны в
+[инструкции безопасного обновления](SAFE_UPDATE.md). Обычные команды Codex
+не запускают этот механизм автоматически.
 See [Plugin packaging and installation](PLUGIN.md) for verification, ZIP builds
 and migration from the earlier local installation. Standalone skill installation
 below is still supported.
 
-Version 1.2.0 includes a local MCP server with callable `search_skills` and
+The plugin includes a local MCP server with callable `search_skills` and
 `read_skill` tools for enabled Codex skills. Requires Node.js 20+ and compatible
 Codex CLI on PATH; the SDK is bundled, with no npm install at startup.
 See [MCP tools and verification](MCP.md), [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)

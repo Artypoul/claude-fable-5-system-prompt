@@ -1,15 +1,19 @@
 {
   "inputs": {
-    "build.mjs": "d3c072f71688839d44133970e975a76c82f0bcbf06921067a0aa6652b07c4354",
-    "package.json": "22f36182e8f97ad3f353e98abd2d8956c05ec30592811261a3fc06cf6b49f4e7",
+    "build.mjs": "484c09f6521a6ca5458e6a1e6a236855d03b511201255ad073acfe8e4f26c595",
+    "package.json": "a050c30b8125448d831f208cfd7b66b2f0d0371214f9ed48bf28b61fb2a7f8eb",
     "package-lock.json": "65e2c57d1ef788d8b25f476de769568e47bcc97a7b52798ccecd5607178c1793",
     "src/catalog.mjs": "808644adc032ced8f910cf6bda059d2bc02aed8baccdb91dbe8f3504a381ee0f",
     "src/main.mjs": "2a151aa436c228b60a7aac4b3c6cedff329d18d5d47b5c547db3ffb2a0634b7a",
     "src/search.mjs": "1e68d642ae24305f5ee408b0fa180d185345a424fe6179b17ae4387f96405376",
-    "src/server.mjs": "b7e679baefe89631353ba2b1fe463691aaf3f775af56fd628d6f8b5c61ccba49"
+    "src/server.mjs": "b7e679baefe89631353ba2b1fe463691aaf3f775af56fd628d6f8b5c61ccba49",
+    "src/update-core.mjs": "038ccd370d72e1a28618977db921dda0249b9c69c5374bba2f6727629701a966",
+    "src/update-main.mjs": "9cad5b7fc0529d2468d4ab612fae9ec9f7ccb9c74a4a17c69a44032a492ed576",
+    "src/update-native.mjs": "3dc7108ebdefdb7fa264a57f869223079a8d723c24d4f981e055f0f99a61cb62"
   },
   "outputs": {
     "dist/server.mjs": "c770330aaeddb644b9b2db0371de499e0b3ceae02adc63a40bc8f9c8e5500acd",
-    "dist/THIRD_PARTY_LICENSES.txt": "b97152193f43e32e86874bf72592e0854948b6d7b86a13f81dd0f7ec96520a91"
+    "dist/update.mjs": "283ced09b5a879eca2f8892a557b44f26e939e2ba4629ead339a71c40967b9d0",
+    "dist/THIRD_PARTY_LICENSES.txt": "012b8c838c4a1c23fdbdf14b0861a0ebd19e25a0a95eae3cae38020e57024811"
   }
 }

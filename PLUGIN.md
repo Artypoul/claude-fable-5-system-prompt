@@ -1,6 +1,7 @@
 # Fable 5 Codex plugin
 
-Version 1.2.0 adds local read-only MCP tools `search_skills` and `read_skill`.
+Version 1.3.0 adds safe updates with verified backups and rollback.
+The plugin includes local read-only MCP tools `search_skills` and `read_skill`.
 They use the enabled Codex catalogue for an explicitly supplied project.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
 See [MCP setup, contracts and verification](MCP.md).
@@ -74,13 +75,16 @@ The plugin skill's qualified name is `$fable5-codex:fable5-codex`.
 ## Update from GitHub
 
 ```sh
-codex plugin marketplace upgrade fable5 --json
-codex plugin add fable5-codex@fable5 --json
-codex plugin list --marketplace fable5 --json
+node /absolute/path/to/installed/plugin/mcp/dist/update.mjs update --project /absolute/path/to/project
 ```
 
-The first command refreshes the tracked `main` snapshot; the second refreshes
-the plugin's installed cache. When publishing a new plugin release, increment
+Используйте [safe updater](SAFE_UPDATE.md): он сохраняет настройки и пакет,
+проверяет установленную версию реальными MCP-вызовами и откатывает обычные
+ошибки. Версия закрепляется на проверенном Git SHA; следующий безопасный
+update снова проверяет `main`. Прямые `marketplace upgrade` / `plugin add`
+обходят эти проверки и не создают наш бэкап.
+
+When publishing a new plugin release, increment
 `version` in `.codex-plugin/plugin.json`, run the package checks, and push the
 changes. Keep the plugin and marketplace names stable across releases.
 

@@ -17,7 +17,7 @@ from verify_codex_skill import ROOT, require, validate
 DIRECTORIES = ('.agents', '.codex-plugin', '.github', 'assets', 'highlights',
                'scripts', 'system-prompt', 'tests', 'mcp', 'docs')
 FILES = ('.gitignore', '.gitattributes', 'README.md', 'LICENSE', 'CONTRIBUTING.md',
-         'CODEX_ADAPTATION_CHANGES.md', 'PLUGIN.md', '.mcp.json', 'MCP.md')
+         'CODEX_ADAPTATION_CHANGES.md', 'PLUGIN.md', '.mcp.json', 'MCP.md', 'SAFE_UPDATE.md')
 
 
 def validate_plugin(root=ROOT):
@@ -37,7 +37,7 @@ def validate_plugin(root=ROOT):
     expected_inputs = {'build.mjs', 'package.json', 'package-lock.json'} | {
         p.relative_to(root / 'mcp').as_posix() for p in (root / 'mcp/src').glob('*.mjs')}
     require(set(build_info['inputs']) == expected_inputs, 'MCP build input inventory differs')
-    require(set(build_info['outputs']) == {'dist/server.mjs', 'dist/THIRD_PARTY_LICENSES.txt'},
+    require(set(build_info['outputs']) == {'dist/server.mjs', 'dist/update.mjs', 'dist/THIRD_PARTY_LICENSES.txt'},
             'MCP build output inventory differs')
     for name, digest in (build_info['inputs'] | build_info['outputs']).items():
         file = root / 'mcp' / name
