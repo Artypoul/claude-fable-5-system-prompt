@@ -1,8 +1,8 @@
 <div align="center">
 
-# Fable 5 Codex Skill
+# Fable 5 Codex Plugin
 
-### Адаптированный source-based skill Fable 5 для OpenAI Codex
+### Плагин для OpenAI Codex с полным source-based skill Fable 5
 
 ![Fable 5 Codex Skill](assets/fable5-hero.png)
 
@@ -19,7 +19,7 @@
 
 ## What this repository is
 
-This repository packages a **source-based Fable 5 skill for OpenAI Codex**. It adapts the original sixteen-section structure into a reusable workflow for:
+This repository packages a **Codex plugin with the complete source-based Fable 5 skill**. It adapts the original sixteen-section structure into a reusable workflow for:
 
 - coding and implementation;
 - code review, debugging and testing;
@@ -33,6 +33,25 @@ The active entry point is [.agents/skills/fable5-codex/SKILL.md](.agents/skills/
 This is **workflow guidance for Codex**, not a system prompt, model identity, hidden API, credential, permission grant or replacement for the active system and developer instructions. The skill cannot give Codex tools or access that the host has not provided.
 
 ## Install and use
+
+Install the complete plugin globally from this repository:
+
+~~~sh
+codex plugin marketplace add Artypoul/claude-fable-5-system-prompt --ref main
+codex plugin add fable5-codex@fable5
+~~~
+
+Update the repository snapshot and refresh the installed plugin:
+
+~~~sh
+codex plugin marketplace upgrade fable5
+codex plugin add fable5-codex@fable5
+~~~
+
+The plugin loads the same complete skill directory through its manifest.
+See [Plugin packaging and installation](PLUGIN.md) for verification, ZIP builds
+and migration from the earlier local installation. Standalone skill installation
+below is still supported.
 
 Copy the complete [.agents/skills/fable5-codex](.agents/skills/fable5-codex) directory into a supported Codex skill location. If the Codex client supports explicit skill mentions, invoke it as `$fable5-codex`.
 

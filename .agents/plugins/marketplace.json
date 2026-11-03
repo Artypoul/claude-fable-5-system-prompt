@@ -1,0 +1,12 @@
+{
+  "name": "fable5",
+  "interface": { "displayName": "Fable 5 Codex" },
+  "plugins": [
+    {
+      "name": "fable5-codex",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}
