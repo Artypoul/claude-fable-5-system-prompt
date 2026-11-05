@@ -3,6 +3,9 @@
 Review the actual diff and its integration with surrounding code. Do not infer correctness from PR description, commit message, author confidence, or test count.
 
 ## Review passes
+
+First enforce the [scope and pattern gates](coding-workflow.md#scope-guard-and-recovery): compare actual changes with the authorized files, sections, behavior and database fields, and verify concrete evidence plus explicit user permission for applied patterns. An unauthorized change blocks acceptance even if technically correct or covered by passing tests. If found, stop the responsible subagent, warn promptly and follow selective recovery before continuing the affected work.
+
 1. **Scope and intent:** Does the diff solve the stated problem without unrelated changes?
 2. **Architecture:** Are boundaries, dependencies, ownership, and contracts consistent with the repository?
 3. **Behavior:** Trace happy paths, invalid input, empty state, permission denial, failures, retries, and recovery.

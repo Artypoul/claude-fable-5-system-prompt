@@ -1,6 +1,12 @@
 # Fable 5 Codex plugin
 
-Version 1.3.2 adds safe updates with verified backups and rollback.
+Version 1.3.3 adds explicit file, section, behavior and database-field scope
+checks, safe selective recovery of unauthorized edits, and evidence plus explicit
+user permission before applying architectural, design or data-access patterns.
+These are skill instructions, not a runtime interception hook. Safe updates with
+verified backups and rollback remain available as introduced in 1.3.2.
+The updater also validates native Git marketplace bookkeeping from newer Codex
+CLI versions without treating it as plugin content or relaxing package checks.
 The plugin includes local read-only MCP tools `search_skills` and `read_skill`.
 They use the enabled Codex catalogue for an explicitly supplied project.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
@@ -83,6 +89,10 @@ node /absolute/path/to/installed/plugin/mcp/dist/update.mjs update --project /ab
 ошибки. Версия закрепляется на проверенном Git SHA; следующий безопасный
 update снова проверяет `main`. Прямые `marketplace upgrade` / `plugin add`
 обходят эти проверки и не создают наш бэкап.
+
+Если новый Codex создаёт `.codex-marketplace-install.json`, для перехода со
+старой версии запускайте bundled runner из доверенного checkout релиза 1.3.3.
+Старый runner может отклонить этот служебный файл; подробности в SAFE_UPDATE.md.
 
 When publishing a new plugin release, increment
 `version` in `.codex-plugin/plugin.json`, run the package checks, and push the

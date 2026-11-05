@@ -230,6 +230,82 @@ test("clean Git package including binary blobs is accepted", async (t) => {
   assert.match(before.commit, /^[a-f0-9]{40}$/);
   assert.equal(Object.keys(before.files).length, 3);
 });
+
+async function nativeMarketplaceMetadata(f, overrides = {}) {
+  const settings = await f.backend.settings();
+  return {
+    source_type: "git",
+    source: f.backend.identity.source,
+    ref_name: settings.marketplace.ref,
+    sparse_paths: [],
+    revision: (await command("git", ["-C", f.market, "rev-parse", "HEAD"])).trim(),
+    ...overrides,
+  };
+}
+
+test("validated native Git marketplace bookkeeping is not plugin content", async (t) => {
+  const f = await gitFixture(t);
+  await fs.writeFile(
+    path.join(f.market, ".codex-marketplace-install.json"),
+    JSON.stringify(await nativeMarketplaceMetadata(f)),
+  );
+  const before = await f.backend.inspect();
+  assert.equal(Object.keys(before.files).length, 3);
+  assert.equal(before.files[".codex-marketplace-install.json"], undefined);
+});
+
+for (const [name, overrides] of [
+  ["source", { source: "https://example.invalid/other.git" }],
+  ["type", { source_type: "local" }],
+  ["ref", { ref_name: "other-branch" }],
+  ["ref shape", { ref_name: 12 }],
+  ["revision", { revision: "0".repeat(40) }],
+  ["sparse paths", { sparse_paths: [".agents"] }],
+  ["sparse shape", { sparse_paths: null }],
+  ["extra field", { extra: true }],
+])
+  test("native marketplace metadata rejects mismatched " + name, async (t) => {
+    const f = await gitFixture(t);
+    await fs.writeFile(
+      path.join(f.market, ".codex-marketplace-install.json"),
+      JSON.stringify(await nativeMarketplaceMetadata(f, overrides)),
+    );
+    await assert.rejects(f.backend.inspect(), { code: "LOCAL_CHANGES" });
+  });
+
+for (const value of ["{broken", "null", "[]", "{}"])
+  test("invalid native marketplace JSON is rejected: " + value, async (t) => {
+    const f = await gitFixture(t);
+    await fs.writeFile(path.join(f.market, ".codex-marketplace-install.json"), value);
+    await assert.rejects(f.backend.inspect(), { code: "LOCAL_CHANGES" });
+  });
+
+test("tracked marketplace bookkeeping filename cannot receive an exemption", async (t) => {
+  const f = await gitFixture(t);
+  const name = ".codex-marketplace-install.json";
+  await fs.writeFile(path.join(f.market, name), "tracked package content");
+  await command("git", ["-C", f.market, "add", name]);
+  await command("git", ["-C", f.market, "-c", "user.name=Review Fixture", "-c",
+    "user.email=fixture@example.invalid", "commit", "--quiet", "-m", "track metadata name"]);
+  await fs.writeFile(path.join(f.market, name), JSON.stringify(await nativeMarketplaceMetadata(f)));
+  await assert.rejects(f.backend.inspect(), { code: "LOCAL_CHANGES" });
+});
+
+for (const location of ["cache", "nested", "other"])
+  test("native metadata exemption does not hide " + location + " files", async (t) => {
+    const f = await gitFixture(t);
+    const name = ".codex-marketplace-install.json";
+    const metadata = JSON.stringify(await nativeMarketplaceMetadata(f));
+    await fs.writeFile(path.join(f.market, name), metadata);
+    if (location === "cache") await fs.writeFile(path.join(f.cache, name), metadata);
+    if (location === "nested") {
+      await fs.mkdir(path.join(f.market, "nested"));
+      await fs.writeFile(path.join(f.market, "nested", name), metadata);
+    }
+    if (location === "other") await fs.writeFile(path.join(f.market, ".ignored-extra"), "extra");
+    await assert.rejects(f.backend.inspect(), { code: "LOCAL_CHANGES" });
+  });
+
 for (const change of ["modified", "assume-unchanged", "untracked", "deleted"])
   test(
     "matching marketplace/cache " + change + " cannot masquerade as Git HEAD",
