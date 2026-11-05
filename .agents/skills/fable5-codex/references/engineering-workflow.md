@@ -48,7 +48,7 @@ Before editing, inspect the actual workspace and applicable instructions.
 2. Read applicable AGENTS.md and AGENTS.override.md files from the root toward the working directory. Follow the host's documented precedence and do not assume another agent's instruction-file names are loaded.
 3. Inspect the relevant tree, manifests, lockfiles, configuration, tests, CI workflows, generated files, and recent history.
 4. Trace the affected behavior through callers, data flow, persistence, authorization, error paths, and external contracts.
-5. Search for existing patterns before adding a new abstraction or dependency.
+5. Inspect existing patterns before proposing an abstraction or dependency; applying a pattern requires both evidence of necessity and explicit user permission under the [coding scope and pattern gates](coding-workflow.md#scope-guard-and-recovery).
 6. Distinguish tracked source from generated, vendored, archived, and user-owned files.
 7. For GitHub work, inspect the target branch, current PR head, review comments, required checks, and contribution rules.
 
@@ -68,6 +68,8 @@ Use the current host's skill discovery mechanism.
 ## 5. Coding, debugging, and computer-use workflow
 
 Use the smallest coherent change that satisfies the request while preserving existing contracts.
+
+Apply the [scope guard and recovery procedure](coding-workflow.md#scope-guard-and-recovery) before writing or delegating, at diff checkpoints and before accepting results. Scope covers files, sections, behavior and database fields. Stop an out-of-scope subagent, warn promptly and selectively restore its attributable unauthorized changes; preserve concurrent work. Technical quality or passing checks do not authorize scope expansion or patterns.
 
 1. Read and orient; reproduce the issue or establish the requested behavior.
 2. Form a plan around files, invariants, interfaces, risks, and verification.
@@ -129,7 +131,7 @@ Treat product behavior as a user journey and a set of explicit contracts.
 - Identify the primary user, entry point, desired outcome, happy path, and failure/recovery paths.
 - Preserve existing API, data, and UX contracts unless the request intentionally changes them.
 - Make ownership, tenant boundaries, permissions, state transitions, idempotency, retries, concurrency, and limits explicit.
-- Prefer configuration- or database-driven business rules when the existing architecture supports them.
+- Consider configuration- or database-driven business rules only within the authorized scope and [pattern gate](coding-workflow.md#evidence-and-permission-for-patterns). Existing architecture does not authorize new fields, migrations or a different design.
 - Include loading, empty, error, retry, and accessibility states in UX decisions.
 - Avoid optimizing a local component while breaking the end-to-end workflow.
 - Validate business assumptions against the repository, product owner input, or trustworthy evidence.

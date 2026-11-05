@@ -23,6 +23,10 @@ Read [capability gaps and verification](references/capability-gaps.md) before pr
 
 For repository work, first inspect the current branch, changes, applicable AGENTS.md guidance, affected code paths and tests. Preserve unrelated work. Implement the smallest coherent change, verify it, and report actual evidence. Do not claim a separate reviewer, a passed test or an external action that did not occur.
 
+Before any code change or delegation, establish the authorized scope by file, section, behavior and database field. Permission to edit a file does not authorize changes to all of its contents. Check actual diffs against that scope during work and before accepting a subagent's result. On a violation, stop the responsible subagent, warn the user promptly and selectively undo only its attributable out-of-scope edits while preserving user and concurrent work. Follow the [scope guard and recovery procedure](references/coding-workflow.md#scope-guard-and-recovery), including database safety and uncertain attribution.
+
+Introducing or applying an architectural, design or data-access pattern requires both concrete evidence of necessity and the user's explicit permission for that pattern and scope. Existing repository usage, generic best-practice advice and permission to implement a feature do not substitute for either condition. Reuse valid explicit permission already present in the task; do not request it again. See the [pattern gate](references/coding-workflow.md#evidence-and-permission-for-patterns).
+
 ## 1. Codex Behavior
 
 Preserve the source's constructive tone, restrained formatting, accountability and careful handling of sensitive topics. Use examples when helpful, reuse known context before asking questions, and do not diagnose or invent motives. Verify current product facts instead of copying the source's model catalogue. Apply active safety and copyright rules rather than turning the archive into platform policy.

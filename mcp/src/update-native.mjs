@@ -353,14 +353,13 @@ export class NativeBackend {
       installed.version,
     );
     const files = await inventory(cached);
-    if (
-      manifest.version !== installed.version ||
-      !equal(files, await inventory(market.root))
-    )
-      throw new UpdateError(
+    const marketplaceFiles = await inventory(market.root);
+    const changed = () =>
+      new UpdateError(
         "LOCAL_CHANGES",
         "Installed package differs from its marketplace snapshot; preserve customizations before updating.",
       );
+    if (manifest.version !== installed.version) throw changed();
     const sourceType = settings.marketplace.source_type;
     if (
       sourceType === "git" &&
@@ -375,6 +374,46 @@ export class NativeBackend {
       commit = (
         await command(this.git, ["-C", market.root, "rev-parse", "HEAD"])
       ).trim();
+    const bookkeeping = ".codex-marketplace-install.json";
+    if (
+      commit &&
+      Object.hasOwn(marketplaceFiles, bookkeeping) &&
+      !Object.hasOwn(files, bookkeeping)
+    ) {
+      const tracked = await command(this.git, [
+        "-C", market.root, "ls-tree", "-r", "--name-only",
+        commit, "--", bookkeeping,
+      ]);
+      if (tracked.trim()) throw changed();
+      let metadata;
+      try {
+        metadata = JSON.parse(
+          await fs.readFile(path.join(market.root, bookkeeping), "utf8"),
+        );
+      } catch {
+        throw changed();
+      }
+      if (
+        !metadata ||
+        Array.isArray(metadata) ||
+        !equal(Object.keys(metadata).sort(), [
+          "ref_name", "revision", "source", "source_type", "sparse_paths",
+        ]) ||
+        metadata.source_type !== "git" ||
+        metadata.source !== settings.marketplace.source ||
+        metadata.revision !== commit ||
+        typeof metadata.ref_name !== "string" ||
+        !metadata.ref_name ||
+        (settings.marketplace.ref != null &&
+          metadata.ref_name !== settings.marketplace.ref) ||
+        !Array.isArray(metadata.sparse_paths) ||
+        metadata.sparse_paths.length !== 0
+      )
+        throw changed();
+      // Native bookkeeping is not package content. Cache and Git checks stay exact.
+      delete marketplaceFiles[bookkeeping];
+    }
+    if (!equal(files, marketplaceFiles)) throw changed();
     if (commit) await this.verifyGitSnapshot(market.root, commit, files);
     this.owned = { plugin: settings.plugin, marketplace: settings.marketplace };
     return {
