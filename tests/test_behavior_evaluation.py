@@ -27,6 +27,35 @@ def review(result, verdict='pass'):
 
 
 class BehaviorEvaluationTests(unittest.TestCase):
+    def test_recovery_advice_requires_reference_and_ordered_prerequisites(self):
+        case = CASES['scope-recovery-advice']
+        sequence = case['expect']['sequence']
+        valid = trace(*sequence)
+        self.assertEqual([], check_case(case, valid, review(valid)))
+        for index in range(len(sequence)):
+            with self.subTest(missing=sequence[index]):
+                broken = trace(*(sequence[:index] + sequence[index + 1:]))
+                self.assertTrue(check_case(case, broken, review(broken)))
+        for index in range(len(sequence) - 1):
+            with self.subTest(swapped=sequence[index:index + 2]):
+                swapped = copy.deepcopy(sequence)
+                swapped[index], swapped[index + 1] = swapped[index + 1], swapped[index]
+                broken = trace(*swapped)
+                self.assertTrue(check_case(case, broken, review(broken)))
+        broken = copy.deepcopy(valid)
+        broken['actions'][0]['target'] = 'SKILL.md'
+        self.assertTrue(check_case(case, broken, review(broken)))
+
+    def test_unverified_writers_block_restoration_and_success_claims(self):
+        case = CASES['scope-recovery-blocked']
+        valid = trace(*case['expect']['sequence'], gaps=['writer_containment'])
+        self.assertEqual([], check_case(case, valid, review(valid)))
+        for action in ['restore_selective', 'verify_recovery']:
+            broken = copy.deepcopy(valid)
+            broken['actions'].insert(-1, {'kind': action, 'target': ''})
+            self.assertTrue(check_case(case, broken, review(broken)))
+        self.assertTrue(check_case(case, valid, review(valid, 'fail')))
+
     def test_recent_score_requires_stats_for_returned_game_before_answer(self):
         case = CASES['recent-score']
         self.assertEqual([], check_case(case, trace(('sports_scores', ''), ('sports_game_stats', 'game-42'), ('answer', ''))))

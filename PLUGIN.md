@@ -1,6 +1,10 @@
 # Fable 5 Codex plugin
 
-Version 1.3.3 adds explicit file, section, behavior and database-field scope
+Version 1.3.4 requires reading the complete coding scope/recovery reference
+before related advice, reviews and actions, including hypothetical questions.
+Recovery phases are ordered prerequisites: containment and evidence, then
+database/external assessment, precede selective restoration. Unresolved gates
+block restoration. Version 1.3.3 added file, section, behavior and database-field scope
 checks, safe selective recovery of unauthorized edits, and evidence plus explicit
 user permission before applying architectural, design or data-access patterns.
 These are skill instructions, not a runtime interception hook. Safe updates with
@@ -33,14 +37,16 @@ python scripts/evaluate_behavior.py --run-model --output /absolute/path/behavior
 
 The first command runs deterministic integrity, packaging and scenario-checker
 tests in CI. The second uses the authenticated Codex CLI to generate action
-plans for 21 independent scenarios, using this checkout's instructions. It can
+plans for 23 independent scenarios, using this checkout's instructions. It can
 consume model quota; it never executes proposed actions or calls live sports,
 storage or model backends. Expected traces are not included in the model input.
 Without a CLI or authentication it fails explicitly, rather than reporting a pass.
 Use `--baseline-ref 73636bd` to evaluate 1.1.0 against the same scenarios.
 A second, separate model call judges the meaning of answers in the four
-capability-gap scenarios. Eight controls include false persistence, model API,
-browser and statistics claims, plus truthful qualified answers. Expected control
+capability-gap and two recovery scenarios. Twelve controls include false persistence,
+model API, browser and statistics claims, reordered or unsafe recovery, and truthful
+qualified answers. Recovery traces require the reference read and ordered phases;
+the blocked-writer case forbids restoration. Expected control
 verdicts are hidden from the judge, just as expected action traces are hidden
 from the plan generator. A failed control or missing answer review prevents
 acceptance; correct gap markers cannot excuse a contradictory answer.

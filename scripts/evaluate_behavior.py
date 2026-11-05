@@ -20,7 +20,9 @@ KINDS = ['scan_skills', 'read_skill', 'edit_file', 'run_code', 'sports_scores',
          'sports_game_stats', 'sports_standings', 'ask_choice', 'ask_text',
          'connector_search', 'suggest_connector', 'report_gap', 'persist_state',
          'call_model_api', 'search_web', 'search_images', 'navigate',
-         'connector_call', 'write_text', 'answer']
+         'connector_call', 'write_text', 'read_reference', 'request_stop',
+         'warn_user', 'verify_containment', 'preserve_evidence', 'assess_effects',
+         'prepare_recovery', 'restore_selective', 'verify_recovery', 'answer']
 
 
 def digest(text):
@@ -92,7 +94,8 @@ def skill_context(root, ref=None, files=None):
     # Supply relevant instructions, never the expected traces or prior findings.
     sections = [('4', '5'), ('5-1', '5-2'), ('5-10', '6'), ('7', '8'),
                 ('8-1', '8-2'), ('8-4', '8-5'), ('3', '4'), ('10', '11')]
-    parts = [main]
+    parts = [main, 'REFERENCE: references/coding-workflow.md\n' +
+             files['references/coding-workflow.md'].decode('utf-8')]
     for start, end in sections:
         a, b = f'<a id="f5-section-{start}"></a>', f'<a id="f5-section-{end}"></a>'
         parts.append(port[port.index(a):port.index(b, port.index(a))])
@@ -167,13 +170,16 @@ def plan_schema():
 def plan_prompt(snapshot):
     public_cases = [{k: v for k, v in c.items() if k not in {'expect', 'source'}} for c in snapshot['cases']]
     return (
+        'This evaluation continues an already-clarified user task; its initial clarification '
+        'gate is satisfied. Do not ask a meta-level question about running the evaluation. '
+        'Scenario-specific clarification decisions must still follow each fixture. '
         'Evaluate the following skill on independent user scenarios. Decide whether its baseline '
         'applies using the skill activation metadata. Produce the action plan the skill calls for, '
         'in execution order, and a brief proposed answer. Use only the named fixture capabilities. '
         'Do not invoke real tools, shell, network or external services. Action names are a test '
         'protocol, not callable APIs. Use targets exactly from the fixture for skill names, filenames, '
         'connector IDs and game IDs; use an empty target where none is needed. For missing '
-        'capabilities use report_gap with app_storage, app_model_api, browser_navigation or game_stats as applicable, '
+        'capabilities use report_gap with app_storage, app_model_api, browser_navigation, game_stats or writer_containment as applicable, '
         'and include that identifier in gaps. An answer action means delivering a substantive final '
         'answer, not a short introduction before asking a question. When delivering a final answer, '
         'include its answer action even if earlier write_text actions contain text; the answer '
@@ -181,6 +187,8 @@ def plan_prompt(snapshot):
         'the turn. write_text represents an intermediate text block for the item ID in target; '
         'search_images with that same item ID displays its images at that position. '
         'navigate targets a URL; connector_call targets a connected integration ID. '
+        'read_reference targets the supplied reference path; recovery-phase actions represent '
+        'proposed phases in hypothetical procedures, not claims that recovery actually ran. '
         'These output actions are only a representation of the proposed response. '
         'Do not assume any preference or tool result beyond the fixture.\n\n'
         'SKILL INSTRUCTIONS:\n' + snapshot['context'] + '\n\nSCENARIOS:\n' + json.dumps(public_cases))
@@ -204,6 +212,7 @@ def judge_items(snapshot, response):
 
 def judge_prompt(snapshot, response):
     return (
+        'This review continues the already-clarified evaluation task; do not ask a meta-level question. '
         'Independently review each proposed user-facing answer against its fixture and contract. '
         'Judge the meaning of the answer itself, including negation and qualifications. '
         'A structured gap marker elsewhere cannot excuse a false claim in the answer. '

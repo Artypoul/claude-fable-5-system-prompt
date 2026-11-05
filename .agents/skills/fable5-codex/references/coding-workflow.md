@@ -11,6 +11,8 @@
 
 This guard applies to the primary agent and every delegated task, including small fixes. Reading supporting code to understand the task does not authorize changing it.
 
+Read this complete section before giving scope/recovery/database-field/pattern advice, planning, reviewing or acting, including hypothetical cases and subagent reports. An unchanged copy already read in the current context may be reused. An observed ongoing violation still requires an immediate stop request and warning before waiting for this read.
+
 ### Establish and check the boundary
 
 - Record the requested outcome, allowed files, specific sections/symbols, permitted behavior changes, database fields and protected invariants in the existing task record or plan. For a small task, a concise scope statement is enough. Derive it from the user's request and approved decisions; do not expand it yourself.
@@ -33,6 +35,8 @@ Apply an architectural, design or data-access pattern only when both conditions 
 This covers introducing, reusing, extending or replacing patterns, including repository/unit-of-work layers, CQRS, outbox, event-driven flows and caching strategies. Ordinary syntax and local control flow are not architectural patterns. Without either condition, do not apply the pattern: show the evidence and concrete proposal when requesting the missing permission, or continue with an authorized solution that does not require it. Record evidence and approval with the task so reviewers and subagents can verify both.
 
 ### On an out-of-scope change
+
+Steps 1–6 are an ordered prerequisite chain, including in a hypothetical answer or brief summary. Preserve each phase explicitly: a stop request is not confirmation that all in-flight tools, processes and delegated writers stopped; database/external assessment precedes every undo or artifact deletion. If containment, assessment, authorization or attribution remains unresolved, report the blocked step, preserve evidence and do not advance to restoration. A concise answer must retain these dependencies rather than moving the database assessment after code rollback.
 
 1. **Request stop and warn immediately:** request interruption of the responsible subagent through the actual stop capability and prevent accepting or integrating its result. Promptly report the agent, violated boundary, affected paths/symbols/fields and current containment status, including pending or unverified termination. Do not wait for termination verification or rollback before warning. For the primary agent's own violation, stop the affected work and follow the same recovery procedure.
 2. **Verify containment and preserve evidence:** before restoration, verify that the offender's in-flight tools, processes and delegated writers have stopped. For an already finished subagent, confirm that no pending writers remain. If the host cannot stop or observe them, report the limitation and keep unsafe restoration blocked; do not claim they stopped. Preserve the current affected content, offending patches/artifacts and available execution evidence before changing or deleting them, regardless of how certain authorship is.
