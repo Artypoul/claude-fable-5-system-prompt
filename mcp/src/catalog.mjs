@@ -155,6 +155,181 @@ export async function fetchNativeCatalog(
   });
 }
 
+function tomlString(value) {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('"')) return JSON.parse(trimmed);
+  if (trimmed.startsWith("'")) return trimmed.slice(1, -1);
+  return null;
+}
+
+function configEntries(config) {
+  const plugins = new Map(), skills = [];
+  let section = null, current = null;
+  for (const raw of config.split(/\r?\n/)) {
+    const line = raw.replace(/\s+#.*$/, "").trim();
+    const plugin = line.match(/^\[plugins\.((?:"(?:\\.|[^"])+")|(?:'[^']+'))\]$/);
+    if (plugin) {
+      try { current = tomlString(plugin[1]); } catch { current = null; }
+      section = current ? "plugin" : null;
+      if (current && !plugins.has(current)) plugins.set(current, { enabled: null });
+      else if (current) plugins.get(current).duplicate = true;
+      continue;
+    }
+    if (line === "[[skills.config]]") { section = "skill"; current = {}; skills.push(current); continue; }
+    if (line.startsWith("[")) { section = null; current = null; continue; }
+    const pair = line.match(/^([A-Za-z0-9_.-]+)\s*=\s*(.+)$/);
+    if (!pair || !current) continue;
+    if (section === "plugin" && pair[1] === "enabled") plugins.get(current).enabled = pair[2] === "true";
+    if (section === "skill" && ["enabled", "path"].includes(pair[1]))
+      current[pair[1]] = pair[1] === "enabled" ? pair[2] === "true" : tomlString(pair[2]);
+  }
+  return { plugins, skills };
+}
+
+async function skillFiles(root, errors = []) {
+  const found = [];
+  async function walk(directory) {
+    for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink()) {
+        if (entry.name === "SKILL.md") errors.push({ path: path.join(directory, entry.name), message: "symlink skill rejected" });
+        continue;
+      }
+      if (entry.name === ".git" || entry.name === "node_modules") continue;
+      const filename = path.join(directory, entry.name);
+      if (entry.isDirectory()) await walk(filename);
+      else if (entry.isFile() && entry.name === "SKILL.md") found.push(filename);
+    }
+  }
+  await walk(root);
+  return found;
+}
+
+function semver(value) {
+  const match = value.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+  return match ? match.slice(1, 4).map(Number) : null;
+}
+
+function compareVersion(a, b) {
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
+
+async function frontmatter(filename) {
+  const file = await fs.open(filename, "r");
+  let text;
+  try {
+    const buffer = Buffer.alloc(64 * 1024);
+    const { bytesRead } = await file.read(buffer, 0, buffer.length, 0);
+    text = new TextDecoder("utf-8", { fatal: true }).decode(buffer.subarray(0, bytesRead));
+  } catch {
+    throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is not valid UTF-8.");
+  } finally {
+    await file.close();
+  }
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  if (!match) throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is missing.");
+  const values = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const pair = line.match(/^(name|description):\s*(.+)$/);
+    if (!pair) continue;
+    values[pair[1]] = pair[2].replace(/^['"]|['"]$/g, "");
+  }
+  if (!values.name || !values.description) throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is incomplete.");
+  return values;
+}
+
+// Read the configured enabled cache directly. This avoids starting Codex app-server,
+// whose startup may perform a marketplace refresh before returning skills/list.
+export async function fetchConfiguredCatalog(
+  cwd,
+  { profileRoot = (() => {
+    if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
+    const root = process.env.USERPROFILE || process.env.HOME;
+    return root && path.join(root, ".codex");
+  })() } = {},
+) {
+  const directory = await projectDirectory(cwd);
+  const errors = [];
+  const skills = [], seenPlugins = new Set();
+  const profileDirectory = path.resolve(profileRoot);
+  const seen = new Set();
+  const add = async (filename, scope, pluginId) => {
+    const stat = await fs.lstat(filename);
+    if (!stat.isFile() || stat.isSymbolicLink())
+      throw new CatalogError("UNSAFE_SKILL_FILE", "SKILL.md must be a regular file, not a file symlink.");
+    const resolved = await fs.realpath(filename);
+    if (seen.has(resolved)) return;
+    seen.add(resolved);
+    const metadata = await frontmatter(resolved);
+    skills.push({ name: metadata.name, description: metadata.description, enabled: true,
+      path: resolved, scope, pluginId });
+  };
+  const repoSkills = path.join(directory, ".agents", "skills");
+  try {
+    const discovered = [];
+    for (const filename of await skillFiles(repoSkills, discovered)) {
+      try { await add(filename, "repo", null); } catch (error) { discovered.push({ path: filename, message: error.message }); }
+    }
+    errors.push(...discovered);
+  } catch (error) {
+    if (error.code !== "ENOENT") errors.push({ path: repoSkills, message: "repo skills unavailable" });
+  }
+  let config;
+  try {
+    config = await fs.readFile(path.join(profileRoot, "config.toml"), "utf8");
+  } catch {
+    errors.push({ path: "config.toml", message: "Codex config unavailable" });
+    config = "";
+  }
+  const entries = configEntries(config);
+  for (const [pluginId, setting] of entries.plugins) {
+    if (setting.duplicate) { errors.push({ path: pluginId, message: "duplicate plugin configuration" }); continue; }
+    if (setting.enabled !== true) continue;
+    const parts = pluginId.split("@");
+    const [plugin, marketplace] = parts;
+    if (parts.length !== 2 || !plugin || !marketplace || !/^[A-Za-z0-9._-]+$/.test(plugin) || !/^[A-Za-z0-9._-]+$/.test(marketplace)) {
+      errors.push({ path: pluginId, message: "invalid plugin identifier" });
+      continue;
+    }
+    if (seenPlugins.has(pluginId)) continue;
+    seenPlugins.add(pluginId);
+    const root = path.join(profileRoot, "plugins", "cache", marketplace, plugin);
+    if (!path.resolve(root).startsWith(profileDirectory + path.sep)) {
+      errors.push({ path: root, message: "plugin cache escapes profile" });
+      continue;
+    }
+    try {
+      const versions = (await fs.readdir(root, { withFileTypes: true }))
+        .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+        .map((entry) => ({ name: entry.name, version: semver(entry.name) }))
+        .filter((entry) => entry.version).sort((a, b) => compareVersion(b.version, a.version));
+      if (!versions.length) throw new Error("no valid semver cache");
+      const versionRoot = path.join(root, versions[0].name);
+      const manifestPath = path.join(versionRoot, ".codex-plugin", "plugin.json");
+      const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+      if (manifest.name !== plugin) throw new Error("plugin manifest mismatch");
+      if (typeof manifest.skills !== "string") continue;
+      if (manifest.version != null && manifest.version !== versions[0].name) throw new Error("plugin manifest version mismatch");
+      const skillRoot = path.resolve(versionRoot, manifest.skills);
+      if (!skillRoot.startsWith(path.resolve(versionRoot) + path.sep)) throw new Error("plugin skill root escapes cache");
+      const discovered = [];
+      for (const filename of await skillFiles(skillRoot, discovered)) {
+        try { await add(filename, "user", pluginId); } catch (error) { discovered.push({ path: filename, message: error.message }); }
+      }
+      errors.push(...discovered);
+    } catch {
+      errors.push({ path: root, message: "enabled plugin cache unavailable" });
+    }
+  }
+  for (const entry of entries.skills) {
+    if (entry.enabled !== true || typeof entry.path !== "string" || !path.isAbsolute(entry.path)) continue;
+    try { await add(entry.path, "user", null); }
+    catch { errors.push({ path: entry.path, message: "configured skill unavailable" }); }
+  }
+  skills.sort((a, b) => a.path.localeCompare(b.path));
+  return { data: [{ cwd: directory, skills, errors }] };
+}
+
 export function parseCatalog(response, cwd) {
   const fail = () => {
     throw new CatalogError(

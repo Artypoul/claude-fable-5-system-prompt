@@ -1,5 +1,14 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.3.7 — direct configured catalogue
+
+The bundled MCP now reads the enabled project, plugin-cache and configured-skill
+catalogue directly by default, avoiding a Codex app-server spawn during ordinary
+discovery. Direct-source evidence covered 101 current skills completely and
+passed tools/list, search_skills and read_skill smoke checks. The native
+app-server catalogue remains an explicit fallback. A custom CODEX_HOME is used
+as supplied instead of receiving an extra `.codex` suffix.
+
 ## 1.3.6 — explicit Fable activation
 
 Explicit Fable requests now direct the agent to use the bundled read-only MCP
