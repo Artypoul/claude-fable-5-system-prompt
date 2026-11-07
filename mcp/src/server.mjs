@@ -3,7 +3,7 @@ import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import * as z from "zod/v4";
 import {
   CatalogError,
-  fetchNativeCatalog,
+  fetchConfiguredCatalog,
   parseCatalog,
   projectDirectory,
   readRegisteredSkill,
@@ -29,7 +29,7 @@ const result = (data) => ({
   structuredContent: data,
 });
 
-export function createServer({ catalogReader = fetchNativeCatalog } = {}) {
+export function createServer({ catalogReader = fetchConfiguredCatalog } = {}) {
   const server = new McpServer({ name: "fable5_skills", version: "0.1.0" });
   const load = async (cwd, signal) => {
     const directory = await projectDirectory(cwd);

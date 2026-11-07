@@ -1,5 +1,10 @@
 # Fable 5 Codex plugin
 
+Version 1.3.7 makes the bundled MCP direct reader the default catalogue source,
+so it does not spawn Codex app-server during ordinary discovery. The source
+reader observed 101 current skills completely; tools/list, search_skills and
+read_skill passed the direct-source smoke. Native app-server catalogue access
+remains an explicit fallback. Custom CODEX_HOME paths are honored exactly.
 Version 1.3.6 directs explicit Fable requests through the bundled MCP skill
 discovery and the enabled Gigma Superpowers gateway before task work. These
 remain instructions, not host-enforced execution or new permissions. Native
