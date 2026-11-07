@@ -218,6 +218,34 @@ test("configured catalogue chooses highest semver and reports invalid metadata",
   assert.ok(catalog.data[0].errors.some((error) => error.path.includes("broken")));
 });
 
+test("configured catalogue applies stable and prerelease semver precedence", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-semver-precedence-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(profile, { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"),
+    '[plugins."stable@gigma-skills"]\nenabled = true\n[plugins."prerelease@gigma-skills"]\nenabled = true\n');
+  const versions = [
+    ["stable", ["1.0.0-rc.1", "1.0.0"]],
+    ["prerelease", ["1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta", "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11", "1.0.0-rc.1"]],
+  ];
+  for (const [plugin, pluginVersions] of versions) {
+    for (const version of pluginVersions) {
+      const versionRoot = path.join(profile, "plugins", "cache", "gigma-skills", plugin, version);
+      await fs.mkdir(path.join(versionRoot, ".codex-plugin"), { recursive: true });
+      await fs.mkdir(path.join(versionRoot, "skills"), { recursive: true });
+      await fs.writeFile(path.join(versionRoot, ".codex-plugin", "plugin.json"),
+        JSON.stringify({ name: plugin, skills: "./skills" }));
+      await fs.writeFile(path.join(versionRoot, "skills", "SKILL.md"),
+        `---\nname: ${version}\ndescription: Selected\n---\n`);
+    }
+  }
+  const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  assert.equal(catalog.skills.find((skill) => skill.plugin_id === "stable@gigma-skills").name, "1.0.0");
+  assert.equal(catalog.skills.find((skill) => skill.plugin_id === "prerelease@gigma-skills").name, "1.0.0-rc.1");
+});
+
 test("configured catalogue limits repository visibility to the project and marks bad frontmatter partial", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-configured-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
@@ -257,6 +285,20 @@ test("configured catalogue skips enabled plugins without skills and accepts larg
   const catalog = await fetchConfiguredCatalog(project, { profileRoot: profile });
   assert.equal(catalog.data[0].errors.length, 0);
   assert.equal(catalog.data[0].skills.length, 1);
+});
+
+test("configured catalogue bounds frontmatter reads at the skill size limit", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-frontmatter-limit-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile"),
+    skillRoot = path.join(profile, "skills", "oversized"), skill = path.join(skillRoot, "SKILL.md");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(skillRoot, { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), "");
+  await fs.writeFile(skill, "---\nname: oversized\ndescription: Too large\n---\n" + "x".repeat(1024 * 1024));
+  const catalog = await fetchConfiguredCatalog(project, { profileRoot: profile });
+  assert.deepEqual(catalog.data[0].skills, []);
+  assert.ok(catalog.data[0].errors.some((error) => error.path === skill));
 });
 
 const fixtures = fileURLToPath(new URL("./fixtures/", import.meta.url));

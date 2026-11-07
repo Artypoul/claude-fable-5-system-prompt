@@ -5,6 +5,8 @@ import * as fs from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 
+const MAX_SKILL_BYTES = 1024 * 1024;
+
 export const sha256 = (value) =>
   createHash("sha256").update(value).digest("hex");
 export class CatalogError extends Error {
@@ -249,26 +251,63 @@ async function skillFiles(root, errors = [], signal, boundaryRoot = root) {
 }
 
 function semver(value) {
-  const match = value.match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
-  return match ? match.slice(1, 4).map(Number) : null;
+  const match = value.match(
+    /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/,
+  );
+  if (!match || match.slice(1, 4).some((part) => part.length > 1 && part.startsWith("0"))) return null;
+  const prerelease = match[4]?.split(".") ?? [];
+  if (prerelease.some((part) => /^\d+$/.test(part) && part.length > 1 && part.startsWith("0"))) return null;
+  return { core: match.slice(1, 4), prerelease };
+}
+
+function compareNumericStrings(a, b) {
+  if (a.length !== b.length) return a.length - b.length;
+  return a === b ? 0 : (a < b ? -1 : 1);
 }
 
 function compareVersion(a, b) {
-  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
+  for (let i = 0; i < 3; i++) {
+    const compared = compareNumericStrings(a.core[i], b.core[i]);
+    if (compared) return compared;
+  }
+  const aPre = a.prerelease, bPre = b.prerelease;
+  if (!aPre.length || !bPre.length) return aPre.length ? -1 : (bPre.length ? 1 : 0);
+  for (let i = 0; i < Math.min(aPre.length, bPre.length); i++) {
+    const aIdentifier = aPre[i], bIdentifier = bPre[i];
+    const aNumeric = /^\d+$/.test(aIdentifier), bNumeric = /^\d+$/.test(bIdentifier);
+    if (aNumeric && bNumeric) {
+      const compared = compareNumericStrings(aIdentifier, bIdentifier);
+      if (compared) return compared;
+    } else if (aNumeric !== bNumeric) return aNumeric ? -1 : 1;
+    else if (aIdentifier !== bIdentifier) return aIdentifier < bIdentifier ? -1 : 1;
+  }
+  return aPre.length - bPre.length;
 }
 
 async function frontmatter(filename, signal) {
   throwIfAborted(signal);
+  let file;
   let text;
   try {
-    const buffer = await fs.readFile(filename, { signal });
+    file = await fs.open(filename, constants.O_RDONLY | (constants.O_NOFOLLOW || 0));
+    if ((await file.stat()).size > MAX_SKILL_BYTES)
+      throw new CatalogError("SKILL_TOO_LARGE", "SKILL.md exceeds 1 MiB.");
+    const buffer = Buffer.alloc(MAX_SKILL_BYTES);
+    let size = 0;
+    while (size < buffer.length) {
+      throwIfAborted(signal);
+      const { bytesRead } = await file.read(buffer, size, buffer.length - size, null);
+      if (!bytesRead) break;
+      size += bytesRead;
+    }
     throwIfAborted(signal);
-    text = new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+    text = new TextDecoder("utf-8", { fatal: true }).decode(buffer.subarray(0, size));
   } catch (error) {
-    if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+    if (error instanceof CatalogError) throw error;
     if (error?.name === "AbortError") throw new CatalogError("CANCELLED", "Catalogue request was cancelled.");
     throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is not valid UTF-8.");
+  } finally {
+    await file?.close().catch(() => {});
   }
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
   if (!match) throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is missing.");
@@ -480,7 +519,7 @@ export async function readRegisteredSkill(catalog, id, offset, limit) {
       catalog.partial ? "CATALOG_INCOMPLETE" : "SKILL_NOT_FOUND",
       "The skill is absent, disabled, or not visible in this project catalogue.",
     );
-  const maxBytes = 1024 * 1024;
+  const maxBytes = MAX_SKILL_BYTES;
   let file;
   try {
     const before = await fs.lstat(skill.path);
