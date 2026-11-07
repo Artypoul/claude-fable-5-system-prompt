@@ -21,6 +21,18 @@ Read a returned ID in the same project to retrieve bounded SKILL.md text. These
 tools do not install skills, run commands, search the web, widen permissions or
 force native skill activation. Use the host's supplied catalogue/file-reading
 surface if the local MCP runtime is unavailable, and disclose that limitation.
+For Superpowers, verify the returned `plugin_id` is `superpowers@gigma-skills`
+and use its registered path and opaque ID; duplicates from other plugins are not
+interchangeable. Read every text page. A missing or ambiguous identity is a gap,
+not permission to select another source. When MCP is unavailable, errors, returns partial results, or misses the skill,
+verify the enabled source through the live host catalogue or manifest. This is
+discovery fallback, not workflow or model fallback. Never infer that a known
+disabled skill is enabled from cached files.
+Every `read_skill` page must match the selected entry's ID, plugin ID and path;
+check partial/warnings and require a stable content SHA-256 across pages. Discard
+partial, changed or mismatched reads and reconcile against the live catalogue.
+An on-disk manifest can map paths, but live host evidence must establish enabled
+status; a manifest alone cannot prove it.
 
 ## MCP and connector safety
 - Discover a connector by capability; do not guess IDs or server names.

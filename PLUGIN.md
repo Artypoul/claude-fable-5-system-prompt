@@ -1,5 +1,8 @@
 # Fable 5 Codex plugin
 
+Version 1.3.5 adds Fable-to-Superpowers routing through the enabled Gigma
+catalogue and explicit delegated implementation and independent review roles.
+These are instructions, not host-enforced execution or new permissions.
 Version 1.3.4 requires reading the complete coding scope/recovery reference
 before related advice, reviews and actions, including hypothetical questions.
 Recovery phases are ordered prerequisites: containment and evidence, then
@@ -32,19 +35,19 @@ not a claim of complete runtime equivalence with the source provider.
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/evaluate_behavior.py --run-model --output /absolute/path/behavior-results.json
+python scripts/evaluate_behavior.py --run-model --model gpt-6.1-terra --reasoning-effort high --judge-model gpt-6.1-sol --judge-reasoning-effort xhigh --output /absolute/path/behavior-results.json
 ```
 
 The first command runs deterministic integrity, packaging and scenario-checker
 tests in CI. The second uses the authenticated Codex CLI to generate action
-plans for 23 independent scenarios, using this checkout's instructions. It can
+plans for 29 independent scenarios, using this checkout's instructions. It can
 consume model quota; it never executes proposed actions or calls live sports,
 storage or model backends. Expected traces are not included in the model input.
 Without a CLI or authentication it fails explicitly, rather than reporting a pass.
 Use `--baseline-ref 73636bd` to evaluate 1.1.0 against the same scenarios.
 A second, separate model call judges the meaning of answers in the four
-capability-gap and two recovery scenarios. Twelve controls include false persistence,
-model API, browser and statistics claims, reordered or unsafe recovery, and truthful
+capability-gap, two recovery and six Superpowers scenarios. Sixteen controls include false persistence,
+model API, browser and statistics claims, reordered or unsafe recovery, invalid skill reads, and truthful
 qualified answers. Recovery traces require the reference read and ordered phases;
 the blocked-writer case forbids restoration. Expected control
 verdicts are hidden from the judge, just as expected action traces are hidden

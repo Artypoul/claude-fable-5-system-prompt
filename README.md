@@ -73,6 +73,8 @@ Before using the skill in a project:
 
 The skill follows the host's current permissions, tool schemas, safety rules, network policy and filesystem boundaries.
 
+For engineering tasks the skill routes through the enabled `superpowers@gigma-skills` source, using the Fable MCP catalogue tools or the live host catalogue when MCP is unavailable, incomplete or misses the skill. It preserves project gates and approved plans, and specifies independent implementation and review roles where delegation is authorized. The instructions do not install a plugin, activate a skill automatically, enforce model selection or grant permissions.
+
 ## What is adapted
 
 The Codex port preserves the source archive's sixteen-section order while replacing provider-specific assumptions with Codex-compatible guidance:
