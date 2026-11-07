@@ -1,5 +1,10 @@
 # Fable 5 Codex plugin
 
+Version 1.3.6 directs explicit Fable requests through the bundled MCP skill
+discovery and the enabled Gigma Superpowers gateway before task work. These
+remain instructions, not host-enforced execution or new permissions. Native
+checks passed for six ordinary Sol/xhigh coordinator runs and a pressure case;
+four of six forced Terra/high coordinator runs preserved the required order.
 Version 1.3.5 adds Fable-to-Superpowers routing through the enabled Gigma
 catalogue and explicit delegated implementation and independent review roles.
 These are instructions, not host-enforced execution or new permissions.

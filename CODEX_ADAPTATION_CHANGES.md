@@ -1,5 +1,16 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.3.6 — explicit Fable activation
+
+Explicit Fable requests now direct the agent to use the bundled read-only MCP
+search and read tools, verify the enabled Gigma Superpowers gateway and its
+pages, and complete that bootstrap before task work. Incomplete MCP execution
+is disclosed; read-only tasks remain read-only. These are instructions, not a
+runtime enforcement mechanism. Six ordinary Sol/xhigh coordinator runs and a
+pressure case observed the required order; four of six forced Terra/high
+coordinator runs did so. The 29 model scenarios evaluate action plans, not
+actual MCP calls, and these observations do not guarantee every host or run.
+
 ## 1.3.5 — Fable and Superpowers cooperation
 
 The entry point routes engineering work through the enabled Gigma Superpowers
