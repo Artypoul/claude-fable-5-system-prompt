@@ -30,3 +30,16 @@ def normalize_paths(paths: list[str]) -> list[str]:
             seen.add(normalized)
             result.append(normalized)
     return result
+
+
+if __name__ == '__main__':
+    import json
+    import sys
+
+    try:
+        paths = json.load(sys.stdin)
+        normalized = normalize_paths(paths)
+    except (ValueError, RecursionError):
+        print('Invalid input', file=sys.stderr)
+        sys.exit(2)
+    print(json.dumps(normalized))
