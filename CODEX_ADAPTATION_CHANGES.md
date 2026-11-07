@@ -1,5 +1,14 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.3.5 — Fable and Superpowers cooperation
+
+The entry point routes engineering work through the enabled Gigma Superpowers
+source, project gates and a single lifecycle, with explicit independent delegation
+roles and no silent substitution. The existing MCP remains read-only and does not
+enforce these instructions. The action-plan evaluator accepts explicit generator
+and judge model/effort options; recorded options are requested settings, not
+telemetry proving the model's hidden reasoning. The original archive is unchanged.
+
 ## 1.3.4 — обязательное чтение процедуры и порядок восстановления
 
 Проверка нового desktop-чата без упоминания Fable показала автоматическое

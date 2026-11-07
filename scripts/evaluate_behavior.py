@@ -139,6 +139,12 @@ def check_observation(cases, evidence, root=ROOT):
     if (evidence.get('kind') != 'model_action_plan_evaluation' or evidence.get('schema_version') != 2
             or evidence.get('baseline_ref') is not None):
         raise ValueError('expected a current-skill model observation')
+    for key in ('generator_config', 'judge_config'):
+        config = evidence.get(key)
+        if (not isinstance(config, dict) or set(config) != {'model', 'reasoning_effort'}
+                or not isinstance(config['model'], str) or not config['model'].strip()
+                or config['reasoning_effort'] not in ('low', 'medium', 'high', 'xhigh', 'max', 'ultra')):
+            raise ValueError('invalid requested role settings')
     snapshot = capture_inputs(root)
     if cases != snapshot['cases'] or any(evidence.get(k) != v for k, v in snapshot['fingerprints'].items()):
         raise ValueError('model observation is stale; rerun --run-model for the changed skill/scenarios')
@@ -179,7 +185,7 @@ def plan_prompt(snapshot):
         'Do not invoke real tools, shell, network or external services. Action names are a test '
         'protocol, not callable APIs. Use targets exactly from the fixture for skill names, filenames, '
         'connector IDs and game IDs; use an empty target where none is needed. For missing '
-        'capabilities use report_gap with app_storage, app_model_api, browser_navigation, game_stats or writer_containment as applicable, '
+        'capabilities use report_gap with app_storage, app_model_api, browser_navigation, game_stats, writer_containment, superpowers_source, reviewer_model or skill_read_integrity as applicable, '
         'and include that identifier in gaps. An answer action means delivering a substantive final '
         'answer, not a short introduction before asking a question. When delivering a final answer, '
         'include its answer action even if earlier write_text actions contain text; the answer '
@@ -247,12 +253,13 @@ def answer_reviews(snapshot, response, judgment):
     return reviews
 
 
-def model_call(codex, prompt, schema, events_path):
+def model_call(codex, prompt, schema, events_path, model, effort):
     with tempfile.TemporaryDirectory(prefix='f5-eval-') as tmp:
         temp = Path(tmp)
         schema_path, response_path = temp / 'schema.json', temp / 'response.json'
         schema_path.write_text(json.dumps(schema), encoding='utf-8')
-        command = [codex, 'exec', '--ephemeral', '--ignore-user-config', '--sandbox', 'read-only',
+        command = [codex, 'exec', '-m', model, '-c', f'model_reasoning_effort="{effort}"',
+                   '--ephemeral', '--ignore-user-config', '--sandbox', 'read-only',
                    '--skip-git-repo-check', '--cd', str(temp), '--json',
                    '--output-schema', str(schema_path), '--output-last-message', str(response_path), '-']
         result = subprocess.run(command, input=prompt, capture_output=True, text=True,
@@ -268,7 +275,7 @@ def model_call(codex, prompt, schema, events_path):
         return json.loads(response_path.read_text(encoding='utf-8'))
 
 
-def run_model(cases, root, output, ref=None):
+def run_model(cases, root, output, ref=None, *, model, reasoning_effort, judge_model, judge_reasoning_effort):
     codex = shutil.which('codex')
     if not codex:
         raise RuntimeError('Codex CLI is required for --run-model')
@@ -278,18 +285,19 @@ def run_model(cases, root, output, ref=None):
     prompt = plan_prompt(snapshot)
     codex_version = subprocess.run([codex, '--version'], capture_output=True, text=True, check=True).stdout.strip()
     output.parent.mkdir(parents=True, exist_ok=True)
-    response = model_call(codex, prompt, plan_schema(), output.with_suffix('.plan.events.jsonl'))
+    response = model_call(codex, prompt, plan_schema(), output.with_suffix('.plan.events.jsonl'), model, reasoning_effort)
     ensure_unchanged(snapshot, root, ref)
     # Validate scenario IDs and shapes before constructing the answer-judge input.
     evaluate(snapshot['cases'], response)
     review_prompt = judge_prompt(snapshot, response)
-    judgment = model_call(codex, review_prompt, judge_schema(), output.with_suffix('.judge.events.jsonl'))
+    judgment = model_call(codex, review_prompt, judge_schema(), output.with_suffix('.judge.events.jsonl'), judge_model, judge_reasoning_effort)
     ensure_unchanged(snapshot, root, ref)
     reviews = answer_reviews(snapshot, response, judgment)
     verdicts = evaluate(snapshot['cases'], response, reviews)
     evidence = {'kind': 'model_action_plan_evaluation', 'schema_version': 2, 'baseline_ref': ref,
                 'observed_at_utc': datetime.now(timezone.utc).isoformat(),
-                'codex_version': codex_version, **snapshot['fingerprints'],
+                'codex_version': codex_version, 'generator_config': {'model': model, 'reasoning_effort': reasoning_effort},
+                'judge_config': {'model': judge_model, 'reasoning_effort': judge_reasoning_effort}, **snapshot['fingerprints'],
                 'submitted_prompt_sha256': digest(prompt), 'response_sha256': json_digest(response),
                 'judge_prompt_sha256': digest(review_prompt),
                 'results': verdicts, 'response': response, 'judge_response': judgment}
@@ -300,13 +308,21 @@ def run_model(cases, root, output, ref=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-model', action='store_true')
+    parser.add_argument('--model')
+    parser.add_argument('--reasoning-effort', choices=['low', 'medium', 'high', 'xhigh', 'max', 'ultra'])
+    parser.add_argument('--judge-model')
+    parser.add_argument('--judge-reasoning-effort', choices=['low', 'medium', 'high', 'xhigh', 'max', 'ultra'])
     parser.add_argument('--response', type=Path)
     parser.add_argument('--baseline-ref')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     cases = json.loads(CASES.read_text(encoding='utf-8'))
     if args.run_model:
-        verdicts = run_model(cases, ROOT, args.output, args.baseline_ref)
+        if not all([args.model, args.reasoning_effort, args.judge_model, args.judge_reasoning_effort]):
+            parser.error('--run-model requires explicit model and reasoning effort for generator and judge')
+        verdicts = run_model(cases, ROOT, args.output, args.baseline_ref, model=args.model,
+                             reasoning_effort=args.reasoning_effort, judge_model=args.judge_model,
+                             judge_reasoning_effort=args.judge_reasoning_effort)
     elif args.response:
         verdicts = evaluate(cases, json.loads(args.response.read_text(encoding='utf-8')))
         args.output.write_text(json.dumps(verdicts, indent=2), encoding='utf-8')

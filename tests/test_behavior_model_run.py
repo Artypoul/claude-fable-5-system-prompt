@@ -19,6 +19,19 @@ import evaluate_behavior as evaluator
 
 
 class ModelRunIntegrityTests(unittest.TestCase):
+    def test_explicit_model_and_effort_are_sent_without_fallback(self):
+        for model, effort in [('gpt-6.1-terra', 'high'), ('gpt-6.1-sol', 'xhigh')]:
+            with self.subTest(model=model), tempfile.TemporaryDirectory() as directory:
+                events = Path(directory) / 'events.jsonl'
+                failed = subprocess.CompletedProcess([], 1, stdout='', stderr='model unavailable')
+                with patch.object(evaluator.subprocess, 'run', return_value=failed) as run:
+                    with self.assertRaisesRegex(RuntimeError, 'model unavailable'):
+                        evaluator.model_call('codex-test', 'prompt', {}, events, model, effort)
+                self.assertEqual(1, run.call_count)
+                argv = run.call_args.args[0]
+                self.assertEqual(model, argv[argv.index('-m') + 1])
+                self.assertEqual(f'model_reasoning_effort="{effort}"', argv[argv.index('-c') + 1])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -48,13 +61,19 @@ class ModelRunIntegrityTests(unittest.TestCase):
         with patch.object(evaluator.shutil, 'which', return_value='codex-test'), \
              patch.object(evaluator.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, stdout='test-version')), \
              patch.object(evaluator, 'model_call', side_effect=transport or default_transport) as call:
-            results = evaluator.run_model(self.cases, self.root, self.output)
+            results = evaluator.run_model(self.cases, self.root, self.output, model='gpt-6.1-terra',
+                                          reasoning_effort='high', judge_model='gpt-6.1-sol',
+                                          judge_reasoning_effort='xhigh')
         return results, call
 
     def test_success_binds_actual_submitted_prompts_and_can_be_replayed(self):
         results, call = self.run_simulated()
         self.assertFalse(any(results.values()))
         evidence = json.loads(self.output.read_text(encoding='utf-8'))
+        self.assertEqual({'model': 'gpt-6.1-terra', 'reasoning_effort': 'high'}, evidence['generator_config'])
+        self.assertEqual({'model': 'gpt-6.1-sol', 'reasoning_effort': 'xhigh'}, evidence['judge_config'])
+        self.assertEqual(('gpt-6.1-terra', 'high'), call.call_args_list[0].args[-2:])
+        self.assertEqual(('gpt-6.1-sol', 'xhigh'), call.call_args_list[1].args[-2:])
         self.assertEqual(evaluator.digest(call.call_args_list[0].args[1]), evidence['submitted_prompt_sha256'])
         self.assertEqual(evaluator.digest(call.call_args_list[1].args[1]), evidence['judge_prompt_sha256'])
         self.assertEqual(results, evaluator.check_observation(self.cases, evidence, self.root))
@@ -136,6 +155,17 @@ class ModelRunIntegrityTests(unittest.TestCase):
         evidence['evaluator_sha256'] = 'previous evaluator'
         with self.assertRaisesRegex(ValueError, 'stale'):
             evaluator.check_observation(self.cases, evidence, self.root)
+
+    def test_replay_rejects_missing_or_invalid_requested_role_settings(self):
+        self.run_simulated()
+        evidence = json.loads(self.output.read_text(encoding='utf-8'))
+        for field, invalid in [('generator_config', None), ('judge_config', {'model': '', 'reasoning_effort': 'xhigh'}),
+                               ('judge_config', {'model': 'gpt-6.1-sol', 'reasoning_effort': 'invented'})]:
+            with self.subTest(field=field, invalid=invalid):
+                broken = copy.deepcopy(evidence)
+                broken[field] = invalid
+                with self.assertRaisesRegex(ValueError, 'role settings'):
+                    evaluator.check_observation(self.cases, broken, self.root)
 
 
 if __name__ == '__main__':

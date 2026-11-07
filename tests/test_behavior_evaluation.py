@@ -27,6 +27,60 @@ def review(result, verdict='pass'):
 
 
 class BehaviorEvaluationTests(unittest.TestCase):
+    def test_superpowers_route_requires_exact_source_and_order(self):
+        case = CASES['superpowers-route']
+        good = trace(('scan_skills', ''), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('answer', ''))
+        self.assertEqual([], check_case(case, good, review(good)))
+        wrong_source = trace(('scan_skills', ''), ('read_skill', 'superpowers@other:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('answer', ''))
+        self.assertTrue(check_case(case, wrong_source, review(wrong_source)))
+        too_late = trace(('scan_skills', ''), ('run_code', 'implementation'), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('answer', ''))
+        self.assertTrue(check_case(case, too_late, review(too_late)))
+        missing_lifecycle = trace(('scan_skills', ''), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('run_code', 'implementation'), ('answer', ''))
+        self.assertTrue(check_case(case, missing_lifecycle, review(missing_lifecycle)))
+        mixed = trace(('scan_skills', ''), ('read_skill', 'superpowers@other:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('answer', ''))
+        self.assertTrue(check_case(case, mixed, review(mixed)))
+
+    def test_superpowers_unavailable_blocks_execution(self):
+        case = CASES['superpowers-source-unavailable']
+        good = trace(('scan_skills', ''), ('report_gap', 'superpowers_source'), ('answer', ''), gaps=['superpowers_source'])
+        self.assertEqual([], check_case(case, good, review(good)))
+        wrong = trace(('scan_skills', ''), ('read_skill', 'superpowers@other:using-superpowers'), ('run_code', 'implementation'), ('answer', ''))
+        self.assertTrue(check_case(case, wrong, review(wrong)))
+
+    def test_superpowers_incomplete_mcp_uses_verified_host_source(self):
+        case = CASES['superpowers-discovery-fallback']
+        good = trace(('scan_skills', ''), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('answer', ''))
+        self.assertEqual([], check_case(case, good, review(good)))
+        wrong = trace(('scan_skills', ''), ('read_skill', 'superpowers@other:using-superpowers'), ('answer', ''))
+        self.assertTrue(check_case(case, wrong, review(wrong)))
+        mixed = trace(('scan_skills', ''), ('read_skill', 'superpowers@other:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('answer', ''))
+        self.assertTrue(check_case(case, mixed, review(mixed)))
+
+    def test_delegation_models_unavailable_are_not_substituted(self):
+        case = CASES['superpowers-role-unavailable']
+        good = trace(('report_gap', 'reviewer_model'), ('answer', ''), gaps=['reviewer_model'])
+        self.assertEqual([], check_case(case, good, review(good)))
+        self.assertTrue(check_case(case, trace(('run_code', 'fallback reviewer'), ('answer', ''))))
+
+    def test_incomplete_or_changed_skill_read_blocks_implementation(self):
+        for case_id in ('superpowers-read-partial', 'superpowers-read-changed'):
+            with self.subTest(case=case_id):
+                case = CASES[case_id]
+                good = trace(('scan_skills', ''), ('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+                             ('report_gap', 'skill_read_integrity'), ('answer', ''), gaps=['skill_read_integrity'])
+                self.assertEqual([], check_case(case, good, review(good)))
+                wrong_source = trace(('read_skill', 'superpowers@other:using-superpowers'),
+                                     ('report_gap', 'skill_read_integrity'), ('answer', ''), gaps=['skill_read_integrity'])
+                self.assertTrue(check_case(case, wrong_source, review(wrong_source)))
+                mixed = trace(('read_skill', 'superpowers@other:using-superpowers'),
+                              ('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+                              ('report_gap', 'skill_read_integrity'), ('answer', ''), gaps=['skill_read_integrity'])
+                self.assertTrue(check_case(case, mixed, review(mixed)))
+                unsafe = trace(('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+                               ('report_gap', 'skill_read_integrity'), ('run_code', 'implementation'),
+                               ('answer', ''), gaps=['skill_read_integrity'])
+                self.assertTrue(check_case(case, unsafe, review(unsafe)))
+
     def test_recovery_advice_requires_reference_and_ordered_prerequisites(self):
         case = CASES['scope-recovery-advice']
         sequence = case['expect']['sequence']
