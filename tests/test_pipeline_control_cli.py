@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -20,6 +21,32 @@ class PipelineControlCliTests(unittest.TestCase):
         self.assertEqual(result.stdout, '["a/b"]\n')
         self.assertEqual(json.loads(result.stdout), ['a/b'])
         self.assertEqual(result.stderr, '')
+
+    def test_utf8_input_is_independent_of_stdin_locale(self):
+        env = {**os.environ, 'PYTHONUTF8': '0', 'PYTHONIOENCODING': 'cp1252'}
+        result = subprocess.run([sys.executable, '-B', str(SCRIPT)],
+                                input=b'["caf\xc3\xa9"]', capture_output=True,
+                                env=env, check=False)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(json.loads(result.stdout), ['café'])
+        self.assertTrue(result.stdout.endswith(b'\n'))
+        self.assertEqual(result.stderr, b'')
+
+    def test_invalid_utf8_bytes_are_rejected_without_echo(self):
+        env = {**os.environ, 'PYTHONUTF8': '0',
+               'PYTHONIOENCODING': 'utf-8:surrogateescape'}
+        for data in (b'["secret-\xff"]', b'["secret-\xed\xb3\xbf"]'):
+            with self.subTest(data=data):
+                result = subprocess.run([sys.executable, '-B', str(SCRIPT)],
+                                        input=data, capture_output=True,
+                                        env=env, check=False)
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(result.stdout, b'')
+                self.assertEqual(result.stderr.splitlines(), [b'Invalid input'])
+                self.assertEqual(len(result.stderr.splitlines()), 1)
+                self.assertTrue(result.stderr.endswith(b'\n'))
+                self.assertNotIn(b'Traceback', result.stderr)
+                self.assertNotIn(b'secret', result.stderr)
 
     def test_invalid_input_emits_only_one_safe_error_line(self):
         cases = {

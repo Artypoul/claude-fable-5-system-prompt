@@ -37,7 +37,7 @@ if __name__ == '__main__':
     import sys
 
     try:
-        paths = json.load(sys.stdin)
+        paths = json.loads(sys.stdin.buffer.read().decode('utf-8'))
         normalized = normalize_paths(paths)
     except (ValueError, RecursionError):
         print('Invalid input', file=sys.stderr)
