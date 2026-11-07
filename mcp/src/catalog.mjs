@@ -186,21 +186,65 @@ function configEntries(config) {
   return { plugins, skills };
 }
 
-async function skillFiles(root, errors = []) {
-  const found = [];
+function throwIfAborted(signal) {
+  if (signal?.aborted)
+    throw new CatalogError("CANCELLED", "Catalogue request was cancelled.");
+}
+
+function withinRoot(root, filename) {
+  const relative = path.relative(root, filename);
+  return relative === "" ||
+    (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative));
+}
+
+async function skillFiles(root, errors = [], signal, boundaryRoot = root) {
+  const found = [], seenDirectories = new Set();
+  throwIfAborted(signal);
+  const allowedBoundary = await fs.realpath(boundaryRoot);
+  throwIfAborted(signal);
+  const allowedRoot = await fs.realpath(root);
+  throwIfAborted(signal);
+  if (!withinRoot(allowedBoundary, allowedRoot)) {
+    errors.push({ path: root, message: "skill root escapes allowed root" });
+    return found;
+  }
   async function walk(directory) {
-    for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
-      if (entry.isSymbolicLink()) {
-        if (entry.name === "SKILL.md") errors.push({ path: path.join(directory, entry.name), message: "symlink skill rejected" });
-        continue;
-      }
+    throwIfAborted(signal);
+    const resolvedDirectory = await fs.realpath(directory);
+    throwIfAborted(signal);
+    if (!withinRoot(allowedRoot, resolvedDirectory) || seenDirectories.has(resolvedDirectory)) return;
+    seenDirectories.add(resolvedDirectory);
+    const entries = await fs.readdir(directory, { withFileTypes: true });
+    throwIfAborted(signal);
+    for (const entry of entries) {
+      throwIfAborted(signal);
       if (entry.name === ".git" || entry.name === "node_modules") continue;
       const filename = path.join(directory, entry.name);
+      if (entry.isSymbolicLink()) {
+        let target;
+        try {
+          target = await fs.realpath(filename);
+          throwIfAborted(signal);
+          if (!withinRoot(allowedRoot, target)) {
+            errors.push({ path: filename, message: "symlink directory escapes allowed root" });
+            continue;
+          }
+          const targetStat = await fs.stat(filename);
+          throwIfAborted(signal);
+          if (targetStat.isDirectory()) await walk(filename);
+          else if (entry.name === "SKILL.md") errors.push({ path: filename, message: "symlink skill rejected" });
+        } catch (error) {
+          if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+          errors.push({ path: filename, message: "unsafe symlink target" });
+        }
+        continue;
+      }
       if (entry.isDirectory()) await walk(filename);
       else if (entry.isFile() && entry.name === "SKILL.md") found.push(filename);
     }
   }
   await walk(root);
+  throwIfAborted(signal);
   return found;
 }
 
@@ -214,17 +258,17 @@ function compareVersion(a, b) {
   return 0;
 }
 
-async function frontmatter(filename) {
-  const file = await fs.open(filename, "r");
+async function frontmatter(filename, signal) {
+  throwIfAborted(signal);
   let text;
   try {
-    const buffer = Buffer.alloc(64 * 1024);
-    const { bytesRead } = await file.read(buffer, 0, buffer.length, 0);
-    text = new TextDecoder("utf-8", { fatal: true }).decode(buffer.subarray(0, bytesRead));
-  } catch {
+    const buffer = await fs.readFile(filename, { signal });
+    throwIfAborted(signal);
+    text = new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+  } catch (error) {
+    if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+    if (error?.name === "AbortError") throw new CatalogError("CANCELLED", "Catalogue request was cancelled.");
     throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is not valid UTF-8.");
-  } finally {
-    await file.close();
   }
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
   if (!match) throw new CatalogError("INVALID_SKILL_METADATA", "SKILL.md frontmatter is missing.");
@@ -242,47 +286,76 @@ async function frontmatter(filename) {
 // whose startup may perform a marketplace refresh before returning skills/list.
 export async function fetchConfiguredCatalog(
   cwd,
-  { profileRoot = (() => {
+  { signal, profileRoot = (() => {
     if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
     const root = process.env.USERPROFILE || process.env.HOME;
     return root && path.join(root, ".codex");
   })() } = {},
 ) {
+  throwIfAborted(signal);
   const directory = await projectDirectory(cwd);
+  throwIfAborted(signal);
   const errors = [];
   const skills = [], seenPlugins = new Set();
   const profileDirectory = path.resolve(profileRoot);
   const seen = new Set();
   const add = async (filename, scope, pluginId) => {
+    throwIfAborted(signal);
     const stat = await fs.lstat(filename);
+    throwIfAborted(signal);
     if (!stat.isFile() || stat.isSymbolicLink())
       throw new CatalogError("UNSAFE_SKILL_FILE", "SKILL.md must be a regular file, not a file symlink.");
     const resolved = await fs.realpath(filename);
+    throwIfAborted(signal);
     if (seen.has(resolved)) return;
     seen.add(resolved);
-    const metadata = await frontmatter(resolved);
+    const metadata = await frontmatter(resolved, signal);
     skills.push({ name: metadata.name, description: metadata.description, enabled: true,
       path: resolved, scope, pluginId });
   };
   const repoSkills = path.join(directory, ".agents", "skills");
   try {
     const discovered = [];
-    for (const filename of await skillFiles(repoSkills, discovered)) {
-      try { await add(filename, "repo", null); } catch (error) { discovered.push({ path: filename, message: error.message }); }
+    for (const filename of await skillFiles(repoSkills, discovered, signal, directory)) {
+      try { await add(filename, "repo", null); }
+      catch (error) {
+        if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+        discovered.push({ path: filename, message: error.message });
+      }
     }
     errors.push(...discovered);
   } catch (error) {
+    if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
     if (error.code !== "ENOENT") errors.push({ path: repoSkills, message: "repo skills unavailable" });
   }
+  const profileSkills = path.join(profileRoot, "skills");
+  try {
+    const discovered = [];
+    for (const filename of await skillFiles(profileSkills, discovered, signal, profileRoot)) {
+      try { await add(filename, "user", null); }
+      catch (error) {
+        if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+        discovered.push({ path: filename, message: error.message });
+      }
+    }
+    errors.push(...discovered);
+  } catch (error) {
+    if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+    if (error.code !== "ENOENT") errors.push({ path: profileSkills, message: "user skills unavailable" });
+  }
+  throwIfAborted(signal);
   let config;
   try {
     config = await fs.readFile(path.join(profileRoot, "config.toml"), "utf8");
+    throwIfAborted(signal);
   } catch {
+    throwIfAborted(signal);
     errors.push({ path: "config.toml", message: "Codex config unavailable" });
     config = "";
   }
   const entries = configEntries(config);
   for (const [pluginId, setting] of entries.plugins) {
+    throwIfAborted(signal);
     if (setting.duplicate) { errors.push({ path: pluginId, message: "duplicate plugin configuration" }); continue; }
     if (setting.enabled !== true) continue;
     const parts = pluginId.split("@");
@@ -299,33 +372,52 @@ export async function fetchConfiguredCatalog(
       continue;
     }
     try {
+      const resolvedProfile = await fs.realpath(profileRoot);
+      const resolvedRoot = await fs.realpath(root);
+      throwIfAborted(signal);
+      if (!withinRoot(resolvedProfile, resolvedRoot)) {
+        errors.push({ path: root, message: "plugin cache escapes profile" });
+        continue;
+      }
       const versions = (await fs.readdir(root, { withFileTypes: true }))
         .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
         .map((entry) => ({ name: entry.name, version: semver(entry.name) }))
         .filter((entry) => entry.version).sort((a, b) => compareVersion(b.version, a.version));
+      throwIfAborted(signal);
       if (!versions.length) throw new Error("no valid semver cache");
       const versionRoot = path.join(root, versions[0].name);
       const manifestPath = path.join(versionRoot, ".codex-plugin", "plugin.json");
       const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+      throwIfAborted(signal);
       if (manifest.name !== plugin) throw new Error("plugin manifest mismatch");
       if (typeof manifest.skills !== "string") continue;
       if (manifest.version != null && manifest.version !== versions[0].name) throw new Error("plugin manifest version mismatch");
       const skillRoot = path.resolve(versionRoot, manifest.skills);
       if (!skillRoot.startsWith(path.resolve(versionRoot) + path.sep)) throw new Error("plugin skill root escapes cache");
       const discovered = [];
-      for (const filename of await skillFiles(skillRoot, discovered)) {
-        try { await add(filename, "user", pluginId); } catch (error) { discovered.push({ path: filename, message: error.message }); }
+      for (const filename of await skillFiles(skillRoot, discovered, signal, versionRoot)) {
+        try { await add(filename, "user", pluginId); }
+        catch (error) {
+          if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+          discovered.push({ path: filename, message: error.message });
+        }
       }
       errors.push(...discovered);
-    } catch {
+    } catch (error) {
+      if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
       errors.push({ path: root, message: "enabled plugin cache unavailable" });
     }
   }
   for (const entry of entries.skills) {
+    throwIfAborted(signal);
     if (entry.enabled !== true || typeof entry.path !== "string" || !path.isAbsolute(entry.path)) continue;
     try { await add(entry.path, "user", null); }
-    catch { errors.push({ path: entry.path, message: "configured skill unavailable" }); }
+    catch (error) {
+      if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
+      errors.push({ path: entry.path, message: "configured skill unavailable" });
+    }
   }
+  throwIfAborted(signal);
   skills.sort((a, b) => a.path.localeCompare(b.path));
   return { data: [{ cwd: directory, skills, errors }] };
 }

@@ -61,6 +61,111 @@ test("configured catalogue honors a custom CODEX_HOME without appending .codex",
   assert.equal(catalog.skills[0].plugin_id, "demo@gigma-skills");
 });
 
+test("configured catalogue includes CODEX_HOME skills and reports partial metadata", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-user-skills-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"),
+    profile = path.join(root, "profile"),
+    valid = path.join(profile, "skills", "demo", "SKILL.md"),
+    invalid = path.join(profile, "skills", "broken", "SKILL.md");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(path.dirname(valid), { recursive: true });
+  await fs.mkdir(path.dirname(invalid), { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), "");
+  await fs.writeFile(valid, "---\nname: demo\ndescription: User skill\n---\n");
+  await fs.writeFile(invalid, "invalid frontmatter");
+  const catalog = parseCatalog(
+    await fetchConfiguredCatalog(project, { profileRoot: profile }),
+    project,
+  );
+  assert.equal(catalog.skills.length, 1);
+  assert.equal(catalog.skills[0].name, "demo");
+  assert.equal(catalog.skills[0].scope, "user");
+  assert.equal(catalog.skills[0].plugin_id, null);
+  assert.equal(catalog.partial, true);
+  assert.ok(catalog.warning_count > 0);
+});
+
+test("configured catalogue follows safe skill-directory symlinks with cycle protection", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-directory-symlink-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"),
+    profile = path.join(root, "profile"),
+    allowed = path.join(profile, "skills", "real"),
+    inside = path.join(profile, "skills", "alias"),
+    cycle = path.join(allowed, "cycle"),
+    external = path.join(root, "external"),
+    outside = path.join(profile, "skills", "outside");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(allowed, { recursive: true });
+  await fs.mkdir(external, { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), "");
+  await fs.writeFile(path.join(allowed, "SKILL.md"), "---\nname: real\ndescription: Real skill\n---\n");
+  await fs.writeFile(path.join(external, "SKILL.md"), "---\nname: external\ndescription: External skill\n---\n");
+  try {
+    await fs.symlink(allowed, inside, "dir");
+    await fs.symlink(path.join(profile, "skills"), cycle, "dir");
+    await fs.symlink(external, outside, "dir");
+  } catch (error) {
+    if (error.code !== "EPERM") throw error;
+    t.diagnostic("Skill-directory symlink checks require Developer Mode on Windows; Linux CI exercises this boundary.");
+    return;
+  }
+  const catalog = await fetchConfiguredCatalog(project, { profileRoot: profile });
+  assert.deepEqual(catalog.data[0].skills.map((skill) => skill.name), ["real"]);
+  assert.ok(catalog.data[0].errors.some((error) => error.path === outside));
+});
+
+test("configured catalogue rejects a plugin cache root whose realpath escapes the profile", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-plugin-cache-symlink-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"),
+    profile = path.join(root, "profile"),
+    cacheParent = path.join(profile, "plugins", "cache", "gigma-skills"),
+    cacheLink = path.join(cacheParent, "demo"),
+    external = path.join(root, "external", "demo", "1.0.0");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(profile, { recursive: true });
+  await fs.mkdir(path.join(external, ".codex-plugin"), { recursive: true });
+  await fs.mkdir(path.join(external, "skills"), { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"),
+    '[plugins."demo@gigma-skills"]\nenabled = true\n');
+  await fs.writeFile(path.join(external, ".codex-plugin", "plugin.json"),
+    JSON.stringify({ name: "demo", skills: "./skills" }));
+  await fs.writeFile(path.join(external, "skills", "SKILL.md"),
+    "---\nname: external\ndescription: External skill\n---\n");
+  try {
+    await fs.mkdir(cacheParent, { recursive: true });
+    await fs.symlink(path.join(root, "external", "demo"), cacheLink, "dir");
+  } catch (error) {
+    if (error.code !== "EPERM") throw error;
+    t.diagnostic("Plugin-cache symlink checks require Developer Mode on Windows; Linux CI exercises this boundary.");
+    return;
+  }
+  const catalog = await fetchConfiguredCatalog(project, { profileRoot: profile });
+  assert.deepEqual(catalog.data[0].skills, []);
+  assert.ok(catalog.data[0].errors.some((error) =>
+    error.path === cacheLink && error.message === "plugin cache escapes profile"));
+});
+
+test("configured catalogue aborts during a direct walk", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-abort-walk-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile"), skills = path.join(profile, "skills");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(skills, { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), "");
+  for (let index = 0; index < 400; index++) {
+    const filename = path.join(skills, `skill-${index}`, "SKILL.md");
+    await fs.mkdir(path.dirname(filename), { recursive: true });
+    await fs.writeFile(filename, `---\nname: skill-${index}\ndescription: Skill ${index}\n---\n`);
+  }
+  const controller = new AbortController();
+  const pending = fetchConfiguredCatalog(project, { profileRoot: profile, signal: controller.signal });
+  setTimeout(() => controller.abort(), 0);
+  await assert.rejects(pending, { code: "CANCELLED" });
+});
+
 test("configured catalogue rejects a skill path symlink before resolving its target", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-configured-symlink-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
