@@ -1,5 +1,25 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.3.7 — direct configured catalogue
+
+The bundled MCP now reads the enabled project, plugin-cache and configured-skill
+catalogue directly by default, avoiding a Codex app-server spawn during ordinary
+discovery. Direct-source evidence covered 101 current skills completely and
+passed tools/list, search_skills and read_skill smoke checks. The native
+app-server catalogue remains an explicit fallback. A custom CODEX_HOME is used
+as supplied instead of receiving an extra `.codex` suffix.
+
+## 1.3.6 — explicit Fable activation
+
+Explicit Fable requests now direct the agent to use the bundled read-only MCP
+search and read tools, verify the enabled Gigma Superpowers gateway and its
+pages, and complete that bootstrap before task work. Incomplete MCP execution
+is disclosed; read-only tasks remain read-only. These are instructions, not a
+runtime enforcement mechanism. Six ordinary Sol/xhigh coordinator runs and a
+pressure case observed the required order; four of six forced Terra/high
+coordinator runs did so. The 29 model scenarios evaluate action plans, not
+actual MCP calls, and these observations do not guarantee every host or run.
+
 ## 1.3.5 — Fable and Superpowers cooperation
 
 The entry point routes engineering work through the enabled Gigma Superpowers

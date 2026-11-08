@@ -1,5 +1,19 @@
 # Fable 5 Codex plugin
 
+Version 1.3.8 adds the read-only `fable-status` MCP tool. It verifies the
+complete Fable 5 → Gigma Superpowers → implementation-planning gateway without
+installing, updating or executing plugins.
+
+Version 1.3.7 makes the bundled MCP direct reader the default catalogue source,
+so it does not spawn Codex app-server during ordinary discovery. The source
+reader observed 101 current skills completely; tools/list, search_skills and
+read_skill passed the direct-source smoke. Native app-server catalogue access
+remains an explicit fallback. Custom CODEX_HOME paths are honored exactly.
+Version 1.3.6 directs explicit Fable requests through the bundled MCP skill
+discovery and the enabled Gigma Superpowers gateway before task work. These
+remain instructions, not host-enforced execution or new permissions. Native
+checks passed for six ordinary Sol/xhigh coordinator runs and a pressure case;
+four of six forced Terra/high coordinator runs preserved the required order.
 Version 1.3.5 adds Fable-to-Superpowers routing through the enabled Gigma
 catalogue and explicit delegated implementation and independent review roles.
 These are instructions, not host-enforced execution or new permissions.
@@ -14,7 +28,8 @@ These are skill instructions, not a runtime interception hook. Safe updates with
 verified backups and rollback remain available as introduced in 1.3.2.
 The updater also validates native Git marketplace bookkeeping from newer Codex
 CLI versions without treating it as plugin content or relaxing package checks.
-The plugin includes local read-only MCP tools `search_skills` and `read_skill`.
+The plugin includes local read-only MCP tools `search_skills`, `read_skill` and
+`fable-status`.
 They use the enabled Codex catalogue for an explicitly supplied project.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
 See [MCP setup, contracts and verification](MCP.md).
