@@ -44,6 +44,20 @@ test("reports the exact Fable and Superpowers gateway", async () => {
   assert.match(result.catalog_sha256, /^[a-f0-9]{64}$/);
 });
 
+test("accepts configured short names only with the exact plugin IDs", async () => {
+  const catalog = makeCatalog({
+    skills: makeCatalog().skills.map((skill) => ({
+      ...skill,
+      name: skill.name.replace("fable5-codex:fable5-codex", "fable5-codex")
+        .replace("superpowers:using-superpowers", "using-superpowers")
+        .replace("superpowers:writing-plans", "writing-plans"),
+    })),
+  });
+  const result = await diagnosePipeline(catalog, "C:/project", { readSkill });
+  assert.equal(result.status, "ready");
+  assert.equal(result.skills.fable.plugin_id, "fable5-codex@gigma-skills");
+});
+
 test("fails closed for partial or warning-bearing catalogues", async () => {
   await assert.rejects(
     diagnosePipeline(makeCatalog({ partial: true }), "C:/project", { readSkill }),

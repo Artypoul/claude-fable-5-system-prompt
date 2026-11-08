@@ -1,7 +1,7 @@
 {
   "inputs": {
     "build.mjs": "5f17cd65c484d793b4a6de63505d9227affdc40c2a7e8274df5773181287c42a",
-    "package.json": "a050c30b8125448d831f208cfd7b66b2f0d0371214f9ed48bf28b61fb2a7f8eb",
+    "package.json": "6f6784079f3884d6a0580e1ba388885422bddb7b062edf7ec64c094fa52f94fd",
     "package-lock.json": "65e2c57d1ef788d8b25f476de769568e47bcc97a7b52798ccecd5607178c1793",
     "src/catalog.mjs": "a84d2d73416162a9340aab27b6bfe17d7a7cdef4652f75f5f6268eeb757e3cf1",
     "src/main.mjs": "2a151aa436c228b60a7aac4b3c6cedff329d18d5d47b5c547db3ffb2a0634b7a",
