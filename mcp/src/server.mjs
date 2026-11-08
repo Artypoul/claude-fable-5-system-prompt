@@ -10,6 +10,7 @@ import {
   sha256,
 } from "./catalog.mjs";
 import { searchSkills } from "./search.mjs";
+import { diagnosePipeline } from "./pipeline-status.mjs";
 
 const annotations = {
   readOnlyHint: true,
@@ -100,6 +101,19 @@ export function createServer({ catalogReader = fetchConfiguredCatalog } = {}) {
     handle(async ({ cwd, skill_id, offset, limit }, signal) =>
       readRegisteredSkill(await load(cwd, signal), skill_id, offset, limit),
     ),
+  );
+  server.registerTool(
+    "fable-status",
+    {
+      description:
+        "Verify the read-only Fable 5 to Superpowers implementation-planning gateway for a project. Does not install, update or execute skills.",
+      inputSchema: z.object({ cwd: cwdSchema }).strict(),
+      annotations,
+    },
+    handle(async ({ cwd }, signal) => {
+      const directory = await projectDirectory(cwd);
+      return diagnosePipeline(await load(directory, signal), directory);
+    }),
   );
   return server;
 }

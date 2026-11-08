@@ -44,7 +44,7 @@ test("actual SDK client discovers schemas, searches and reads through stdio tool
   const listed = await client.listTools();
   assert.deepEqual(
     listed.tools.map((tool) => tool.name),
-    ["search_skills", "read_skill"],
+    ["search_skills", "read_skill", "fable-status"],
   );
   assert.equal(listed.tools[0].annotations.readOnlyHint, true);
   const search = await client.callTool({
@@ -81,7 +81,7 @@ test("the distributed bundle starts outside the repository without node_modules"
   const script = path.join(cwd, "server.mjs");
   await fs.copyFile(path.join(root, "dist/server.mjs"), script);
   const client = await connect(t, script, os.tmpdir());
-  assert.equal((await client.listTools()).tools.length, 2);
+  assert.equal((await client.listTools()).tools.length, 3);
 });
 
 test(

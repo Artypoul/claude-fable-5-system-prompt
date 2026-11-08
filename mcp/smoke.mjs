@@ -34,7 +34,7 @@ try {
   const { tools } = await client.listTools();
   assert.deepEqual(
     tools.map((tool) => tool.name),
-    ["search_skills", "read_skill"],
+    ["search_skills", "read_skill", "fable-status"],
   );
   const search = unpack(
     await client.callTool({
@@ -57,6 +57,22 @@ try {
   );
   assert.match(read.content, /name: fable5-codex/);
   assert.match(read.sha256, /^[a-f0-9]{64}$/);
+  const status = unpack(
+    await client.callTool({
+      name: "fable-status",
+      arguments: { cwd: project },
+    }),
+  );
+  assert.equal(status.status, "ready");
+  assert.equal(status.skills.fable.plugin_id, "fable5-codex@gigma-skills");
+  assert.equal(
+    status.skills.using_superpowers.plugin_id,
+    "superpowers@gigma-skills",
+  );
+  assert.equal(
+    status.skills.writing_plans.plugin_id,
+    "superpowers@gigma-skills",
+  );
   console.log(
     JSON.stringify(
       {
@@ -69,6 +85,7 @@ try {
         matches: search.total,
         partial: search.partial,
         content_sha256: read.sha256,
+        pipeline_status: status.status,
       },
       null,
       2,
