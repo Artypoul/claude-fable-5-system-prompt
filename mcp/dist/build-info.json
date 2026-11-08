@@ -5,14 +5,15 @@
     "package-lock.json": "65e2c57d1ef788d8b25f476de769568e47bcc97a7b52798ccecd5607178c1793",
     "src/catalog.mjs": "808644adc032ced8f910cf6bda059d2bc02aed8baccdb91dbe8f3504a381ee0f",
     "src/main.mjs": "2a151aa436c228b60a7aac4b3c6cedff329d18d5d47b5c547db3ffb2a0634b7a",
+    "src/pipeline-status.mjs": "c6e3f7cc09cfd8218dec4319511a016e79de475c10caed1c81020e4fe8e2674a",
     "src/search.mjs": "1e68d642ae24305f5ee408b0fa180d185345a424fe6179b17ae4387f96405376",
-    "src/server.mjs": "b7e679baefe89631353ba2b1fe463691aaf3f775af56fd628d6f8b5c61ccba49",
+    "src/server.mjs": "1fa0ece329f1ba3413a705127995d1d4164f2d2166167e0e6b180f11092689cf",
     "src/update-core.mjs": "19b18c1fc56ce946b4dada2b23f8f07890a7b665c02b3837390b63bf5e1dcfd6",
     "src/update-main.mjs": "9cad5b7fc0529d2468d4ab612fae9ec9f7ccb9c74a4a17c69a44032a492ed576",
     "src/update-native.mjs": "a72857d0573143507302277574123c7b5e4b42b3d0922dd7d7bb1311920a91e4"
   },
   "outputs": {
-    "dist/server.mjs": "c770330aaeddb644b9b2db0371de499e0b3ceae02adc63a40bc8f9c8e5500acd",
+    "dist/server.mjs": "d5b03f030e2dc09106af87b7ec38dfa94bf4e050a058e99638671cc153350da7",
     "dist/update.mjs": "62c2a752153eb4af47bc49446c8ae9e918de35b0dec15a478157c17948c0734c",
     "dist/THIRD_PARTY_LICENSES.txt": "012b8c838c4a1c23fdbdf14b0861a0ebd19e25a0a95eae3cae38020e57024811"
   }
