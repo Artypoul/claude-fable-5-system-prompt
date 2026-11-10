@@ -37,6 +37,43 @@ test("configured catalogue reads enabled cache skills without spawning Codex", a
   assert.equal(catalog.partial, false);
 });
 
+test("configured catalogue accepts matching plugin versions with build metadata", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-build-version-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile"),
+    versionRoot = path.join(profile, "plugins", "cache", "gigma-skills", "demo", "0.1.0+codex.20261110053238");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(path.join(versionRoot, ".codex-plugin"), { recursive: true });
+  await fs.mkdir(path.join(versionRoot, "skills"), { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), '[plugins."demo@gigma-skills"]\nenabled = true\n');
+  await fs.writeFile(path.join(versionRoot, ".codex-plugin", "plugin.json"), JSON.stringify({ name: "demo", version: "0.1.0", skills: "./skills" }));
+  await fs.writeFile(path.join(versionRoot, "skills", "SKILL.md"), "---\nname: demo\ndescription: Demo skill\n---\n");
+  const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  assert.equal(catalog.partial, false);
+  assert.equal(catalog.warning_count, 0);
+  assert.equal(catalog.skills[0]?.plugin_id, "demo@gigma-skills");
+});
+
+test("configured catalogue rejects invalid, different core and different prerelease versions", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-version-mismatch-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile");
+  await fs.mkdir(project, { recursive: true });
+  const cases = [["core", "1.0.0+build", "2.0.0"], ["pre", "1.0.0-rc.1+build", "1.0.0-rc.2"], ["invalid", "1.0.0+build", "01.0.0"]];
+  await fs.mkdir(profile, { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), cases.map(([name]) => `[plugins."${name}@gigma-skills"]\nenabled = true\n`).join(""));
+  for (const [name, cacheVersion, manifestVersion] of cases) {
+    const versionRoot = path.join(profile, "plugins", "cache", "gigma-skills", name, cacheVersion);
+    await fs.mkdir(path.join(versionRoot, ".codex-plugin"), { recursive: true });
+    await fs.mkdir(path.join(versionRoot, "skills"), { recursive: true });
+    await fs.writeFile(path.join(versionRoot, ".codex-plugin", "plugin.json"), JSON.stringify({ name, version: manifestVersion, skills: "./skills" }));
+    await fs.writeFile(path.join(versionRoot, "skills", "SKILL.md"), `---\nname: ${name}\ndescription: Demo\n---\n`);
+  }
+  const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  assert.equal(catalog.skills.length, 0);
+  assert.equal(catalog.warning_count, 3);
+});
+
 test("configured catalogue honors a custom CODEX_HOME without appending .codex", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-codex-home-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));

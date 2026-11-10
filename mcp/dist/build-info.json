@@ -3,7 +3,7 @@
     "build.mjs": "5f17cd65c484d793b4a6de63505d9227affdc40c2a7e8274df5773181287c42a",
     "package.json": "6f6784079f3884d6a0580e1ba388885422bddb7b062edf7ec64c094fa52f94fd",
     "package-lock.json": "65e2c57d1ef788d8b25f476de769568e47bcc97a7b52798ccecd5607178c1793",
-    "src/catalog.mjs": "a84d2d73416162a9340aab27b6bfe17d7a7cdef4652f75f5f6268eeb757e3cf1",
+    "src/catalog.mjs": "c8c03378ec5a71fef20eea9bee4195b29e9a9677fdc708bcbef7b21d05567c84",
     "src/main.mjs": "2a151aa436c228b60a7aac4b3c6cedff329d18d5d47b5c547db3ffb2a0634b7a",
     "src/pipeline-status.mjs": "c6e3f7cc09cfd8218dec4319511a016e79de475c10caed1c81020e4fe8e2674a",
     "src/search.mjs": "1e68d642ae24305f5ee408b0fa180d185345a424fe6179b17ae4387f96405376",
@@ -13,7 +13,7 @@
     "src/update-native.mjs": "a72857d0573143507302277574123c7b5e4b42b3d0922dd7d7bb1311920a91e4"
   },
   "outputs": {
-    "dist/server.mjs": "376128d07a0ccefceee3d30b7c653fcc196db4a08046982fe090e928a291369e",
+    "dist/server.mjs": "abbda6d6fef5c5aed5b5fb101920e5ea955fe90243f226bc8ac0414931d0dc63",
     "dist/update.mjs": "33fbd3d02e155fc62ba307fbad11779b8ce2143c234286f5e0753b5c40da8a32",
     "dist/THIRD_PARTY_LICENSES.txt": "012b8c838c4a1c23fdbdf14b0861a0ebd19e25a0a95eae3cae38020e57024811"
   }

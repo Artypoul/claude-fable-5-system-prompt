@@ -430,7 +430,11 @@ export async function fetchConfiguredCatalog(
       throwIfAborted(signal);
       if (manifest.name !== plugin) throw new Error("plugin manifest mismatch");
       if (typeof manifest.skills !== "string") continue;
-      if (manifest.version != null && manifest.version !== versions[0].name) throw new Error("plugin manifest version mismatch");
+      if (manifest.version != null) {
+        const manifestVersion = typeof manifest.version === "string" && semver(manifest.version);
+        if (!manifestVersion || compareVersion(manifestVersion, versions[0].version) !== 0)
+          throw new Error("plugin manifest version mismatch");
+      }
       const skillRoot = path.resolve(versionRoot, manifest.skills);
       if (!skillRoot.startsWith(path.resolve(versionRoot) + path.sep)) throw new Error("plugin skill root escapes cache");
       const discovered = [];
