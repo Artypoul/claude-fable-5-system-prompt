@@ -34,6 +34,29 @@ partial, changed or mismatched reads and reconcile against the live catalogue.
 An on-disk manifest can map paths, but live host evidence must establish enabled
 status; a manifest alone cannot prove it.
 
+## Fable activation gate
+For every explicit Fable 5 trigger, keep the activation state visible as
+`pending`, `ready`, `partial` or `blocked`. The only `ready` transition is the
+ordered same-`cwd` chain `search_skills → read_skill → fable-status` (or the
+host's `fable_status` name), with complete stable catalogue data, a matching
+Superpowers read and `status=ready`, `partial=false`, `warning_count=0`, plus
+the exact `fable5-codex@gigma-skills` path and digest. Require
+`catalogHashMatchesSearch=true` when the field is exposed; otherwise compare
+the status `catalog_sha256` directly with the search digest. Record the project `cwd`, Fable
+and catalogue digests, selected `superpowers@gigma-skills` identity/path and
+read digest. Do not begin
+task-specific work while `pending`, and restart the gate when `cwd` or source
+changes. If any step fails, set `FABLE_GATE=partial` and
+`PIPELINE_INCOMPLETE` before using an authorized host/file fallback; keep
+dependent work partial or blocked and never call the fallback full MCP
+activation. If the exact Superpowers source or lifecycle cannot be verified,
+set `SUPERPOWERS_GATE=blocked` and do not call `read_skill` for an alternative
+plugin, guessed ID or unverified entry; do not implement, delegate or substitute
+a different plugin. If the selected lifecycle requires an independent reviewer
+and the exact approved reviewer model/effort is unavailable, set
+`SUPERPOWERS_REVIEW_GATE=blocked` and do not implement, delegate or claim
+completion.
+
 ## MCP and connector safety
 - Discover a connector by capability; do not guess IDs or server names.
 - Respect explicit opt-in and per-action authorization.

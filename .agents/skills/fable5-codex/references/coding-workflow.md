@@ -11,7 +11,7 @@
 
 This guard applies to the primary agent and every delegated task, including small fixes. Reading supporting code to understand the task does not authorize changing it.
 
-Read this complete section before giving scope/recovery/database-field/pattern advice, planning, reviewing or acting, including hypothetical cases and subagent reports. An unchanged copy already read in the current context may be reused. An observed ongoing violation still requires an immediate stop request and warning before waiting for this read.
+For ordinary scope/recovery/database-field/pattern advice, read this complete section before planning, reviewing or acting, including hypothetical cases and subagent reports. An unchanged copy already read in the current context may be reused. **Priority exception for an observed ongoing violation:** the first actions are `request_stop` and `warn_user`; do not put `read_reference` or any other recovery phase before them. After that immediate containment step, read this section before any further recovery advice or action.
 
 ### Establish and check the boundary
 
@@ -44,6 +44,8 @@ Steps 1–6 are an ordered prerequisite chain, including in a hypothetical answe
 4. **Prepare selective recovery:** compare the pre-task/pre-dispatch state with observed agent patches. Coordinate other active writers touching affected paths or use a restoration mechanism that rejects intervening changes. Re-read and revalidate affected content immediately before applying recovery; on a version/content mismatch, preserve the current state and reassess instead of applying a stale inverse patch. If changes overlap or attribution is uncertain, stop the affected work and request targeted direction instead of guessing. Unrelated writers may continue.
 5. **Restore only attributable unauthorized edits:** undo only confidently attributable out-of-scope hunks and agent-created artifacts whose removal is safe after the preceding assessment. Preserve in-scope changes, pre-existing edits, other writers' work and the retained recovery evidence. Do not reset a branch/worktree, clean untracked files broadly or restore whole files from HEAD. Report what was restored, preserved or remains unresolved.
 6. **Verify before resuming:** inspect the resulting diff and relevant checks against the recorded scope and baseline. Resume affected work only after containment and recovery are verified and the assignment is corrected. The corrected assignment must remain within the authorized scope; an expansion additionally requires the user's explicit approval of the concrete change. Never use a clean test run to excuse an unauthorized change.
+
+Any recovery explanation must name both the recorded baseline and the current content when preparing selective recovery, and must distinguish unverified in-flight tools, processes and delegated writers from confirmed containment.
 
 ## Plan and implementation
 1. Break work into independently verifiable changes.
