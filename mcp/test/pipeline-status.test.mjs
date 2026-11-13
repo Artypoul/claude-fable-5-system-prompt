@@ -69,6 +69,18 @@ test("fails closed for partial or warning-bearing catalogues", async () => {
   );
 });
 
+test("propagates an error reading writing-plans", async () => {
+  const readError = new CatalogError("SKILL_UNREADABLE", "read failed");
+  const failingReadSkill = async (catalog, id, offset) => {
+    if (id === "writing_plans") throw readError;
+    return readSkill(catalog, id, offset);
+  };
+  await assert.rejects(
+    diagnosePipeline(makeCatalog(), "C:/project", { readSkill: failingReadSkill }),
+    (error) => error === readError,
+  );
+});
+
 test("fails closed when an exact plugin entry is missing or duplicated", async () => {
   const missing = makeCatalog({
     skills: makeCatalog().skills.filter((skill) => skill.name !== "superpowers:writing-plans"),
