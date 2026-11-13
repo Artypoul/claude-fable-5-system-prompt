@@ -70,13 +70,14 @@ test("fails closed for partial or warning-bearing catalogues", async () => {
 });
 
 test("propagates an error reading writing-plans", async () => {
+  const readError = new CatalogError("SKILL_UNREADABLE", "read failed");
   const failingReadSkill = async (catalog, id, offset) => {
-    if (id === "writing_plans") throw new CatalogError("SKILL_UNREADABLE", "read failed");
+    if (id === "writing_plans") throw readError;
     return readSkill(catalog, id, offset);
   };
   await assert.rejects(
     diagnosePipeline(makeCatalog(), "C:/project", { readSkill: failingReadSkill }),
-    (error) => error instanceof CatalogError && error.code === "SKILL_UNREADABLE",
+    (error) => error === readError,
   );
 });
 
