@@ -27,10 +27,84 @@ def review(result, verdict='pass'):
 
 
 class BehaviorEvaluationTests(unittest.TestCase):
+    def test_fable_gate_requires_ordered_status_before_task_work(self):
+        case = {
+            'expect': {
+                'baseline': True,
+                'required': [
+                    ['scan_skills', ''],
+                    ['read_skill', 'superpowers@gigma-skills:using-superpowers'],
+                    ['fable_status', 'ready'],
+                    ['run_code', 'implementation'],
+                    ['answer', ''],
+                ],
+                'before': [
+                    ['scan_skills', 'read_skill'],
+                    ['read_skill', 'fable_status'],
+                    ['fable_status', 'run_code'],
+                ],
+            },
+            'capabilities': ['scan_skills', 'read_skill', 'fable_status', 'run_code'],
+        }
+        good = trace(
+            ('scan_skills', ''),
+            ('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+            ('fable_status', 'ready'),
+            ('run_code', 'implementation'),
+            ('answer', ''),
+        )
+        self.assertEqual([], check_case(case, good))
+        missing_status = trace(
+            ('scan_skills', ''),
+            ('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+            ('run_code', 'implementation'),
+            ('answer', ''),
+        )
+        self.assertTrue(check_case(case, missing_status))
+        late_status = trace(
+            ('scan_skills', ''),
+            ('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+            ('run_code', 'implementation'),
+            ('fable_status', 'ready'),
+            ('answer', ''),
+        )
+        self.assertTrue(check_case(case, late_status))
+
+    def test_fable_fallback_is_explicit_partial_and_blocks_dependent_work(self):
+        case = {
+            'expect': {
+                'baseline': True,
+                'required': [
+                    ['scan_skills', ''],
+                    ['report_gap', 'PIPELINE_INCOMPLETE'],
+                    ['answer', ''],
+                ],
+                'forbidden': ['run_code', 'fable_status'],
+                'gaps': ['PIPELINE_INCOMPLETE'],
+            },
+            'capabilities': ['scan_skills', 'read_skill', 'report_gap'],
+        }
+        good = trace(
+            ('scan_skills', ''),
+            ('report_gap', 'PIPELINE_INCOMPLETE'),
+            ('answer', ''),
+            gaps=['PIPELINE_INCOMPLETE'],
+        )
+        self.assertEqual([], check_case(case, good))
+        hidden_fallback = trace(
+            ('scan_skills', ''),
+            ('read_skill', 'superpowers@gigma-skills:using-superpowers'),
+            ('run_code', 'implementation'),
+            ('answer', ''),
+        )
+        self.assertTrue(check_case(case, hidden_fallback))
+
     def test_superpowers_route_requires_exact_source_and_order(self):
         case = CASES['superpowers-route']
-        good = trace(('scan_skills', ''), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('answer', ''))
+        good = trace(('scan_skills', ''), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('run_code', 'reviewer'), ('answer', ''))
         self.assertEqual([], check_case(case, good, review(good)))
+        query_target = trace(('scan_skills', 'superpowers'), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('run_code', 'reviewer'), ('answer', ''))
+        self.assertEqual([], check_case(case, query_target, review(query_target)))
         wrong_source = trace(('scan_skills', ''), ('read_skill', 'superpowers@other:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('run_code', 'implementation'), ('answer', ''))
         self.assertTrue(check_case(case, wrong_source, review(wrong_source)))
         too_late = trace(('scan_skills', ''), ('run_code', 'implementation'), ('read_skill', 'superpowers@gigma-skills:using-superpowers'), ('read_skill', 'superpowers@gigma-skills:subagent-driven-development'), ('answer', ''))
