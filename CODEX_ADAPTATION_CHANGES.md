@@ -1,5 +1,15 @@
 # Codex adaptation: changes and source-to-port decisions
 
+## 1.3.11 - profile discovery without inherited home variables
+
+The configured catalogue falls back to Node's OS home-directory lookup when
+CODEX_HOME, USERPROFILE and HOME are missing or empty. Explicit CODEX_HOME and
+the existing environment-variable precedence are preserved. This prevents
+skill discovery from passing an undefined profile path to path.resolve when
+the host starts the MCP server with a reduced environment. Existing activation
+checks still require evidence from the current chat after the updated server
+has loaded; a separate smoke process does not establish that activation.
+
 ## 1.3.7 — direct configured catalogue
 
 The bundled MCP now reads the enabled project, plugin-cache and configured-skill

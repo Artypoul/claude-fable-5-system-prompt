@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import * as fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
 
@@ -327,7 +328,7 @@ export async function fetchConfiguredCatalog(
   cwd,
   { signal, profileRoot = (() => {
     if (process.env.CODEX_HOME) return process.env.CODEX_HOME;
-    const root = process.env.USERPROFILE || process.env.HOME;
+    const root = process.env.USERPROFILE || process.env.HOME || os.userInfo().homedir;
     return root && path.join(root, ".codex");
   })() } = {},
 ) {

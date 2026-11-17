@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { test } from "node:test";
 import * as fs from "node:fs/promises";
 import os from "node:os";
@@ -98,6 +99,38 @@ test("configured catalogue honors a custom CODEX_HOME without appending .codex",
   assert.equal(catalog.skills[0].plugin_id, "demo@gigma-skills");
 });
 
+test("configured catalogue uses the OS home when profile environment is absent", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-os-home-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"),
+    profile = path.join(root, ".codex"),
+    skill = path.join(profile, "skills", "demo", "SKILL.md");
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(path.dirname(skill), { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), "");
+  await fs.writeFile(skill, "---\nname: demo\ndescription: OS home skill\n---\n");
+  const keys = ["CODEX_HOME", "USERPROFILE", "HOME"];
+  const previous = new Map(keys.map((key) => [key, process.env[key]]));
+  t.after(() => {
+    for (const [key, value] of previous) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+  t.mock.method(os, "userInfo", () => ({ homedir: root }));
+  for (const value of [undefined, ""]) {
+    for (const key of keys) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    const catalog = parseCatalog(await fetchConfiguredCatalog(project), project);
+    assert.equal(catalog.partial, false);
+    assert.equal(catalog.warning_count, 0);
+    assert.equal(catalog.skills.length, 1);
+    assert.equal(catalog.skills[0].path, await fs.realpath(skill));
+  }
+});
+
 test("configured catalogue includes CODEX_HOME skills and reports partial metadata", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-user-skills-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
@@ -121,6 +154,33 @@ test("configured catalogue includes CODEX_HOME skills and reports partial metada
   assert.equal(catalog.skills[0].plugin_id, null);
   assert.equal(catalog.partial, true);
   assert.ok(catalog.warning_count > 0);
+});
+
+test("configured catalogue survives missing and empty home variables with the native OS lookup", async (t) => {
+  const project = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-native-home-"));
+  t.after(() => fs.rm(project, { recursive: true, force: true }));
+  const skill = path.join(project, ".agents", "skills", "native-home", "SKILL.md");
+  await fs.mkdir(path.dirname(skill), { recursive: true });
+  await fs.writeFile(skill, "---\nname: native-home\ndescription: Native home regression\n---\n");
+  const moduleUrl = new URL("../src/catalog.mjs", import.meta.url).href;
+  const script = `
+    import { fetchConfiguredCatalog } from ${JSON.stringify(moduleUrl)};
+    const result = await fetchConfiguredCatalog(process.argv[1]);
+    if (!result.data[0].skills.some(skill => skill.name === "native-home" && skill.scope === "repo"))
+      throw new Error("Repository skill was not discovered");
+  `;
+  for (const value of [undefined, ""]) {
+    const env = { ...process.env };
+    for (const key of ["CODEX_HOME", "USERPROFILE", "HOME"]) {
+      if (value === undefined) delete env[key];
+      else env[key] = value;
+    }
+    const result = spawnSync(process.execPath, ["--input-type=module", "-e", script, project], {
+      env, encoding: "utf8", windowsHide: true, timeout: 15000,
+    });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0, result.stderr);
+  }
 });
 
 test("configured catalogue follows safe skill-directory symlinks with cycle protection", async (t) => {
