@@ -165,11 +165,24 @@ function tomlString(value) {
   return null;
 }
 
+function stripTomlComment(line) {
+  let quote = null, escaped = false;
+  for (let index = 0; index < line.length; index++) {
+    const char = line[index];
+    if (quote === '"' && escaped) { escaped = false; continue; }
+    if (quote === '"' && char === "\\") { escaped = true; continue; }
+    if (quote && char === quote) { quote = null; continue; }
+    if (!quote && (char === '"' || char === "'")) { quote = char; continue; }
+    if (!quote && char === "#") return line.slice(0, index);
+  }
+  return line;
+}
+
 function configEntries(config) {
   const plugins = new Map(), skills = [];
   let section = null, current = null;
   for (const raw of config.split(/\r?\n/)) {
-    const line = raw.replace(/\s+#.*$/, "").trim();
+    const line = stripTomlComment(raw).trim();
     const plugin = line.match(/^\[plugins\.((?:"(?:\\.|[^"])+")|(?:'[^']+'))\]$/);
     if (plugin) {
       try { current = tomlString(plugin[1]); } catch { current = null; }

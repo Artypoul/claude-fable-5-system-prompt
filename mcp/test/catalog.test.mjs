@@ -49,6 +49,34 @@ test("configured catalogue applies disabled skill path", async (t) => {
   }
 });
 
+test("configured catalogue preserves comment markers inside skill selectors", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable-comment-rules-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project # sample"), profile = path.join(root, "profile");
+  const filename = path.join(project, ".agents", "skills", "demo", "SKILL.md");
+  const name = 'demo " # sample';
+  await fs.mkdir(path.dirname(filename), { recursive: true });
+  await fs.mkdir(profile, { recursive: true });
+  await fs.writeFile(filename, `---\nname: ${name}\ndescription: Demo\n---\n`);
+  const config = path.join(profile, "config.toml");
+  const catalog = async () => parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  await fs.writeFile(config, "");
+  const initial = await catalog(), old = initial.skills[0];
+  assert.equal(old.path, await fs.realpath(filename));
+  for (const selector of [
+    `path = ${JSON.stringify(filename)}`,
+    `path = '${filename}'`,
+    `name = ${JSON.stringify(name)}`,
+    `name = '${name}'`,
+  ]) {
+    await fs.writeFile(config, `[[skills.config]] # rule\n${selector} # selector\nenabled = false # disable\n`);
+    const disabled = await catalog();
+    assert.equal(disabled.skills.some((skill) => skill.path === old.path), false, selector);
+    await assert.rejects(readRegisteredSkill(disabled, old.id, 0, 32000), { code: "SKILL_NOT_FOUND" });
+    assert.equal(disabled.partial, false);
+  }
+});
+
 test("configured catalogue applies disabled skill name", async (t) => {
   const f = await skillRulesFixture(t);
   await f.config(["repo", "user", "plugin"].map((name) => rule("name", name, false)).join(""));
