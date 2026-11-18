@@ -1,6 +1,6 @@
 # Fable 5 Codex plugin
 
-Version **1.4.1** clarifies individual skill enablement and selected-profile health, and closes supported Fable identity corrections.
+Version **1.4.1** respects individual skill settings, verifies updater health in the selected Codex profile, and supports exactly one Fable installation from the two documented sources.
 
 Version **1.4.0** adds [ChatGPT through GitHub](.agents/skills/fable5-codex/references/chatgpt-github.md): a supported immutable instruction-loading route with full-read, dependency and capability gates. It preserves native MCP behavior and distinguishes GitHub readiness from installation, native activation and task completion. Use the [project instruction](docs/chatgpt-project-instructions.md), [acceptance guide](docs/chatgpt-github-acceptance.md) and [evidence report](docs/chatgpt-github-evidence.md). The second release PR updates both Gigma registry pins to the tested source commit.
 
