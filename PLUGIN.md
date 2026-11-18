@@ -32,7 +32,7 @@ The updater also validates native Git marketplace bookkeeping from newer Codex
 CLI versions without treating it as plugin content or relaxing package checks.
 The plugin includes local read-only MCP tools `search_skills`, `read_skill` and
 `fable-status`.
-They use the enabled Codex catalogue for an explicitly supplied project.
+They use the enabled Codex catalogue for an explicitly supplied project. Native readiness requires exactly one enabled Fable source, either `fable5-codex@fable5` or `fable5-codex@gigma-skills`, with matching search, read and status identity, path and digest. Duplicate or unknown Fable sources block readiness; Superpowers must be `superpowers@gigma-skills`. The standalone updater targets `@fable5`, while Gigma-managed installations use the Gigma update route.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
 See [MCP setup, contracts and verification](MCP.md).
 

@@ -26,13 +26,16 @@ const catalogSha256 = (catalog) =>
   sha256(JSON.stringify([...catalog.skills].sort((a, b) => a.id.localeCompare(b.id))));
 
 function selectSkill(catalog, expected) {
-  const matches = catalog.skills.filter(
-    (skill) => expected.names.includes(skill.name) && skill.plugin_id === expected.plugin_id,
+  const matches = catalog.skills.filter((skill) =>
+    expected.names.includes(skill.name) && (expected.key === "fable" || skill.plugin_id === expected.plugin_id),
   );
-  if (matches.length !== 1)
+  const allowedIds = expected.key === "fable"
+    ? [expected.plugin_id, "fable5-codex@fable5"]
+    : [expected.plugin_id];
+  if (matches.length !== 1 || !allowedIds.includes(matches[0].plugin_id))
     fail(
       "PIPELINE_NOT_READY",
-      `Expected exactly one ${expected.names.join(" or ")} skill from ${expected.plugin_id}.`,
+      `Expected exactly one ${expected.names.join(" or ")} skill from ${allowedIds.join(" or ")}.`,
     );
   return matches[0];
 }

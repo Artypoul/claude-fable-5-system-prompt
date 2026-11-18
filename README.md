@@ -68,6 +68,8 @@ codex plugin add fable5-codex@fable5
 node /absolute/path/to/installed/plugin/mcp/dist/update.mjs update --project /absolute/path/to/project
 ~~~
 
+Native activation accepts exactly one enabled Fable source: `fable5-codex@fable5` or `fable5-codex@gigma-skills`. Search, read and status must agree on its identity, path and digest; duplicate or unknown Fable sources block readiness. The standalone updater above applies to `@fable5`; Gigma-managed installations use the Gigma update route. Superpowers must be `superpowers@gigma-skills`.
+
 The plugin loads the same complete skill directory through its manifest.
 Переход с 1.2.0, расположение бэкапов и ручное восстановление описаны в
 [инструкции безопасного обновления](SAFE_UPDATE.md). Обычные команды Codex
