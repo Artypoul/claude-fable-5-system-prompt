@@ -66,6 +66,58 @@ substantive README validation open. The coordinator independently reproduced the
 404 at the same registry SHA. This demonstrates task-source failure handling;
 it is not a live missing-instruction test.
 
+## Live engineering execution and independent review
+
+An isolated `gpt-6.1-terra/high` executor (`live_github_engineering`) read
+registry `dea1febe3e6bdcdc3c63601a6c3463e9518a56e4`, selecting Fable
+`12893d702231419dad5d7bf50f4a531880db6b7b` and the unchanged Superpowers pin.
+The task used a disposable two-file Python fixture. Only `labels.py` could be
+changed; `test_labels.py`, remote repositories and product settings were outside
+its write scope. The requested function accepts a list of strings, strips them,
+removes blanks and exact duplicates in first-seen order, preserves case, raises
+`TypeError` for invalid inputs and does not mutate the input.
+
+The first trial proceeded after an engineering-reference display was truncated
+by one token. It is retained as an incomplete-preflight trial and is not counted
+as a successful full-read-before-work check. Before a new baseline fixture was
+inspected, the executor completed `references/engineering-workflow.md` at the
+same pinned blob `d3532af5b2b0844beb8b266f87abf231bc7b329d`: contiguous ranges
+1–55, 56–110, 111–165, 166–220, 221–243, followed by an empty 244–250 EOF read.
+It also completely read the pinned Superpowers requesting-code-review skill
+and reviewer template; the other applicable Fable and lifecycle dependencies
+had already been read. This recovery does not retroactively validate the first
+trial.
+
+The new `live-engineering-confirmed` trial observed the following:
+
+- Baseline `normalize_labels` sorted a set of stripped values. The six unchanged
+  tests produced three failures and one error, exit code 1.
+- Only `labels.py` was changed. Container/member type checks and a result/seen
+  loop implement the requested behavior.
+- `python -B -m unittest discover -v` then passed all six tests. A separate
+  in-memory assertion confirmed input non-mutation.
+- The directory contained exactly the original two files before and after;
+  no cache, Git metadata, commits or other files were created there.
+
+| Fixture content | SHA-256 |
+| --- | --- |
+| Original `labels.py` | `2e47771dd1317aa712a293b77afb12c71e1a96d7df5520294e0ef589e3edfefb` |
+| Accepted `labels.py` | `e2c73c690da60a1526438f8b57a9d5be85f1567a98a8795eff044d321ead61d2` |
+| Unchanged `test_labels.py` | `a3afd275a2e14cf4aef655df5c4e3c844d987f5857dcf351eb0ae6f990b0a00d` |
+
+A separate `gpt-6.1-sol/xhigh` reviewer (`fable_review`) personally read both
+files, reran all six tests, and checked additional invalid-input and non-mutation
+cases without writes. It reproduced the original three failures and one error
+in memory, verified the two-file inventory and hashes before and after, and
+returned **approve, no blocking findings**. Its verdict covers the code and
+scope; it does not independently attest the executor's earlier instruction-read
+transcript. The coordinator separately verified the final inventory and hashes.
+
+The instruction blobs in this engineering run match the final accepted skill
+package; later evidence-only commits do not change the model-input fingerprint.
+This is actual local execution and separate review, not a fixture action plan,
+a GitHub bot review, native MCP activation, or a project-settings test.
+
 ## Independent review and corrections
 
 A separate isolated `gpt-6.1-sol/xhigh` reviewer inspected the actual Fable diff
@@ -79,6 +131,11 @@ The reviewer separately read the candidate Fable manifest and GitHub contract
 through GitHub and matched their blob hashes to the inspected local source.
 Review covers its inspected revision; subsequent evidence or instruction changes
 require their own verification and are not implicitly covered by that verdict.
+
+The automatic Codex GitHub reviewer on Fable PR #19 reported that the account's
+code-review usage limit was exhausted. No successful automatic GitHub review is
+claimed. The isolated source reviewer and live-fixture reviewer above performed
+actual independent work through a different available capability.
 
 ## Local regression checks
 
