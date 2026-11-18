@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CatalogError, sha256 } from "../src/catalog.mjs";
+import * as fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { fetchConfiguredCatalog, parseCatalog, readRegisteredSkill, CatalogError, sha256 } from "../src/catalog.mjs";
 import { diagnosePipeline } from "../src/pipeline-status.mjs";
 
 const makeCatalog = (overrides = {}) => {
@@ -108,4 +111,24 @@ test("fails closed when a registered skill changes while being read", async () =
     diagnosePipeline(makeCatalog(), "C:/project", { readSkill: unstable }),
     (error) => error instanceof CatalogError && error.code === "PIPELINE_NOT_READY",
   );
+});
+
+test("individually disabled required skill prevents pipeline readiness", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable-pipeline-rules-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile");
+  await fs.mkdir(project, { recursive: true });
+  for (const [plugin, names] of [["fable5-codex", ["fable5-codex"]], ["superpowers", ["using-superpowers", "writing-plans"]]]) {
+    const version = path.join(profile, "plugins", "cache", "gigma-skills", plugin, "1.0.0");
+    await fs.mkdir(path.join(version, ".codex-plugin"), { recursive: true });
+    await fs.writeFile(path.join(version, ".codex-plugin", "plugin.json"), JSON.stringify({ name: plugin, skills: "./skills" }));
+    for (const name of names) {
+      const skill = path.join(version, "skills", name, "SKILL.md");
+      await fs.mkdir(path.dirname(skill), { recursive: true });
+      await fs.writeFile(skill, `---\nname: ${name}\ndescription: ${name}\n---\n# ${name}\n`);
+    }
+  }
+  await fs.writeFile(path.join(profile, "config.toml"), '[plugins."fable5-codex@gigma-skills"]\nenabled = true\n[plugins."superpowers@gigma-skills"]\nenabled = true\n[[skills.config]]\nname = "using-superpowers"\nenabled = false\n');
+  const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  await assert.rejects(diagnosePipeline(catalog, project, { readSkill: readRegisteredSkill }), { code: "PIPELINE_NOT_READY" });
 });

@@ -161,7 +161,7 @@ export async function fetchNativeCatalog(
 function tomlString(value) {
   const trimmed = value.trim();
   if (trimmed.startsWith('"')) return JSON.parse(trimmed);
-  if (trimmed.startsWith("'")) return trimmed.slice(1, -1);
+  if (/^'[^']*'$/.test(trimmed)) return trimmed.slice(1, -1);
   return null;
 }
 
@@ -181,10 +181,22 @@ function configEntries(config) {
     if (line === "[[skills.config]]") { section = "skill"; current = {}; skills.push(current); continue; }
     if (line.startsWith("[")) { section = null; current = null; continue; }
     const pair = line.match(/^([A-Za-z0-9_.-]+)\s*=\s*(.+)$/);
-    if (!pair || !current) continue;
+    if (!pair || !current) {
+      if (section === "skill" && current && line) current.invalid = true;
+      continue;
+    }
     if (section === "plugin" && pair[1] === "enabled") plugins.get(current).enabled = pair[2] === "true";
-    if (section === "skill" && ["enabled", "path"].includes(pair[1]))
-      current[pair[1]] = pair[1] === "enabled" ? pair[2] === "true" : tomlString(pair[2]);
+    if (section === "skill") {
+      const key = pair[1];
+      if (!["enabled", "path", "name"].includes(key) || Object.hasOwn(current, key)) {
+        current.invalid = true;
+        continue;
+      }
+      if (key === "enabled") current.enabled = pair[2] === "true" ? true : pair[2] === "false" ? false : null;
+      else {
+        try { current[key] = tomlString(pair[2]); } catch { current.invalid = true; }
+      }
+    }
   }
   return { plugins, skills };
 }
@@ -452,14 +464,34 @@ export async function fetchConfiguredCatalog(
       errors.push({ path: root, message: "enabled plugin cache unavailable" });
     }
   }
+  const rules = [];
   for (const entry of entries.skills) {
     throwIfAborted(signal);
-    if (entry.enabled !== true || typeof entry.path !== "string" || !path.isAbsolute(entry.path)) continue;
-    try { await add(entry.path, "user", null); }
-    catch (error) {
-      if (error instanceof CatalogError && error.code === "CANCELLED") throw error;
-      errors.push({ path: entry.path, message: "configured skill unavailable" });
+    if (entry.invalid || typeof entry.enabled !== "boolean" ||
+        Object.hasOwn(entry, "name") === Object.hasOwn(entry, "path")) continue;
+    if (typeof entry.name === "string") {
+      if (entry.name) rules.push(entry);
+    } else if (typeof entry.path === "string" && path.isAbsolute(entry.path)) {
+      try {
+        const stat = await fs.lstat(entry.path);
+        if (!stat.isFile() || stat.isSymbolicLink()) {
+          if (entry.enabled) errors.push({ path: entry.path, message: "configured skill unavailable" });
+          if (!stat.isSymbolicLink()) continue;
+        }
+        const resolved = await fs.realpath(entry.path);
+        rules.push({ ...entry, path: resolved });
+      } catch {
+        // A selector for a missing file cannot match a discovered skill.
+      }
     }
+  }
+  for (let index = skills.length - 1; index >= 0; index--) {
+    const skill = skills[index];
+    let enabled = true;
+    for (const rule of rules) {
+      if (rule.name === skill.name || rule.path === skill.path) enabled = rule.enabled;
+    }
+    if (!enabled) skills.splice(index, 1);
   }
   throwIfAborted(signal);
   skills.sort((a, b) => a.path.localeCompare(b.path));
