@@ -10,7 +10,7 @@ Inspect the live tool registry and the selected tool's description/schema. Tool 
 4. Browser/computer automation when direct interaction is required.
 5. Ask for access or clarification only when the missing permission/resource blocks progress.
 
-## Bundled installed-skill tools
+## Bundled installed-skill tools (native_codex)
 The plugin's local server exposes `search_skills` and `read_skill`; inspect the
 host's namespaced schemas before calling. Both require the current project's
 absolute `cwd`, not the plugin's installation directory. Search is lexical over
@@ -34,8 +34,8 @@ partial, changed or mismatched reads and reconcile against the live catalogue.
 An on-disk manifest can map paths, but live host evidence must establish enabled
 status; a manifest alone cannot prove it.
 
-## Fable activation gate
-For every explicit Fable 5 trigger, keep the activation state visible as
+## Fable activation gate (native_codex)
+For every explicit Fable 5 trigger using `native_codex`, keep the activation state visible as
 `pending`, `ready`, `partial` or `blocked`. The only `ready` transition is the
 ordered same-`cwd` chain `search_skills → read_skill → fable-status` (or the
 host's `fable_status` name), with complete stable catalogue data, a matching
@@ -56,6 +56,32 @@ a different plugin. If the selected lifecycle requires an independent reviewer
 and the exact approved reviewer model/effort is unavailable, set
 `SUPERPOWERS_REVIEW_GATE=blocked` and do not implement, delegate or claim
 completion.
+
+## ChatGPT GitHub operation mapping
+
+For `chatgpt_github`, first read the complete [GitHub activation
+contract](chatgpt-github.md). Its `ready` means verified instruction readiness
+for the requested scope, not native installation or MCP activation. Keep the
+registry/Fable/Superpowers tuple frozen; follow required references at their
+originating commits. Record complete read coverage and blob/digest identities.
+A search snippet or incomplete result never substitutes for a complete read.
+
+| Workflow operation | Supported ChatGPT capability |
+| --- | --- |
+| Discover/read a skill | Actual GitHub repository/commit/file tools; full content at an immutable revision |
+| Follow a required reference | Same repository/commit plus resolved path; verify a separate pin for another source |
+| Track an approved plan | Existing task context or an authorized artifact; no fictional native task API |
+| Execute tests | Available execution environment, or observed CI tied to the exact candidate SHA |
+| Delegate/review | Actual isolated agent or separate reviewer with required model/effort and evidence |
+| Commit or create a PR | Discovered authorized GitHub mutation tool; verify base, scope, returned SHA and resulting diff |
+| Save project instructions | Authorized settings surface and read-back; a template alone is not a saved setting |
+
+Use this mapping for platform-specific names in the selected Superpowers
+workflow. Preserve its required outcomes and dependencies. If a required helper
+script is available in the pinned package, read it and execute it through the
+actual host only when permitted. If unavailable, use a documented equivalent
+only when that workflow permits it; otherwise block the affected step. Do not
+pretend that a file read invoked a native Skill tool or installed the package.
 
 ## MCP and connector safety
 - Discover a connector by capability; do not guess IDs or server names.

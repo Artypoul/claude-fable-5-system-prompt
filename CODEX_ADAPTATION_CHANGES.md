@@ -1,3 +1,11 @@
+## 1.4.0 — ChatGPT through GitHub (2026-11-18)
+
+- Add an explicitly selected `chatgpt_github` mode with its own readiness contract. Keep native `search_skills → read_skill → fable-status` checks and MCP code unchanged.
+- Freeze registry, Fable and Superpowers commits; verify registry/lock and manifest agreement, complete reads, mandatory dependencies and actual capabilities.
+- Distinguish instruction readiness, task checks, independent review, PR publication and project-settings inheritance. Missing/partial/mixed-version evidence cannot pass dependent gates.
+- Supply a project instruction and scenario/evidence guides. Keep the historical source archive and its mapped canonical blocks unchanged.
+- Update the plugin manifest to 1.4.0. GitHub source reading does not install or enable a native plugin.
+
 # Codex adaptation: changes and source-to-port decisions
 
 ## 1.3.11 - profile discovery without inherited home variables
