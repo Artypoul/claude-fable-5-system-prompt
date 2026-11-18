@@ -72,6 +72,13 @@ on every page. Finish through the file's confirmed end. If the connector cannot
 establish completeness, report the exact file and block the dependent step.
 Never combine mismatched pages, revisions, paths or sources.
 
+For the large canonical `source-faithful-port.md`, the skill explicitly selects
+applicable sections: read each selected section completely through its confirmed
+anchor boundary and record that section coverage. Unrelated sections need not be
+loaded. This is deliberate scope selection, not acceptance of a truncated
+required section. Entry points, selected lifecycle files and references required
+as complete files must still be read in full.
+
 Record repository, commit, path, blob SHA (or content SHA-256 when supplied), and
 coverage for each required read. A Git blob SHA and a SHA-256 are different
 digest types; label them correctly. If exact bytes are materialized locally,
@@ -167,6 +174,14 @@ target project and preserve unrelated instructions when an authorized settings
 surface is available. Otherwise provide the exact text and say that saving and
 new-chat verification remain open. Do not invent a settings API or infer a
 project identity from a link to a Page.
+
+When reporting activation or evaluating a project-instruction bootstrap, state
+whether the project rule was merely supplied as context or was observed saved.
+Explicitly report `PROJECT_SETTINGS=unverified` and `NEW_PROJECT_CHAT=unverified`
+when their product-level evidence is absent, even if instruction readiness or a
+plan-only task succeeds. Do not silently omit those open acceptance criteria.
+This status belongs in the activation/evaluation report, not in unrelated later
+simple answers whose activation report is already recorded.
 
 After saving, start a real new chat in that project with an ordinary task that
 does not mention Fable. Observe the registry and pinned source reads before task

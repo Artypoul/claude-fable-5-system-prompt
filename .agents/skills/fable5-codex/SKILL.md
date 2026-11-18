@@ -23,7 +23,10 @@ is the instruction-reading surface; announce it. Its immutable source reads and
 capability checks determine GitHub readiness, independently of native MCP.
 Do not reinterpret a failed native gate as GitHub success or switch routes
 silently. Source-read readiness, native activation and task completion are
-separate facts. An explicit request to change the selected route restarts its
+separate facts. In a project-setup or activation report, explicitly distinguish
+instructions merely supplied as context from observed saved project settings
+and actual new-chat inheritance; report either product check as unverified
+when its evidence is absent. An explicit request to change the selected route restarts its
 bootstrap and preserves the earlier result.
 
 The following native bootstrap and mandatory activation gate apply only to

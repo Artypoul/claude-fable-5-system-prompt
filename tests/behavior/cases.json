@@ -31,7 +31,7 @@
   {
     "id": "github-project-plan",
     "source": "ChatGPT GitHub activation contract",
-    "request": "Prepare only a plan to audit the named repository README. Do not edit files or create a PR.",
+    "request": "Prepare only a plan to audit the named repository README. Also report what this run establishes about the project setup and what remains unverified. Do not edit files or create a PR.",
     "capabilities": [
       "connector_call",
       "read_skill",
