@@ -107,3 +107,30 @@ that limitation. The activation instructions were clarified, the fixture's user
 request explicitly asks what project setup is verified, and a new isolated run
 reads the complete input in bounded chunks. The expected setup contract and
 negative controls were retained.
+
+
+### Accepted current observation
+
+The accepted isolated generator `behavior_generator_acceptance` consumed the
+entire 100,367-byte input through six consecutive character ranges, then the
+schema. Separate `behavior_judge_acceptance` consumed all 51,573 bytes of its
+judge input through EOF and the complete schema. Neither received expected
+control verdicts; the generator received no expected traces or earlier results.
+
+- 37 of 37 action-plan scenarios passed.
+- All 21 positive/negative answer controls received their required verdicts.
+- The current Python suite passed all 79 tests, including stale-observation and
+  prompt/response-binding rejection checks.
+- `ensure_unchanged` and `check_observation` accepted the collected responses.
+- Generator: `gpt-6.1-terra/high`; independent judge: `gpt-6.1-sol/xhigh`.
+- Transport is explicitly `chatgpt_collaboration`; `codex_version` is null.
+
+The complete public responses, independent judgments, role identities and
+fingerprints are in `tests/behavior/observed-results.json`. No response or
+judgment was edited by the coordinator to turn a failure into a pass.
+
+Current skill package SHA-256: `f851742211b6c1ea6c8477152356203856fcd1bc78bc83b9e78453aa46b3e2e3`.
+
+Submitted generator prompt SHA-256: `a28639d4b8adcfc02942f63c201ecb0e8ef836d0483bc7968dcfded2df7ff006`.
+
+Independent judge prompt SHA-256: `d44d63b0db4d9952ba681e4b0078aecb0c59ccd8b1337af3d0bd0c316807bf7e`.
