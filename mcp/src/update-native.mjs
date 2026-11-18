@@ -780,7 +780,8 @@ export class NativeBackend {
     const own = entries?.length === 1 && !entries[0].errors?.length &&
       entries[0].skills?.find(
         (skill) => skill.pluginId === this.identity.pluginId &&
-          skill.name === this.identity.plugin && skill.enabled,
+          (skill.name === this.identity.plugin ||
+            skill.name === `${this.identity.plugin}:${this.identity.plugin}`) && skill.enabled,
       );
 
     if (

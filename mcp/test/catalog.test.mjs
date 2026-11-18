@@ -42,7 +42,9 @@ test("configured catalogue applies disabled skill path", async (t) => {
   const initial = await f.catalog();
   for (const filename of [f.repo, f.user, f.plugin]) {
     const real = await fs.realpath(filename), old = initial.skills.find((skill) => skill.path === real);
-    await f.config(rule("path", path.join(path.dirname(filename), "..") + "/" + path.basename(path.dirname(filename)) + "/SKILL.md", false));
+    const selector = path.dirname(filename) + "/../" + path.basename(path.dirname(filename)) + "/SKILL.md";
+    assert.notEqual(selector, real);
+    await f.config(rule("path", selector, false));
     const catalog = await f.catalog();
     assert.equal(catalog.skills.some((skill) => skill.path === real), false);
     await assert.rejects(readRegisteredSkill(catalog, old.id, 0, 32000), { code: "SKILL_NOT_FOUND" });

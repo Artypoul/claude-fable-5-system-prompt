@@ -364,7 +364,7 @@ test("legacy customized backup falls back locally when Git install succeeds with
   assert.ok(equal(await inventory(restored.path), before.files));
 });
 
-async function healthFixture(t) {
+async function healthFixture(t, nativeName = "fable5-codex:fable5-codex") {
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-health-"));
   const previous = { CODEX_HOME: process.env.CODEX_HOME, HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
   t.after(async () => {
@@ -387,7 +387,7 @@ async function healthFixture(t) {
   await fs.writeFile(path.join(installed, skill), "---\nname: fable5-codex\ndescription: selected fixture\n---\nselected content\n");
   await fs.copyFile(path.join(root, "mcp/dist/server.mjs"), path.join(installed, "mcp/dist/server.mjs"));
   const native = path.join(temp, "native-fixture.mjs");
-  await fs.writeFile(native, `#!${process.execPath}\nimport { createInterface } from 'node:readline';\nconst skill = ${JSON.stringify(path.join(installed, skill))};\nfor await (const line of createInterface({input: process.stdin})) {\n const request = JSON.parse(line);\n if (request.id === 1) console.log(JSON.stringify({id: 1, result: {}}));\n if (request.id === 2) console.log(JSON.stringify({id: 2, result: {data: [{cwd: process.cwd(), errors: [], skills: [{name: 'fable5-codex', description: 'fixture', path: skill, scope: 'user', pluginId: 'fable5-codex@fable5', enabled: true}]}]}}));\n}\n`);
+  await fs.writeFile(native, `#!${process.execPath}\nimport { createInterface } from 'node:readline';\nconst skill = ${JSON.stringify(path.join(installed, skill))};\nfor await (const line of createInterface({input: process.stdin})) {\n const request = JSON.parse(line);\n if (request.id === 1) console.log(JSON.stringify({id: 1, result: {}}));\n if (request.id === 2) console.log(JSON.stringify({id: 2, result: {data: [{cwd: process.cwd(), errors: [], skills: [{name: ${JSON.stringify(nativeName)}, description: 'fixture', path: skill, scope: 'user', pluginId: 'fable5-codex@fable5', enabled: true}]}]}}));\n}\n`);
   await fs.chmod(native, 0o755);
   return { temp, project, profile, installed: { path: installed }, files: await inventory(installed), skill, backend: new NativeBackend({ codex: native }) };
 }
@@ -396,6 +396,12 @@ test("health MCP uses the custom CODEX_HOME", async (t) => {
   const f = await healthFixture(t);
   process.env.HOME = path.join(f.temp, "empty-home");
   delete process.env.USERPROFILE;
+  process.env.CODEX_HOME = f.profile;
+  await assert.doesNotReject(f.backend.health(f.installed, f.project, f.files));
+});
+
+test("health accepts the configured short native skill name", async (t) => {
+  const f = await healthFixture(t, "fable5-codex");
   process.env.CODEX_HOME = f.profile;
   await assert.doesNotReject(f.backend.health(f.installed, f.project, f.files));
 });
