@@ -363,3 +363,68 @@ test("legacy customized backup falls back locally when Git install succeeds with
   assert.equal(restored.sourceMode, "local_backup");
   assert.ok(equal(await inventory(restored.path), before.files));
 });
+
+async function healthFixture(t) {
+  const temp = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-health-"));
+  const previous = { CODEX_HOME: process.env.CODEX_HOME, HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
+  t.after(async () => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    await fs.rm(temp, { recursive: true, force: true });
+  });
+  const project = path.join(temp, "project"), profile = path.join(temp, "profile");
+  const installed = path.join(profile, "plugins/cache/fable5/fable5-codex/1.0.0");
+  const skill = ".agents/skills/fable5-codex/SKILL.md";
+  await fs.mkdir(project, { recursive: true });
+  await fs.mkdir(path.join(installed, ".codex-plugin"), { recursive: true });
+  await fs.mkdir(path.join(installed, path.dirname(skill)), { recursive: true });
+  await fs.mkdir(path.join(installed, "mcp/dist"), { recursive: true });
+  await fs.writeFile(path.join(profile, "config.toml"), '[plugins."fable5-codex@fable5"]\nenabled = true\n');
+  await fs.writeFile(path.join(installed, ".codex-plugin/plugin.json"), JSON.stringify({ name: "fable5-codex", version: "1.0.0", skills: "./.agents/skills/" }));
+  await fs.writeFile(path.join(installed, ".mcp.json"), JSON.stringify({ mcpServers: { fable5_skills: { command: "node", cwd: "./", args: ["mcp/dist/server.mjs"] } } }));
+  await fs.writeFile(path.join(installed, skill), "---\nname: fable5-codex\ndescription: selected fixture\n---\nselected content\n");
+  await fs.copyFile(path.join(root, "mcp/dist/server.mjs"), path.join(installed, "mcp/dist/server.mjs"));
+  const native = path.join(temp, "native-fixture.mjs");
+  await fs.writeFile(native, `#!${process.execPath}\nimport { createInterface } from 'node:readline';\nconst skill = ${JSON.stringify(path.join(installed, skill))};\nfor await (const line of createInterface({input: process.stdin})) {\n const request = JSON.parse(line);\n if (request.id === 1) console.log(JSON.stringify({id: 1, result: {}}));\n if (request.id === 2) console.log(JSON.stringify({id: 2, result: {data: [{cwd: process.cwd(), errors: [], skills: [{name: 'fable5-codex', description: 'fixture', path: skill, scope: 'user', pluginId: 'fable5-codex@fable5', enabled: true}]}]}}));\n}\n`);
+  await fs.chmod(native, 0o755);
+  return { temp, project, profile, installed: { path: installed }, files: await inventory(installed), skill, backend: new NativeBackend({ codex: native }) };
+}
+
+test("health MCP uses the custom CODEX_HOME", async (t) => {
+  const f = await healthFixture(t);
+  process.env.HOME = path.join(f.temp, "empty-home");
+  delete process.env.USERPROFILE;
+  process.env.CODEX_HOME = f.profile;
+  await assert.doesNotReject(f.backend.health(f.installed, f.project, f.files));
+});
+
+test("health rejects a matching identity from another installation", async (t) => {
+  const f = await healthFixture(t);
+  const foreign = path.join(f.temp, "foreign-home", ".codex");
+  const foreignInstalled = path.join(foreign, "plugins/cache/fable5/fable5-codex/1.0.0");
+  await fs.mkdir(foreign, { recursive: true });
+  await fs.writeFile(path.join(foreign, "config.toml"), '[plugins."fable5-codex@fable5"]\nenabled = true\n');
+  await copyPackage(f.installed.path, foreignInstalled, f.files);
+  await fs.appendFile(path.join(foreignInstalled, f.skill), "foreign content\n");
+  process.env.HOME = path.dirname(foreign);
+  delete process.env.USERPROFILE;
+  process.env.CODEX_HOME = foreign;
+  await assert.rejects(f.backend.health(f.installed, f.project, f.files), { code: "HEALTH_FAILED" });
+});
+
+test("health uses the default profile without CODEX_HOME", async (t) => {
+  const f = await healthFixture(t);
+  const defaultProfile = path.join(f.temp, "home", ".codex");
+  await fs.mkdir(path.dirname(defaultProfile), { recursive: true });
+  await fs.rename(f.profile, defaultProfile);
+  const native = f.backend.codex;
+  const script = await fs.readFile(native, "utf8");
+  await fs.writeFile(native, script.replaceAll(f.profile, defaultProfile));
+  f.installed.path = f.installed.path.replace(f.profile, defaultProfile);
+  process.env.HOME = path.dirname(defaultProfile);
+  delete process.env.USERPROFILE;
+  delete process.env.CODEX_HOME;
+  await assert.doesNotReject(f.backend.health(f.installed, f.project, f.files));
+});

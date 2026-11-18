@@ -773,11 +773,16 @@ export class NativeBackend {
         "Installed files differ from the expected package.",
       );
     const native = await fetchNativeCatalog(project, { command: this.codex });
-    const own = native.data
-      .flatMap((entry) => entry.skills)
-      .find(
-        (skill) => skill.pluginId === this.identity.pluginId && skill.enabled,
+    const entries = native.data?.filter(
+      (entry) => typeof entry.cwd === "string" &&
+        path.resolve(entry.cwd) === path.resolve(project),
+    );
+    const own = entries?.length === 1 && !entries[0].errors?.length &&
+      entries[0].skills?.find(
+        (skill) => skill.pluginId === this.identity.pluginId &&
+          skill.name === this.identity.plugin && skill.enabled,
       );
+
     if (
       !own ||
       !path
@@ -788,6 +793,13 @@ export class NativeBackend {
         "HEALTH_FAILED",
         "Codex did not load the installed skill.",
       );
+    const relativeSkill = path.relative(path.resolve(installed.path), path.resolve(own.path));
+    const skillKey = relativeSkill.split(path.sep).join("/");
+    const expectedDigest = files[skillKey];
+    const skillBytes = await fs.readFile(own.path);
+    if (path.basename(own.path) !== "SKILL.md" || !expectedDigest ||
+        digest(skillBytes) !== expectedDigest)
+      throw new UpdateError("HEALTH_FAILED", "Installed skill bytes did not match.");
     const config = JSON.parse(
       await fs.readFile(path.join(installed.path, ".mcp.json"), "utf8"),
     );
@@ -804,6 +816,7 @@ export class NativeBackend {
       );
     const env = getDefaultEnvironment();
     env.FABLE5_CODEX_BIN = this.codex;
+    if (process.env.CODEX_HOME) env.CODEX_HOME = path.resolve(project, process.env.CODEX_HOME);
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: [path.join(installed.path, "mcp/dist/server.mjs")],
@@ -838,7 +851,8 @@ export class NativeBackend {
         }),
       );
       const skill = found.skills.find(
-        (s) => s.plugin_id === this.identity.pluginId,
+        (s) => s.plugin_id === this.identity.pluginId &&
+          s.name === this.identity.plugin && s.path === path.resolve(own.path),
       );
       if (!skill || found.partial)
         throw new UpdateError(
@@ -851,7 +865,12 @@ export class NativeBackend {
           arguments: { cwd: project, skill_id: skill.id },
         }),
       );
-      if (!read.content.includes("name: fable5-codex") || !read.sha256)
+      const expectedContent = Array.from(skillBytes.toString("utf8"))
+        .slice(0, 16000).join("");
+      if (read.skill?.id !== skill.id || read.skill?.path !== skill.path ||
+          read.skill?.plugin_id !== this.identity.pluginId ||
+          read.skill?.name !== this.identity.plugin || read.sha256 !== expectedDigest ||
+          read.offset !== 0 || read.content !== expectedContent)
         throw new UpdateError("HEALTH_FAILED", "MCP skill read did not match.");
     };
     try {
