@@ -1,5 +1,7 @@
 # Fable 5 Codex plugin
 
+Version **1.4.0** adds [ChatGPT through GitHub](.agents/skills/fable5-codex/references/chatgpt-github.md): a supported immutable instruction-loading route with full-read, dependency and capability gates. It preserves native MCP behavior and distinguishes GitHub readiness from installation, native activation and task completion. Use the [project instruction](docs/chatgpt-project-instructions.md), [acceptance guide](docs/chatgpt-github-acceptance.md) and [evidence report](docs/chatgpt-github-evidence.md). The second release PR updates both Gigma registry pins to the tested source commit.
+
 Version 1.3.8 adds the read-only `fable-status` MCP tool. It verifies the
 complete Fable 5 → Gigma Superpowers → implementation-planning gateway without
 installing, updating or executing plugins.
@@ -55,13 +57,13 @@ python scripts/evaluate_behavior.py --run-model --model gpt-6.1-terra --reasonin
 
 The first command runs deterministic integrity, packaging and scenario-checker
 tests in CI. The second uses the authenticated Codex CLI to generate action
-plans for 29 independent scenarios, using this checkout's instructions. It can
+plans for 37 independent scenarios, using this checkout's instructions. It can
 consume model quota; it never executes proposed actions or calls live sports,
 storage or model backends. Expected traces are not included in the model input.
 Without a CLI or authentication it fails explicitly, rather than reporting a pass.
 Use `--baseline-ref 73636bd` to evaluate 1.1.0 against the same scenarios.
 A second, separate model call judges the meaning of answers in the four
-capability-gap, two recovery and six Superpowers scenarios. Sixteen controls include false persistence,
+capability-gap, two recovery and six Superpowers scenarios. Twenty-one controls include false persistence,
 model API, browser and statistics claims, reordered or unsafe recovery, invalid skill reads, and truthful
 qualified answers. Recovery traces require the reference read and ordered phases;
 the blocked-writer case forbids restoration. Expected control
@@ -72,6 +74,16 @@ Model output and instruction fingerprints are written to the selected output
 path; keep both `.plan.events.jsonl` and `.judge.events.jsonl` logs outside the
 repository. These evaluations do
 not prove reliability on every task or provide missing backend implementations.
+
+When the CLI transport is unavailable, the same frozen `plan_prompt` and
+`judge_prompt` may be collected through actual separate ChatGPT agents. Keep
+the generator input free of expected traces and the judge input free of expected
+control verdicts. Record the actual transport, separate agent identities, role
+settings and prompt/response fingerprints; run the same `ensure_unchanged`,
+`answer_reviews`, `evaluate` and `check_observation` checks. Set `codex_version`
+to null when the CLI did not produce the observation. Agent input/output file
+transport is not execution of the proposed fixture actions. Never fill response
+or judgment fields by hand or refresh fingerprints on old answers.
 
 After a successful model run, copy its JSON observation (not its raw event log)
 to `tests/behavior/observed-results.json`. CI rechecks the observed plans against

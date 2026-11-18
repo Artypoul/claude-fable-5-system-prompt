@@ -32,6 +32,27 @@ The active entry point is [.agents/skills/fable5-codex/SKILL.md](.agents/skills/
 
 This is **workflow guidance for Codex**, not a system prompt, model identity, hidden API, credential, permission grant or replacement for the active system and developer instructions. The skill cannot give Codex tools or access that the host has not provided.
 
+## ChatGPT through the connected GitHub integration
+
+Version **1.4.0** adds a supported `chatgpt_github` instruction-loading mode.
+Say **«Примени Fable 5 через GitHub и выполни задачу»**. The agent resolves the
+Gigma registry to one commit, verifies its Fable/Superpowers pins and manifests,
+reads full instructions and required dependencies, then checks the real task
+capabilities. The canonical contract is
+[ChatGPT through GitHub](.agents/skills/fable5-codex/references/chatgpt-github.md).
+
+For project chats, save the [copyable project instruction](docs/chatgpt-project-instructions.md)
+in the intended ChatGPT project and verify a new chat without a Fable reminder.
+This repository cannot save that setting or prove inheritance by itself. See the
+[acceptance scenarios](docs/chatgpt-github-acceptance.md) and
+[observed evidence](docs/chatgpt-github-evidence.md).
+
+`FABLE_MODE=chatgpt_github FABLE_GATE=ready` means the selected instructions and
+capabilities for the requested scope are verified. It is not native plugin
+installation, MCP activation or completed work. Native Codex keeps its strict
+`search_skills → read_skill → fable-status` chain. Node/Codex are required for
+that local MCP route, not merely to read instructions through GitHub.
+
 ## Install and use
 
 Install the complete plugin globally from this repository:
@@ -73,7 +94,7 @@ Before using the skill in a project:
 
 The skill follows the host's current permissions, tool schemas, safety rules, network policy and filesystem boundaries.
 
-For engineering tasks the skill routes through the enabled `superpowers@gigma-skills` source, using the Fable MCP catalogue tools or the live host catalogue when MCP is unavailable, incomplete or misses the skill. It preserves project gates and approved plans, and specifies independent implementation and review roles where delegation is authorized. The instructions do not install a plugin, activate a skill automatically, enforce model selection or grant permissions.
+For engineering tasks in native Codex mode the skill routes through the enabled `superpowers@gigma-skills` source, using the Fable MCP catalogue tools or the live host catalogue when MCP is unavailable, incomplete or misses the skill. It preserves project gates and approved plans, and specifies independent implementation and review roles where delegation is authorized. The instructions do not install a plugin, activate a skill automatically, enforce model selection or grant permissions.
 
 ## What is adapted
 

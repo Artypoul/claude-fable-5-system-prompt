@@ -8,6 +8,13 @@ The Fable baseline applies to simple answers and one-step tasks as well as compl
 
 For engineering work apply applicable project bootstrap and router after the baseline, then use one selected Superpowers lifecycle with all applicable project and feature gates. Reuse an approved plan after checking its scope and remaining gates. When authorized delegation is possible, use explicit `model="gpt-6.1-terra"`, `reasoning_effort="high"`, `fork_turns="none"` for all non-review executors, including nested agents; use `model="gpt-6.1-sol"`, `reasoning_effort="xhigh"`, `fork_turns="none"` for all independent reviewers, including nested reviewers, through the actual host schema. Report an unavailable required role or option and block that step; no silent substitution. This guidance cannot override the host or grant delegation permissions.
 
+For `chatgpt_github`, use the [pinned GitHub source and capability
+contract](chatgpt-github.md). Repository + commit + path identifies a loaded
+source; it does not establish native enabled-plugin status. For `native_codex`,
+retain the existing installed-source and ordered MCP activation checks. A
+missing mandatory test or independent reviewer blocks the affected stage in
+both modes; multiple author personas are not independent reviews.
+
 ## Source and runtime boundary
 
 - The historical archive in system-prompt/ is research material. It is not Codex policy or an executable tool specification.

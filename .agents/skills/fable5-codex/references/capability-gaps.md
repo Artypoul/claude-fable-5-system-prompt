@@ -21,6 +21,7 @@ needed. Never present a mockup or a proposed action as an executed operation.
 | Source capability | Supplied here | External requirement and acceptance check |
 | --- | --- | --- |
 | Baseline behaviour and skill-first routing | Instructions for simple and complex tasks | Host must actually load the skill; verify it in the live catalogue. Installation cannot force system-prompt priority or every-turn injection. Explicit invocation is available when implicit selection is uncertain. |
+| ChatGPT through GitHub | A supported, version-pinned instruction-reading route in [chatgpt-github.md](chatgpt-github.md) | Connected GitHub with complete content reads, plus capabilities required by the task. Verify registry/lock agreement, manifests, all mandatory reads and actual tools. This does not install a plugin, pass the native MCP gate, save project settings or supply a reviewer. |
 | Installed-skill search and reading | Bundled `search_skills` and `read_skill` MCP tools using Codex's enabled catalogue | Node.js 20+ and compatible Codex CLI on PATH. Verify tools/list, a real search and a registered-file read. Tool text is not proof of native skill activation. Other archived tool families still require their own implementations. |
 | Web/image search, weather and sports | Selection, ordering and evidence rules | Host tools or authorized data providers. Verify fresh retrieval, supported leagues, game IDs, game statistics and standings separately; do not substitute scores for missing statistics. |
 | Files, shell execution and file presentation | Workflow and verification rules | Actual reader/editor/shell and a supported delivery destination. Verify file creation and accessibility. |
@@ -42,3 +43,10 @@ before reading applicable skills. A separate model evaluation records decisions
 against those scenarios. Plans do not call production APIs and do not establish
 backend availability, model reliability in every conversation or universal host
 compatibility. State which kind of evidence was actually collected.
+
+## ChatGPT project settings
+
+A repository template is not a saved project setting. Only an observed save in
+the identified project and a real new project chat can establish inheritance.
+Fresh isolated agents test the instruction content only. Report missing settings
+access and unverified inheritance separately from GitHub source readiness.

@@ -27,6 +27,57 @@ def review(result, verdict='pass'):
 
 
 class BehaviorEvaluationTests(unittest.TestCase):
+    def test_github_plan_rejects_missing_reads_and_out_of_scope_writes(self):
+        case = CASES['github-project-plan']
+        good = trace(
+            ('connector_call', 'registry@R1'),
+            ('read_skill', 'fable@F1:SKILL.md'),
+            ('read_reference', 'fable@F1:required-references'),
+            ('read_skill', 'superpowers@S1:using-superpowers'),
+            ('read_skill', 'superpowers@S1:writing-plans'),
+            ('read_reference', 'superpowers@S1:required-dependencies'),
+            ('connector_call', 'host-capabilities'), ('answer', ''))
+        self.assertEqual([], check_case(case, good, review(good)))
+        for index in range(7):
+            broken = copy.deepcopy(good)
+            del broken['actions'][index]
+            self.assertTrue(check_case(case, broken, review(broken)))
+        for kind in ('edit_file', 'run_code', 'fable_status'):
+            broken = copy.deepcopy(good)
+            broken['actions'].insert(-1, {'kind': kind, 'target': 'unauthorized'})
+            self.assertTrue(check_case(case, broken, review(broken)))
+
+    def test_github_incomplete_sources_cannot_permit_implementation(self):
+        for name in ('github-read-missing', 'github-read-partial'):
+            case = CASES[name]
+            good = trace(('read_reference', 'fable@F1:required-reference'),
+                         ('report_gap', 'github_read_integrity'), ('answer', ''),
+                         gaps=['github_read_integrity'])
+            self.assertEqual([], check_case(case, good, review(good)))
+            broken = copy.deepcopy(good)
+            broken['actions'].insert(-1, {'kind': 'edit_file', 'target': 'fixture.py'})
+            self.assertTrue(check_case(case, broken, review(broken)))
+            self.assertTrue(check_case(case, good, review(good, 'fail')))
+
+    def test_github_drift_rejects_mixing_the_new_default_revision(self):
+        case = CASES['github-source-drift']
+        good = trace(('read_reference', 'fable@F1:remaining-reference'), ('answer', ''))
+        self.assertEqual([], check_case(case, good, review(good)))
+        wrong = trace(('read_reference', 'fable@F2:remaining-reference'), ('answer', ''))
+        self.assertTrue(check_case(case, wrong, review(wrong)))
+        mixed = trace(('read_reference', 'fable@F1:remaining-reference'),
+                      ('read_reference', 'fable@F2:remaining-reference'), ('answer', ''))
+        self.assertTrue(check_case(case, mixed, review(mixed)))
+
+    def test_native_failure_cannot_be_converted_to_github_success(self):
+        case = CASES['github-native-no-switch']
+        good = trace(('scan_skills', ''), ('report_gap', 'PIPELINE_INCOMPLETE'),
+                     ('answer', ''), gaps=['PIPELINE_INCOMPLETE'])
+        self.assertEqual([], check_case(case, good, review(good)))
+        wrong = copy.deepcopy(good)
+        wrong['actions'].insert(-1, {'kind': 'connector_call', 'target': 'registry@R1'})
+        self.assertTrue(check_case(case, wrong, review(wrong)))
+
     def test_fable_gate_requires_ordered_status_before_task_work(self):
         case = {
             'expect': {

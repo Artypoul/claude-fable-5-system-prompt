@@ -108,6 +108,11 @@ def skill_context(root, ref=None, files=None):
                 ('8-1', '8-2'), ('8-4', '8-5'), ('3', '4'), ('10', '11')]
     parts = [main, 'REFERENCE: references/coding-workflow.md\n' +
              files['references/coding-workflow.md'].decode('utf-8')]
+    # Include the actual route contract, not only its link. Older baselines lack it.
+    github_reference = files.get('references/chatgpt-github.md')
+    if github_reference is not None:
+        parts.append('REFERENCE: references/chatgpt-github.md\n' +
+                     github_reference.decode('utf-8'))
     for start, end in sections:
         a, b = f'<a id="f5-section-{start}"></a>', f'<a id="f5-section-{end}"></a>'
         parts.append(port[port.index(a):port.index(b, port.index(a))])
@@ -190,7 +195,7 @@ def plan_prompt(snapshot):
     return (
         'This evaluation continues an already-clarified user task; its initial clarification '
         'gate is satisfied. Do not ask a meta-level question about running the evaluation. '
-        'For scenarios whose context does not name Fable/MCP discovery or skill-read integrity, '
+        'For scenarios whose context does not name Fable/MCP/GitHub discovery or skill-read integrity, '
         'treat the baseline skill activation as already satisfied and do not invent Fable gate '
         'actions or gaps. Use only capabilities and gaps supported by that scenario. '
         'Scenario-specific clarification decisions must still follow each fixture. '
@@ -200,7 +205,7 @@ def plan_prompt(snapshot):
         'Do not invoke real tools, shell, network or external services. Action names are a test '
         'protocol, not callable APIs. Use targets exactly from the fixture for skill names, filenames, '
         'connector IDs and game IDs; use an empty target where none is needed. For missing '
-        'capabilities use report_gap with app_storage, app_model_api, browser_navigation, game_stats, writer_containment, superpowers_source, reviewer_model or skill_read_integrity as applicable, '
+        'capabilities use report_gap with app_storage, app_model_api, browser_navigation, game_stats, writer_containment, superpowers_source, reviewer_model, github_read_integrity, PIPELINE_INCOMPLETE or skill_read_integrity as applicable, '
         'and include that identifier in gaps. An answer action means delivering a substantive final '
         'answer, not a short introduction before asking a question. When delivering a final answer, '
         'include its answer action even if earlier write_text actions contain text; the answer '
@@ -224,11 +229,11 @@ def plan_prompt(snapshot):
         'condition, verify containment first when the scenario requires it, then preserve evidence '
         'and emit report_gap with '
         'its identifier and repeat that identifier in gaps. For '
-        'Superpowers actions, preserve the exact plugin_id:name target shown in the scenario context; '
+        'native Superpowers actions, preserve the exact plugin_id:name target shown in the scenario context; '
         'when a required independent reviewer is unavailable, report_gap reviewer_model and do not '
         'emit implementation or other work actions. Recovery answers must explicitly name the '
         'recorded baseline and current content, all in-flight tools/processes/delegated writers, '
-        'and any unknown database/external effects. Superpowers answers must mention the selected '
+        'and any unknown database/external effects. Native Superpowers answers must mention the selected '
         'registered paths, explicitly read and verify both selected skill pages before use, approved '
         'plan, project/feature gates, exact reviewer roles and that no execution is claimed until '
         'evidence exists. For partial or changed reads, explicitly reject '
@@ -243,6 +248,11 @@ def plan_prompt(snapshot):
         'For delegated Superpowers roles, the superpowers-route answer must literally include '
         'gpt-6.1-terra/high and gpt-6.1-sol/xhigh, and state fork_turns none for both the '
         'Terra implementer and Sol reviewer. '
+        'For chatgpt_github fixtures, use the exact repository/revision/path action labels supplied '
+        'in that fixture. connector_call registry@R1 represents the described immutable registry/lock '
+        'and manifest resolution; connector_call host-capabilities inspects the described actual host. '
+        'These are fixture protocol labels, not real callable APIs. Do not add native MCP steps to a '
+        'GitHub fixture or infer a project-settings save from a project-rule fixture. '
         'Do not assume any preference or tool result beyond the fixture.\n\n'
         'SKILL INSTRUCTIONS:\n' + snapshot['context'] + '\n\nSCENARIOS:\n' + json.dumps(public_cases))
 
