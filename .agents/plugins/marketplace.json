@@ -4,6 +4,7 @@
   "plugins": [
     {
       "name": "fable5-codex",
+      "version": "1.4.2",
       "source": { "source": "local", "path": "./" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity"

@@ -38,6 +38,29 @@ class PortValidationTests(unittest.TestCase):
         self.assertIn(old, text)
         file.write_text(text.replace(old, new, 1))
 
+    def test_native_activation_identity_contract(self):
+        for name in [SKILL, SKILL.parent / 'references/tools-and-mcp.md']:
+            text = (ROOT / name).read_text()
+            with self.subTest(path=name):
+                for identity in ['fable5-codex@fable5', 'fable5-codex@gigma-skills',
+                                 'superpowers@gigma-skills']:
+                    self.assertIn(identity, text)
+                self.assertIn('Exactly one enabled Fable entry', text)
+                self.assertIn('unknown identity block readiness', text)
+        for name in ['README.md', 'PLUGIN.md']:
+            text = (ROOT / name).read_text()
+            self.assertIn('standalone updater', text)
+            self.assertIn('@fable5', text)
+            self.assertIn('Gigma update route', text)
+
+    def test_github_superpowers_uses_owned_source_without_silent_fallback(self):
+        text = (ROOT / SKILL.parent / 'references/chatgpt-github.md').read_text()
+        self.assertRegex(text, r'The selected repositories must be\s+`Artypoul/claude-fable-5-system-prompt` and `Artypoul/superpowers`, unless')
+        self.assertIn('user has explicitly authorized a different source', text)
+        self.assertIn('Do not silently fall back to `obra/superpowers`', text)
+        self.assertIn('full 40-hex commit pins', text)
+        self.assertIn('read `skills/using-superpowers/SKILL.md` completely', text)
+
     def test_valid_package(self):
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

@@ -14,6 +14,96 @@ import {
   sha256,
 } from "../src/catalog.mjs";
 
+// These cases fail if discovery publishes a skill without applying the effective rule.
+async function skillRulesFixture(t) {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable-rules-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project"), profile = path.join(root, "profile");
+  const repo = path.join(project, ".agents", "skills", "repo", "SKILL.md");
+  const user = path.join(profile, "skills", "user", "SKILL.md");
+  const pluginRoot = path.join(profile, "plugins", "cache", "gigma-skills", "demo", "1.0.0");
+  const plugin = path.join(pluginRoot, "skills", "plugin", "SKILL.md");
+  for (const [filename, name] of [[repo, "repo"], [user, "user"], [plugin, "plugin"]]) {
+    await fs.mkdir(path.dirname(filename), { recursive: true });
+    await fs.writeFile(filename, `---\nname: ${name}\ndescription: ${name} skill\n---\n`);
+  }
+  await fs.mkdir(path.join(pluginRoot, ".codex-plugin"), { recursive: true });
+  await fs.writeFile(path.join(pluginRoot, ".codex-plugin", "plugin.json"), JSON.stringify({ name: "demo", skills: "./skills" }));
+  const config = (rules, enabled = true) => fs.writeFile(path.join(profile, "config.toml"),
+    `[plugins."demo@gigma-skills"]\nenabled = ${enabled}\n${rules}`);
+  const catalog = async () => parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  return { project, repo, user, plugin, config, catalog };
+}
+const rule = (selector, value, enabled) => `[[skills.config]]\n${selector} = ${JSON.stringify(value)}\nenabled = ${enabled}\n`;
+
+test("configured catalogue applies disabled skill path", async (t) => {
+  const f = await skillRulesFixture(t);
+  await f.config("");
+  const initial = await f.catalog();
+  for (const filename of [f.repo, f.user, f.plugin]) {
+    const real = await fs.realpath(filename), old = initial.skills.find((skill) => skill.path === real);
+    const selector = path.dirname(filename) + "/../" + path.basename(path.dirname(filename)) + "/SKILL.md";
+    assert.notEqual(selector, real);
+    await f.config(rule("path", selector, false));
+    const catalog = await f.catalog();
+    assert.equal(catalog.skills.some((skill) => skill.path === real), false);
+    await assert.rejects(readRegisteredSkill(catalog, old.id, 0, 32000), { code: "SKILL_NOT_FOUND" });
+  }
+});
+
+test("configured catalogue preserves comment markers inside skill selectors", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable-comment-rules-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const project = path.join(root, "project # sample"), profile = path.join(root, "profile");
+  const filename = path.join(project, ".agents", "skills", "demo", "SKILL.md");
+  const name = 'demo " # sample';
+  await fs.mkdir(path.dirname(filename), { recursive: true });
+  await fs.mkdir(profile, { recursive: true });
+  await fs.writeFile(filename, `---\nname: ${name}\ndescription: Demo\n---\n`);
+  const config = path.join(profile, "config.toml");
+  const catalog = async () => parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
+  await fs.writeFile(config, "");
+  const initial = await catalog(), old = initial.skills[0];
+  assert.equal(old.path, await fs.realpath(filename));
+  for (const selector of [
+    `path = ${JSON.stringify(filename)}`,
+    `path = '${filename}'`,
+    `name = ${JSON.stringify(name)}`,
+    `name = '${name}'`,
+  ]) {
+    await fs.writeFile(config, `[[skills.config]] # rule\n${selector} # selector\nenabled = false # disable\n`);
+    const disabled = await catalog();
+    assert.equal(disabled.skills.some((skill) => skill.path === old.path), false, selector);
+    await assert.rejects(readRegisteredSkill(disabled, old.id, 0, 32000), { code: "SKILL_NOT_FOUND" });
+    assert.equal(disabled.partial, false);
+  }
+});
+
+test("configured catalogue applies disabled skill name", async (t) => {
+  const f = await skillRulesFixture(t);
+  await f.config(["repo", "user", "plugin"].map((name) => rule("name", name, false)).join(""));
+  assert.deepEqual((await f.catalog()).skills, []);
+});
+
+test("configured catalogue uses the last matching skill rule", async (t) => {
+  const f = await skillRulesFixture(t);
+  const real = await fs.realpath(f.plugin);
+  await f.config(rule("name", "plugin", false) + rule("path", f.plugin, true));
+  let catalog = await f.catalog();
+  const restored = catalog.skills.find((skill) => skill.path === real);
+  assert.equal(restored?.plugin_id, "demo@gigma-skills");
+  assert.match((await readRegisteredSkill(catalog, restored.id, 0, 32000)).content, /name: plugin/);
+  await f.config(rule("path", f.plugin, true) + rule("name", "plugin", false) +
+    `[[skills.config]]\nname = "plugin"\nunknown = "x"\nenabled = true\n` +
+    `[[skills.config]]\nname = "plugin"\npath = ${JSON.stringify(f.plugin)}\nenabled = true\n` +
+    `[[skills.config]]\nname = "plugin"\nenabled = invalid\n` +
+    `[[skills.config]]\nname = "plugin"\npath = invalid\nenabled = true\n`);
+  catalog = await f.catalog();
+  assert.equal(catalog.skills.some((skill) => skill.path === real), false);
+  await f.config(rule("path", f.plugin, true), false);
+  assert.equal((await f.catalog()).skills.some((skill) => skill.path === real), false);
+});
+
 test("configured catalogue reads enabled cache skills without spawning Codex", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "fable5-configured-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
