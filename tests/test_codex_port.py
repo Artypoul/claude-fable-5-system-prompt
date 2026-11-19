@@ -53,6 +53,14 @@ class PortValidationTests(unittest.TestCase):
             self.assertIn('@fable5', text)
             self.assertIn('Gigma update route', text)
 
+    def test_github_superpowers_uses_owned_source_without_silent_fallback(self):
+        text = (ROOT / SKILL.parent / 'references/chatgpt-github.md').read_text()
+        self.assertRegex(text, r'The selected repositories must be\s+`Artypoul/claude-fable-5-system-prompt` and `Artypoul/superpowers`, unless')
+        self.assertIn('user has explicitly authorized a different source', text)
+        self.assertIn('Do not silently fall back to `obra/superpowers`', text)
+        self.assertIn('full 40-hex commit pins', text)
+        self.assertIn('read `skills/using-superpowers/SKILL.md` completely', text)
+
     def test_valid_package(self):
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
