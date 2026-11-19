@@ -19,7 +19,7 @@ const makeCatalog = (overrides = {}) => {
     scope: "user",
     plugin_id,
   }));
-  return { skills, partial: false, warning_count: 0, ...overrides };
+  return { skills, catalog_source: "native_host", native_context_verified: true, partial: false, warning_count: 0, source_warning_count: 0, warnings: [], ...overrides };
 };
 
 const readSkill = async (catalog, id, offset) => {
@@ -32,8 +32,12 @@ const readSkill = async (catalog, id, offset) => {
     total_chars: content.length,
     next_offset: null,
     sha256: sha256(content),
+    catalog_source: catalog.catalog_source,
+    native_context_verified: catalog.native_context_verified,
     partial: catalog.partial,
     warning_count: catalog.warning_count,
+    source_warning_count: catalog.source_warning_count,
+    warnings: catalog.warnings,
   };
 };
 
@@ -174,7 +178,7 @@ test("individually disabled required skill prevents pipeline readiness", async (
   await fs.writeFile(standaloneSkill, "---\nname: fable5-codex\ndescription: fable\n---\n# fable\n");
   await fs.writeFile(path.join(profile, "config.toml"), '[plugins."fable5-codex@gigma-skills"]\nenabled = true\n[plugins."superpowers@gigma-skills"]\nenabled = true\n[[skills.config]]\nname = "using-superpowers"\nenabled = false\n');
   const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
-  await assert.rejects(diagnosePipeline(catalog, project, { readSkill: readRegisteredSkill }), { code: "PIPELINE_NOT_READY" });
+  await assert.rejects(diagnosePipeline(catalog, project, { readSkill: readRegisteredSkill }), { code: "PIPELINE_INCOMPLETE" });
   for (const config of [
     '[plugins."fable5-codex@fable5"]\nenabled = false\n[plugins."superpowers@gigma-skills"]\nenabled = true\n',
     '[plugins."fable5-codex@fable5"]\nenabled = true\n[plugins."superpowers@gigma-skills"]\nenabled = false\n',
@@ -182,10 +186,48 @@ test("individually disabled required skill prevents pipeline readiness", async (
   ]) {
     await fs.writeFile(path.join(profile, "config.toml"), config);
     const current = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
-    await assert.rejects(diagnosePipeline(current, project, { readSkill: readRegisteredSkill }), { code: "PIPELINE_NOT_READY" });
+    await assert.rejects(diagnosePipeline(current, project, { readSkill: readRegisteredSkill }), { code: "PIPELINE_INCOMPLETE" });
   }
   await fs.writeFile(path.join(profile, "config.toml"), '[plugins."fable5-codex@fable5"]\nenabled = false\n[plugins."fable5-codex@gigma-skills"]\nenabled = true\n[plugins."superpowers@gigma-skills"]\nenabled = true\n');
   const current = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
-  const result = await diagnosePipeline(current, project, { readSkill: readRegisteredSkill });
-  assert.equal(result.skills.fable.plugin_id, "fable5-codex@gigma-skills");
+  assert.equal(current.skills.find(s => s.name === "fable5-codex").plugin_id, "fable5-codex@gigma-skills");
+  await assert.rejects(diagnosePipeline(current, project), { code: "PIPELINE_INCOMPLETE" });
+});
+
+
+test("rejects hidden source warnings or malformed warning metadata on a complete catalogue", async () => {
+  for (const override of [
+    { source_warning_count: 1 },
+    { warnings: ["CATALOG_SOURCE_ERROR"] },
+    { source_warning_count: undefined },
+    { warnings: undefined },
+    { warnings: "" },
+  ]) {
+    await assert.rejects(diagnosePipeline(makeCatalog(override), "C:/project", { readSkill }), { code: "PIPELINE_INCOMPLETE" });
+  }
+});
+
+test("rejects unverified provenance or hidden warnings on every read page", async () => {
+  for (const override of [
+    { catalog_source: "configured_cache", native_context_verified: false },
+    { catalog_source: "unknown" },
+    { catalog_source: undefined },
+    { native_context_verified: undefined },
+    { native_context_verified: false },
+    { source_warning_count: 1 },
+    { source_warning_count: undefined },
+    { warnings: ["CATALOG_SOURCE_ERROR"] },
+    { warnings: undefined },
+    { warnings: "" },
+  ]) {
+    const badRead = async (catalog, id, offset) => {
+      const page = await readSkill(catalog, id, offset);
+      if (id === "fable") {
+        if (offset === 0) page.next_offset = 1;
+        else Object.assign(page, override);
+      }
+      return page;
+    };
+    await assert.rejects(diagnosePipeline(makeCatalog(), "C:/project", { readSkill: badRead }), { code: "PIPELINE_NOT_READY" });
+  }
 });

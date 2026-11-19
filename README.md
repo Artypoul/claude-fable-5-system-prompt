@@ -74,6 +74,14 @@ node /absolute/path/to/installed/plugin/mcp/dist/update.mjs update --project /ab
 
 Native activation accepts exactly one enabled Fable source: `fable5-codex@fable5` or `fable5-codex@gigma-skills`. Search, read and status must agree on its identity, path and digest; duplicate or unknown Fable sources block readiness. The standalone updater above applies to `@fable5`; Gigma-managed installations use the Gigma update route. Superpowers must be `superpowers@gigma-skills`.
 
+In version **1.4.3**, the default read-only MCP source explicitly reports cached
+instruction candidates as partial and their native enablement as unverified.
+It cannot observe all effective settings of the calling Codex session, so
+`fable-status` returns `PIPELINE_INCOMPLETE` for this source. Reading cached text
+does not pass native activation. A same-session verified host adapter is not
+currently supplied; the separately selected ChatGPT/GitHub route remains the
+supported immutable instruction-loading route described above.
+
 The plugin loads the same complete skill directory through its manifest.
 Переход с 1.2.0, расположение бэкапов и ручное восстановление описаны в
 [инструкции безопасного обновления](SAFE_UPDATE.md). Обычные команды Codex
@@ -83,7 +91,7 @@ and migration from the earlier local installation. Standalone skill installation
 below is still supported.
 
 The plugin includes a local MCP server with callable `search_skills` and
-`read_skill` tools for enabled Codex skills. Requires Node.js 20+ and compatible
+`read_skill` tools for configured cached instruction candidates. Requires Node.js 20+ and compatible
 Codex CLI on PATH; the SDK is bundled, with no npm install at startup.
 See [MCP tools and verification](MCP.md), [capability gaps](.agents/skills/fable5-codex/references/capability-gaps.md)
 for services the host must supply and [behavioral checks](PLUGIN.md#behavioral-checks)

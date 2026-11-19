@@ -58,7 +58,7 @@ export function createServer({ catalogReader = fetchConfiguredCatalog } = {}) {
     "search_skills",
     {
       description:
-        "Find enabled installed Codex skills by name and description for a project. Empty query browses the catalogue. Read returned skill IDs with read_skill. Lexical matching; no web search, installation or execution.",
+        "Find configured candidate Codex skills by name and description for a project. Empty query browses the catalogue. Read returned skill IDs with read_skill. Lexical matching; no web search, installation or execution.",
       inputSchema: z
         .object({
           query: z.string().max(512),
@@ -73,7 +73,11 @@ export function createServer({ catalogReader = fetchConfiguredCatalog } = {}) {
       const catalog = await load(cwd, signal);
       return {
         ...searchSkills(catalog.skills, query, limit, offset),
+        catalog_source: catalog.catalog_source,
+        native_context_verified: catalog.native_context_verified,
         partial: catalog.partial,
+        warnings: catalog.warnings,
+        source_warning_count: catalog.source_warning_count,
         warning_count: catalog.warning_count,
         catalog_sha256: sha256(
           JSON.stringify(
@@ -87,7 +91,7 @@ export function createServer({ catalogReader = fetchConfiguredCatalog } = {}) {
     "read_skill",
     {
       description:
-        "Read a currently enabled registered SKILL.md by the opaque ID returned by search_skills, in the same project. Returns text only; does not execute it, grant permissions or activate a native skill. Offsets count Unicode code points.",
+        "Read a registered candidate SKILL.md by the opaque ID returned by search_skills, in the same project. Returns text only; does not execute it, grant permissions or activate a native skill. Offsets count Unicode code points.",
       inputSchema: z
         .object({
           cwd: cwdSchema,

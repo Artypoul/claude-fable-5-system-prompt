@@ -1,5 +1,14 @@
 # Fable 5 Codex plugin
 
+Version **1.4.3** separates cached instruction discovery from verified native
+enablement. Default search and read results carry explicit unverified provenance
+and remain partial; `fable-status` cannot promote them to native `ready`. The
+package currently supplies no same-session host adapter that can close that gap.
+Cache selection honors Codex's `local` directory priority and reports unsupported
+or ambiguous selections instead of silently choosing another source. Updater
+package health retains its independent native path and byte checks; it does not
+certify the calling session's activation. See [the MCP contract](MCP.md).
+
 Version **1.4.2** selects `Artypoul/superpowers` as the canonical GitHub
 instruction source, with no silent fallback to upstream. Immutable pin, full-read,
 lifecycle and reviewer gates remain in place. The fork retains attribution to
@@ -39,7 +48,7 @@ The updater also validates native Git marketplace bookkeeping from newer Codex
 CLI versions without treating it as plugin content or relaxing package checks.
 The plugin includes local read-only MCP tools `search_skills`, `read_skill` and
 `fable-status`.
-They use the enabled Codex catalogue for an explicitly supplied project. Native readiness requires exactly one enabled Fable source, either `fable5-codex@fable5` or `fable5-codex@gigma-skills`, with matching search, read and status identity, path and digest. Duplicate or unknown Fable sources block readiness; Superpowers must be `superpowers@gigma-skills`. The standalone updater targets `@fable5`, while Gigma-managed installations use the Gigma update route.
+They inspect configured cached instruction candidates for an explicitly supplied project and expose the limits of that source. Native readiness additionally requires verified calling-session context and exactly one enabled Fable source, either `fable5-codex@fable5` or `fable5-codex@gigma-skills`, with matching search, read and status identity, path and digest. The default cache source cannot satisfy that context requirement. Duplicate or unknown Fable sources also block readiness; Superpowers must be `superpowers@gigma-skills`. The standalone updater targets `@fable5`, while Gigma-managed installations use the Gigma update route.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
 See [MCP setup, contracts and verification](MCP.md).
 

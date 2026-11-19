@@ -1,3 +1,19 @@
+## 1.4.3 — native catalogue provenance and local cache selection (2026-11-19)
+
+- Label default cache discovery as configured candidates with unverified native
+  context. Preserve that provenance and partial status through search and every
+  read page; independently reject unverified context in `fable-status`.
+- Keep source reading useful without claiming that a base-profile setting proves
+  effective project, profile, session or managed enablement. No verified
+  same-session host adapter is supplied and no caller-controlled verification
+  switch is introduced. A spawned Codex process is not the caller's session.
+- Prefer the native `local` cache directory, preserve ordinary semantic version
+  ordering and reject corrupt selected or unsupported ambiguous cache states
+  without falling back to another version.
+- Preserve updater package-health checks and restoration of older bundles. A
+  known context-only warning is acceptable there only alongside independent
+  native installation identity and byte checks, never as native activation.
+
 ## 1.4.0 — ChatGPT through GitHub (2026-11-18)
 
 - Add an explicitly selected `chatgpt_github` mode with its own readiness contract. Keep native `search_skills → read_skill → fable-status` checks and MCP code unchanged.

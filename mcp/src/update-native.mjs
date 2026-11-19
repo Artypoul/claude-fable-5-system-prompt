@@ -835,6 +835,16 @@ export class NativeBackend {
         throw new UpdateError("HEALTH_FAILED", "MCP returned an error.");
       return JSON.parse(result.content[0].text);
     };
+    const acceptableCatalog = (payload, skill) => {
+      const legacy = payload.catalog_source === undefined && payload.native_context_verified === undefined &&
+        payload.source_warning_count === undefined && payload.warnings === undefined &&
+        payload.partial === false && payload.warning_count === 0 && skill?.enabled_in_native_context === undefined;
+      const candidate = payload.catalog_source === "configured_cache" && payload.native_context_verified === false &&
+        payload.partial === true && payload.warning_count === 1 && payload.source_warning_count === 0 &&
+        Array.isArray(payload.warnings) && payload.warnings.length === 1 &&
+        payload.warnings[0] === "NATIVE_CONTEXT_UNVERIFIED" && skill?.enabled_in_native_context === null;
+      return legacy || candidate;
+    };
     let timer;
     const probe = async () => {
       await client.connect(transport);
@@ -855,7 +865,7 @@ export class NativeBackend {
         (s) => s.plugin_id === this.identity.pluginId &&
           s.name === this.identity.plugin && s.path === path.resolve(own.path),
       );
-      if (!skill || found.partial)
+      if (!skill || !acceptableCatalog(found, skill))
         throw new UpdateError(
           "HEALTH_FAILED",
           "MCP did not find the installed skill in a complete catalogue.",
@@ -868,7 +878,8 @@ export class NativeBackend {
       );
       const expectedContent = Array.from(skillBytes.toString("utf8"))
         .slice(0, 16000).join("");
-      if (read.skill?.id !== skill.id || read.skill?.path !== skill.path ||
+      if (!acceptableCatalog(read, read.skill) || read.catalog_source !== found.catalog_source ||
+          read.skill?.id !== skill.id || read.skill?.path !== skill.path ||
           read.skill?.plugin_id !== this.identity.pluginId ||
           read.skill?.name !== this.identity.plugin || read.sha256 !== expectedDigest ||
           read.offset !== 0 || read.content !== expectedContent)

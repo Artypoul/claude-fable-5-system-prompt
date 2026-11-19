@@ -140,7 +140,7 @@ export async function fetchNativeCatalog(
           method: "skills/list",
           params: { cwds: [directory], forceReload: true },
         });
-      } else finish(null, message.result);
+      } else finish(null, { ...message.result, catalog_source: "native_subprocess", native_context_verified: false });
     });
     signal?.addEventListener("abort", abort, { once: true });
     if (signal?.aborted) {
@@ -446,11 +446,26 @@ export async function fetchConfiguredCatalog(
       }
       const versions = (await fs.readdir(root, { withFileTypes: true }))
         .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
-        .map((entry) => ({ name: entry.name, version: semver(entry.name) }))
-        .filter((entry) => entry.version).sort((a, b) => compareVersion(b.version, a.version));
+        .filter((entry) => /^[A-Za-z0-9._+-]+$/.test(entry.name) && entry.name !== "." && entry.name !== "..")
+        .map((entry) => ({ name: entry.name, version: semver(entry.name) }));
       throwIfAborted(signal);
-      if (!versions.length) throw new Error("no valid semver cache");
-      const versionRoot = path.join(root, versions[0].name);
+      if (!versions.length) throw new Error("no valid cache version");
+      let selected = versions.find((entry) => entry.name === "local");
+      if (!selected) {
+        // Avoid claiming an exact selection where native and local comparison can diverge.
+        const semantic = versions.filter((entry) => entry.version);
+        if (semantic.some((entry) => entry.version.core.some((part) =>
+          compareNumericStrings(part, "18446744073709551615") > 0)) ||
+          (versions.length > 2 && semantic.length && semantic.length !== versions.length) ||
+          semantic.some((entry, index) => semantic.slice(index + 1).some((other) =>
+            compareVersion(entry.version, other.version) === 0)))
+          throw new Error("ambiguous cache version selection");
+        versions.sort((a, b) => a.version && b.version
+          ? compareVersion(b.version, a.version)
+          : (a.name === b.name ? 0 : (a.name < b.name ? 1 : -1)));
+        selected = versions[0];
+      }
+      const versionRoot = path.join(root, selected.name);
       const manifestPath = path.join(versionRoot, ".codex-plugin", "plugin.json");
       const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
       throwIfAborted(signal);
@@ -458,7 +473,8 @@ export async function fetchConfiguredCatalog(
       if (typeof manifest.skills !== "string") continue;
       if (manifest.version != null) {
         const manifestVersion = typeof manifest.version === "string" && semver(manifest.version);
-        if (!manifestVersion || compareVersion(manifestVersion, versions[0].version) !== 0)
+        if (!manifestVersion || (selected.name !== "local" &&
+            (!selected.version || compareVersion(manifestVersion, selected.version) !== 0)))
           throw new Error("plugin manifest version mismatch");
       }
       const skillRoot = path.resolve(versionRoot, manifest.skills);
@@ -508,7 +524,7 @@ export async function fetchConfiguredCatalog(
   }
   throwIfAborted(signal);
   skills.sort((a, b) => a.path.localeCompare(b.path));
-  return { data: [{ cwd: directory, skills, errors }] };
+  return { catalog_source: "configured_cache", native_context_verified: false, data: [{ cwd: directory, skills, errors }] };
 }
 
 export function parseCatalog(response, cwd) {
@@ -527,6 +543,8 @@ export function parseCatalog(response, cwd) {
   if (entries.length !== 1) fail();
   const entry = entries[0];
   if (!Array.isArray(entry.skills) || !Array.isArray(entry.errors)) fail();
+  const catalog_source = ["configured_cache", "native_subprocess", "native_host"].includes(response.catalog_source) ? response.catalog_source : "unknown";
+  const native_context_verified = catalog_source === "native_host" && response.native_context_verified === true;
   const skills = new Map();
   for (const skill of entry.skills) {
     if (
@@ -553,12 +571,17 @@ export function parseCatalog(response, cwd) {
       path: filename,
       scope: skill.scope,
       plugin_id: skill.pluginId ?? null,
+      enabled_in_native_context: native_context_verified ? true : null,
     });
   }
   return {
     skills: [...skills.values()],
-    partial: entry.errors.length > 0,
-    warning_count: entry.errors.length,
+    catalog_source,
+    native_context_verified,
+    source_warning_count: entry.errors.length,
+    warnings: [...entry.errors.map(() => "CATALOG_SOURCE_ERROR"), ...(!native_context_verified ? ["NATIVE_CONTEXT_UNVERIFIED"] : [])],
+    partial: entry.errors.length > 0 || !native_context_verified,
+    warning_count: entry.errors.length + (native_context_verified ? 0 : 1),
   };
 }
 
@@ -649,7 +672,11 @@ export async function readRegisteredSkill(catalog, id, offset, limit) {
       total_chars: chars.length,
       next_offset: offset + limit < chars.length ? offset + limit : null,
       sha256: sha256(bytes),
+      catalog_source: catalog.catalog_source,
+      native_context_verified: catalog.native_context_verified,
       partial: catalog.partial,
+      warnings: catalog.warnings,
+      source_warning_count: catalog.source_warning_count,
       warning_count: catalog.warning_count,
     };
   } catch (error) {
