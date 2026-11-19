@@ -40,6 +40,10 @@ Gigma registry to one commit, verifies its Fable/Superpowers pins and manifests,
 reads full instructions and required dependencies, then checks the real task
 capabilities. The canonical contract is
 [ChatGPT through GitHub](.agents/skills/fable5-codex/references/chatgpt-github.md).
+The canonical Superpowers source is the pinned `Artypoul/superpowers` fork;
+missing or mismatched sources block the dependent step rather than silently
+falling back to upstream. The fork retains the upstream project by Jesse Vincent
+and its [source and license](https://github.com/obra/superpowers).
 
 For project chats, save the [copyable project instruction](docs/chatgpt-project-instructions.md)
 in the intended ChatGPT project and verify a new chat without a Fable reminder.
