@@ -26,6 +26,7 @@ for await (const line of lines) {
       JSON.stringify({
         id: 2,
         result: {
+          ...(mode === "spoof" ? { catalog_source: "native_host", native_context_verified: true } : {}),
           data: [{ cwd: request.params.cwds[0], skills: [], errors: [] }],
         },
       }) + "\n",

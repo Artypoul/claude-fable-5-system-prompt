@@ -47,6 +47,10 @@ async function readCompleteSkill(catalog, skill, readSkill) {
     const page = await readSkill(catalog, skill.id, offset, 32000);
     if (
       !page ||
+      page.catalog_source !== "native_host" ||
+      page.native_context_verified !== true ||
+      page.source_warning_count !== 0 ||
+      !Array.isArray(page.warnings) || page.warnings.length !== 0 ||
       page.partial !== false ||
       page.warning_count !== 0 ||
       page.skill?.id !== skill.id ||
@@ -75,7 +79,11 @@ async function readCompleteSkill(catalog, skill, readSkill) {
 export async function diagnosePipeline(catalog, cwd, { readSkill = readRegisteredSkill } = {}) {
   if (!catalog || !Array.isArray(catalog.skills))
     fail("PIPELINE_NOT_READY", "Skill catalogue is unavailable.");
-  if (catalog.partial !== false || catalog.warning_count !== 0)
+  if (catalog.catalog_source !== "native_host" || catalog.native_context_verified !== true)
+    fail("PIPELINE_INCOMPLETE", "Native host context is unverified; use a verified host catalogue before checking pipeline readiness.");
+  if (catalog.partial !== false || catalog.warning_count !== 0 ||
+      catalog.source_warning_count !== 0 ||
+      !Array.isArray(catalog.warnings) || catalog.warnings.length !== 0)
     fail("PIPELINE_INCOMPLETE", "Skill catalogue is partial or contains warnings.");
 
   const skills = {};

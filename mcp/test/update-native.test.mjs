@@ -4,6 +4,7 @@ import * as fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
 import { NativeBackend, command } from "../src/update-native.mjs";
 import {
   inventory,
@@ -385,7 +386,7 @@ async function healthFixture(t, nativeName = "fable5-codex:fable5-codex") {
   await fs.writeFile(path.join(installed, ".codex-plugin/plugin.json"), JSON.stringify({ name: "fable5-codex", version: "1.0.0", skills: "./.agents/skills/" }));
   await fs.writeFile(path.join(installed, ".mcp.json"), JSON.stringify({ mcpServers: { fable5_skills: { command: "node", cwd: "./", args: ["mcp/dist/server.mjs"] } } }));
   await fs.writeFile(path.join(installed, skill), "---\nname: fable5-codex\ndescription: selected fixture\n---\nselected content\n");
-  await fs.copyFile(path.join(root, "mcp/dist/server.mjs"), path.join(installed, "mcp/dist/server.mjs"));
+  await build({ entryPoints: [path.join(root, "mcp/src/main.mjs")], bundle: true, platform: "node", target: "node20", format: "esm", outfile: path.join(installed, "mcp/dist/server.mjs"), logLevel: "silent" });
   const native = path.join(temp, "native-fixture.mjs");
   await fs.writeFile(native, `#!${process.execPath}\nimport { createInterface } from 'node:readline';\nconst skill = ${JSON.stringify(path.join(installed, skill))};\nfor await (const line of createInterface({input: process.stdin})) {\n const request = JSON.parse(line);\n if (request.id === 1) console.log(JSON.stringify({id: 1, result: {}}));\n if (request.id === 2) console.log(JSON.stringify({id: 2, result: {data: [{cwd: process.cwd(), errors: [], skills: [{name: ${JSON.stringify(nativeName)}, description: 'fixture', path: skill, scope: 'user', pluginId: 'fable5-codex@fable5', enabled: true}]}]}}));\n}\n`);
   await fs.chmod(native, 0o755);
@@ -433,4 +434,50 @@ test("health uses the default profile without CODEX_HOME", async (t) => {
   delete process.env.USERPROFILE;
   delete process.env.CODEX_HOME;
   await assert.doesNotReject(f.backend.health(f.installed, f.project, f.files));
+});
+
+test('health rejects real configured catalogue errors', async (t) => {
+  const f = await healthFixture(t);
+  process.env.CODEX_HOME = f.profile;
+  const bad = path.join(f.project, '.agents/skills/bad/SKILL.md');
+  await fs.mkdir(path.dirname(bad), { recursive: true });
+  await fs.writeFile(bad, 'invalid skill metadata');
+  await assert.rejects(f.backend.health(f.installed, f.project, f.files), { code: 'HEALTH_FAILED' });
+});
+
+test('health accepts legacy rollback payloads but rejects malformed candidate provenance on search and read', async (t) => {
+  const f = await healthFixture(t);
+  process.env.CODEX_HOME = f.profile;
+  const server = path.join(f.installed.path, 'mcp/dist/server.mjs');
+  const skillPath = path.join(f.installed.path, f.skill);
+  const bytes = await fs.readFile(skillPath);
+  const { createHash } = await import('node:crypto');
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  const script = (mode, where) => `import { createInterface } from 'node:readline';
+const skill = { id: 'a'.repeat(64), name: 'fable5-codex', plugin_id: 'fable5-codex@fable5', path: ${JSON.stringify(skillPath)} };
+const mode = ${JSON.stringify(mode)}, where = ${JSON.stringify(where)};
+const candidate = {catalog_source:'configured_cache',native_context_verified:false,partial:true,warning_count:1,source_warning_count:0,warnings:['NATIVE_CONTEXT_UNVERIFIED']};
+for await (const line of createInterface({input:process.stdin})) {
+ const m=JSON.parse(line); if (m.id == null) continue;
+ let result;
+ if(m.method==='initialize') result={protocolVersion:m.params.protocolVersion,capabilities:{tools:{}},serverInfo:{name:'fixture',version:'1'}};
+ else if(m.method==='tools/list') result={tools:['search_skills','read_skill'].map(name=>({name,inputSchema:{type:'object',properties:{}}}))};
+ else if(m.method==='tools/call') {
+  const search=m.params.name==='search_skills', bad=where===(search?'search':'read');
+  const meta=mode==='legacy'?{partial:false,warning_count:0}:{...candidate};
+  if(mode!=='legacy') skill.enabled_in_native_context=null;
+  if(bad && mode==='missing') delete meta.warnings;
+  if(bad && mode==='wrong') meta.catalog_source='native_subprocess';
+  if(bad && mode==='malformed') meta.warnings=['OTHER'];
+  const data=search?{...meta,skills:[skill]}:{...meta,skill,sha256:${JSON.stringify(hash)},offset:0,content:${JSON.stringify(bytes.toString('utf8'))}};
+  result={content:[{type:'text',text:JSON.stringify(data)}]};
+ } else continue;
+ console.log(JSON.stringify({jsonrpc:'2.0',id:m.id,result}));
+}`;
+  for (const [mode, where, ok] of [['legacy', 'search', true], ['missing', 'search', false], ['wrong', 'search', false], ['malformed', 'read', false], ['missing', 'read', false], ['wrong', 'read', false]]) {
+    await fs.writeFile(server, script(mode, where));
+    const files = await inventory(f.installed.path);
+    if (ok) await assert.doesNotReject(f.backend.health(f.installed, f.project, files));
+    else await assert.rejects(f.backend.health(f.installed, f.project, files), { code: 'HEALTH_FAILED' }, `${mode} ${where}`);
+  }
 });

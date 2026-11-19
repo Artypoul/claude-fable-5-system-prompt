@@ -47,7 +47,7 @@ test("configured catalogue applies disabled skill path", async (t) => {
     await f.config(rule("path", selector, false));
     const catalog = await f.catalog();
     assert.equal(catalog.skills.some((skill) => skill.path === real), false);
-    await assert.rejects(readRegisteredSkill(catalog, old.id, 0, 32000), { code: "SKILL_NOT_FOUND" });
+    await assert.rejects(readRegisteredSkill(catalog, old.id, 0, 32000), { code: "CATALOG_INCOMPLETE" });
   }
 });
 
@@ -74,8 +74,8 @@ test("configured catalogue preserves comment markers inside skill selectors", as
     await fs.writeFile(config, `[[skills.config]] # rule\n${selector} # selector\nenabled = false # disable\n`);
     const disabled = await catalog();
     assert.equal(disabled.skills.some((skill) => skill.path === old.path), false, selector);
-    await assert.rejects(readRegisteredSkill(disabled, old.id, 0, 32000), { code: "SKILL_NOT_FOUND" });
-    assert.equal(disabled.partial, false);
+    await assert.rejects(readRegisteredSkill(disabled, old.id, 0, 32000), { code: "CATALOG_INCOMPLETE" });
+    assert.equal(disabled.partial, true);
   }
 });
 
@@ -125,7 +125,7 @@ test("configured catalogue reads enabled cache skills without spawning Codex", a
   assert.equal(catalog.skills.length, 1);
   assert.equal(catalog.skills[0].plugin_id, "demo@gigma-skills");
   assert.equal(catalog.skills[0].path, await fs.realpath(skill));
-  assert.equal(catalog.partial, false);
+  assert.equal(catalog.partial, true);
 });
 
 test("configured catalogue accepts matching plugin versions with build metadata", async (t) => {
@@ -140,8 +140,8 @@ test("configured catalogue accepts matching plugin versions with build metadata"
   await fs.writeFile(path.join(versionRoot, ".codex-plugin", "plugin.json"), JSON.stringify({ name: "demo", version: "0.1.0", skills: "./skills" }));
   await fs.writeFile(path.join(versionRoot, "skills", "SKILL.md"), "---\nname: demo\ndescription: Demo skill\n---\n");
   const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
-  assert.equal(catalog.partial, false);
-  assert.equal(catalog.warning_count, 0);
+  assert.equal(catalog.partial, true);
+  assert.equal(catalog.warning_count, 1);
   assert.equal(catalog.skills[0]?.plugin_id, "demo@gigma-skills");
 });
 
@@ -162,7 +162,8 @@ test("configured catalogue rejects invalid, different core and different prerele
   }
   const catalog = parseCatalog(await fetchConfiguredCatalog(project, { profileRoot: profile }), project);
   assert.equal(catalog.skills.length, 0);
-  assert.equal(catalog.warning_count, 3);
+  assert.equal(catalog.warning_count, 4);
+  assert.equal(catalog.source_warning_count, 3);
 });
 
 test("configured catalogue honors a custom CODEX_HOME without appending .codex", async (t) => {
@@ -214,8 +215,8 @@ test("configured catalogue uses the OS home when profile environment is absent",
       else process.env[key] = value;
     }
     const catalog = parseCatalog(await fetchConfiguredCatalog(project), project);
-    assert.equal(catalog.partial, false);
-    assert.equal(catalog.warning_count, 0);
+    assert.equal(catalog.partial, true);
+    assert.equal(catalog.warning_count, 1);
     assert.equal(catalog.skills.length, 1);
     assert.equal(catalog.skills[0].path, await fs.realpath(skill));
   }
@@ -533,7 +534,7 @@ test("native catalogue contract: active entries only, no name-based deduplicatio
   const parsed = parseCatalog(data, cwd);
   assert.equal(parsed.skills.length, 2);
   assert.notEqual(parsed.skills[0].id, parsed.skills[1].id);
-  assert.equal(parsed.partial, false);
+  assert.equal(parsed.partial, true);
   data.data[0].errors.push({ path: "redacted", message: "invalid skill" });
   assert.equal(parseCatalog(data, cwd).partial, true);
 });
@@ -573,11 +574,11 @@ test("read registered text in Unicode code points and bind complete content dige
     code: "INVALID_OFFSET",
   });
   await assert.rejects(readRegisteredSkill(catalog, "0".repeat(64), 0, 10), {
-    code: "SKILL_NOT_FOUND",
+    code: "CATALOG_INCOMPLETE",
   });
   await assert.rejects(
     readRegisteredSkill({ ...catalog, skills: [] }, id, 0, 10),
-    { code: "SKILL_NOT_FOUND" },
+    { code: "CATALOG_INCOMPLETE" },
   );
 });
 
@@ -629,7 +630,11 @@ test("native JSON-RPC transport: success, source error, bad JSON, timeout, cance
     });
   assert.deepEqual(await run("ok"), {
     data: [{ cwd, skills: [], errors: [] }],
+    catalog_source: "native_subprocess", native_context_verified: false,
   });
+  const spoofed = await run("spoof");
+  assert.equal(spoofed.catalog_source, "native_subprocess");
+  assert.equal(spoofed.native_context_verified, false);
   await assert.rejects(run("bad-json"), { code: "INVALID_CATALOG" });
   await assert.rejects(run("error"), { code: "CATALOG_UNAVAILABLE" });
   await assert.rejects(run("timeout", { timeoutMs: 100 }), {
