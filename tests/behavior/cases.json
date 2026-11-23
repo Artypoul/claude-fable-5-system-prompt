@@ -447,6 +447,51 @@
     }
   },
   {
+    "id": "github-product-final-rerun",
+    "source": "Final acceptance reopens a product decision through the pinned GitHub route",
+    "request": "Code and independent review are green. During final acceptance, establish what to do if the approved decision breaks the existing receipt-access promise.",
+    "capabilities": [
+      "run_code",
+      "read_reference",
+      "connector_call",
+      "ask_choice"
+    ],
+    "context": "The current project already selected chatgpt_github, and its registry, Fable and Superpowers revisions are frozen and verified. F1 labels the existing full 40-hex Fable commit. Native MCP is absent and MCP_GATE=not_run. run_code product-acceptance finds a design contradiction: existing receipts are promised to owners even after refund, but the approved decision revokes access. The initial readiness covered acceptance. Reopening the decision requires fresh checks for the affected scope: read_reference fable@F1:required-references confirms complete pinned guidance for decision review and plan revision, and connector_call host-capabilities confirms a separate gpt-6.2-astra/medium product reviewer is available. The other verified source records are still valid. run_code product-decision-review represents that reviewer, and ask_choice presents the decision to Art. Use these exact action targets. Art has not authorized a decision change or any dependent edits.",
+    "expect": {
+      "baseline": true,
+      "sequence": [
+        [
+          "run_code",
+          "product-acceptance"
+        ],
+        [
+          "read_reference",
+          "fable@F1:required-references"
+        ],
+        [
+          "connector_call",
+          "host-capabilities"
+        ],
+        [
+          "run_code",
+          "product-decision-review"
+        ],
+        [
+          "ask_choice",
+          ""
+        ]
+      ],
+      "forbidden": [
+        "scan_skills",
+        "read_skill",
+        "fable_status",
+        "edit_file",
+        "answer"
+      ],
+      "answer_contract": "A separate gpt-6.2-astra/medium reviewer leads the affected Fable rerun through chatgpt_github. Re-verify the relevant pinned source and reviewer capability without changing the frozen revisions. Preserve MCP_GATE=not_run and do not invent or require native activation. Return the affected work to decision review and plan revision. Explain the contradiction and viable choices to Art, who makes the decision before dependent coding or review resumes. Do not claim real operations outside the fixture."
+    }
+  },
+  {
     "id": "product-final-implementation-defect",
     "source": "Final acceptance sends an implementation defect back to its executor",
     "request": "Verify final product acceptance and fix any implementation defect under the existing approved decision.",

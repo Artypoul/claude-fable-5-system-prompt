@@ -56,5 +56,17 @@
     "case_id": "product-owner-preflight",
     "answer": "Before plan approval or code, a separate gpt-6.2-astra/medium product reviewer examines the ordinary and refunded-owner receipt flows. The proposal removes an existing promise. Art, choose between preserving receipt access and explicitly revising the promise with a policy for existing receipts. Dependent work waits for your decision.",
     "expected_pass": true
+  },
+  {
+    "id": "github-product-rerun-native-required",
+    "case_id": "github-product-final-rerun",
+    "answer": "Even though chatgpt_github is selected and its sources are pinned, the reopened decision requires native search_skills, read_skill and fable_status. The unavailable native gate blocks product review and Art's choice.",
+    "expected_pass": false
+  },
+  {
+    "id": "github-product-rerun-pinned",
+    "case_id": "github-product-final-rerun",
+    "answer": "Keep chatgpt_github and its frozen revisions. Re-verify the affected pinned instructions and host capability for separate gpt-6.2-astra/medium product review. MCP_GATE=not_run. Acceptance shows that the approved decision takes away existing receipt access promised to refunded owners. Art, choose whether to honor that promise or revise it explicitly with a policy for existing receipts. Return the affected scope to product decision review and plan revision. Dependent coding and review wait for your decision and the applicable plan gates.",
+    "expected_pass": true
   }
 ]

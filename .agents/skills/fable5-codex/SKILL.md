@@ -86,7 +86,12 @@ When delegation is authorized, configure each new agent explicitly with `fork_tu
 
 Parallelize independent areas with disjoint write scopes and separate checks. Settle a common contract before dependent work and keep implementation, tests and fixes with the same executor. Preserve reviewer independence and project gates. If a required model, effort or isolated context is unavailable, report the specific gap and hold the affected stage. Higher-priority instructions and user scope govern every assignment.
 
-After independent code review, Astra verifies the agreed product criteria against current user-scenario evidence. Return implementation defects to the original executor, then recheck affected evidence after current code review. When new facts require reconsidering the product decision, Astra re-runs `search_skills → read_skill → fable_status` in the active project and leads the affected Fable work from product decision review and plan revision. Resume affected coding and review only after Art settles outstanding product choices and the applicable plan gates pass.
+After independent code review, Astra verifies the agreed product criteria against current user-scenario evidence. Return implementation defects to the original executor, then recheck affected evidence after current code review. When new facts require reconsidering the product decision, Astra repeats the affected Fable checks through the selected mode.
+
+- In `native_codex`, re-run `search_skills → read_skill → fable_status` in the active project.
+- In `chatgpt_github`, follow the [pinned GitHub route](references/chatgpt-github.md) using the frozen registry, Fable and Superpowers revisions. Reopen activation only for prerequisites invalidated by the new scope or source change, and re-verify the relevant pinned source reads and host capabilities. Keep `MCP_GATE=not_run` when no native probe ran.
+
+Astra leads the affected work through product decision review and plan revision. Resume affected coding and review only after Art settles outstanding product choices and the applicable plan gates pass.
 
 Read [capability gaps and verification](references/capability-gaps.md) before promising persistent storage, authenticated AI calls, specialized widgets or specialist workflows. That reference distinguishes guidance supplied by this package from capabilities supplied by the host and from integrations that still need implementation.
 
