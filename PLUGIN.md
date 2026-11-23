@@ -1,5 +1,12 @@
 # Fable 5 Codex plugin
 
+Version **1.4.4** checks product decisions, including the product owner's
+proposals, before plan approval and dependent implementation. GPT-6.2 Sol
+Medium handles coding, GPT-6.1 Sol Extra High independently reviews code, and
+GPT-6.2 Astra Medium checks decisions and acceptance evidence and leads repeat
+Fable passes when the product decision changes. The native MCP implementation
+uses the working 1.4.2 baseline.
+
 Version **1.4.2** selects `Artypoul/superpowers` as the canonical GitHub
 instruction source, with no silent fallback to upstream. Immutable pin, full-read,
 lifecycle and reviewer gates remain in place. The fork retains attribution to

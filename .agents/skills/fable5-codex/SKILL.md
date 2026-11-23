@@ -74,7 +74,24 @@ For engineering work, apply the Fable baseline, then applicable project bootstra
 
 In `native_codex`, on every `read_skill` page, verify the returned skill ID, `plugin_id` and path match the selected enabled entry, check `partial` and `warning_count`, and require the same content `sha256` across all pages. Discard a partial, changed or mismatched read and reconcile against the live catalogue before using it. In fallback discovery, enabled status needs live host evidence; a manifest or cache can map a path but cannot establish that a skill is enabled.
 
-When delegation is authorized and available, assign every non-review executor, including nested agents, explicit `model="gpt-6.1-terra"`, `reasoning_effort="high"`, and `fork_turns="none"`; assign every independent reviewer, including nested reviewers, explicit `model="gpt-6.1-sol"`, `reasoning_effort="xhigh"`, and `fork_turns="none"`, using the live host schema. Preserve reviewer independence and any stricter applicable gates. If a required role, model, effort or isolated context is unavailable, report the specific gap and block the affected step; do not silently change models or claim an independent review occurred. These are instructions, not runtime enforcement, permission to delegate, or a claim that the host supports the options. Higher-priority instructions and the user's scope always control.
+### Product decisions and model routing
+
+When the task proposes or changes product behavior, have a separate product reviewer check the decision before plan approval and dependent coding. Apply this to decisions proposed by Art and by agents. Give the reviewer the goal, current behavior and evidence, the proposed change, affected normal and edge scenarios, and acceptance criteria. Bring any material discrepancy, concrete consequences and viable choices to Art. Art makes the product decision before dependent work starts.
+
+When delegation is authorized, configure each new agent explicitly with `fork_turns="none"` and the following model and effort. Apply the same roles to nested assignments.
+
+- Code implementation and fixes use `model="gpt-6.2-sol"` and `reasoning_effort="medium"`. Other execution uses `model="gpt-6.1-terra"` and `reasoning_effort="high"`.
+- Independent code review and other independent review outside the product role use `model="gpt-6.1-sol"` and `reasoning_effort="xhigh"`.
+- Product decision review, final product acceptance and leading a repeat Fable pass use `model="gpt-6.2-astra"` and `reasoning_effort="medium"`.
+
+Parallelize independent areas with disjoint write scopes and separate checks. Settle a common contract before dependent work and keep implementation, tests and fixes with the same executor. Preserve reviewer independence and project gates. If a required model, effort or isolated context is unavailable, report the specific gap and hold the affected stage. Higher-priority instructions and user scope govern every assignment.
+
+After independent code review, Astra verifies the agreed product criteria against current user-scenario evidence. Return implementation defects to the original executor, then recheck affected evidence after current code review. When new facts require reconsidering the product decision, Astra repeats the affected Fable checks through the selected mode.
+
+- In `native_codex`, re-run `search_skills → read_skill → fable_status` in the active project.
+- In `chatgpt_github`, follow the [pinned GitHub route](references/chatgpt-github.md) using the frozen registry, Fable and Superpowers revisions. Reopen activation only for prerequisites invalidated by the new scope or source change, and re-verify the relevant pinned source reads and host capabilities. Keep `MCP_GATE=not_run` when no native probe ran.
+
+Astra leads the affected work through product decision review and plan revision. Resume affected coding and review only after Art settles outstanding product choices and the applicable plan gates pass.
 
 Read [capability gaps and verification](references/capability-gaps.md) before promising persistent storage, authenticated AI calls, specialized widgets or specialist workflows. That reference distinguishes guidance supplied by this package from capabilities supplied by the host and from integrations that still need implementation.
 
