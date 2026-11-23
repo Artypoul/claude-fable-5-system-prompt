@@ -31,6 +31,7 @@ class ModelRunIntegrityTests(unittest.TestCase):
                 argv = run.call_args.args[0]
                 self.assertEqual(model, argv[argv.index('-m') + 1])
                 self.assertEqual(f'model_reasoning_effort="{effort}"', argv[argv.index('-c') + 1])
+                self.assertIn('project_doc_max_bytes=65536', argv)
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

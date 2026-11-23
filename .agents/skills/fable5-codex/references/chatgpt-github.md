@@ -42,9 +42,12 @@ work or mutate external state. Higher-priority instructions always govern.
    `fable5-codex` and `superpowers` entries. Require unique entries, matching
    versions and source URLs/SHAs in both files, and full 40-hex commit pins.
    The selected repositories must be
-   `Artypoul/claude-fable-5-system-prompt` and `obra/superpowers`, unless the user
-   has explicitly authorized a different source. A similarly named package is
-   not a substitute. Reject inconsistent, missing or ambiguous entries.
+   `Artypoul/claude-fable-5-system-prompt` and `Artypoul/superpowers`, unless the
+   user has explicitly authorized a different source. Do not silently fall back to `obra/superpowers`
+   if the owned source is unavailable or mismatched; block the dependent step.
+   A similarly named package is not a substitute. Reject inconsistent, missing
+   or ambiguous entries. The owned fork is the instruction source; upstream
+   authorship and license attribution remain with the original project.
 3. At the pinned Fable commit, read the complete
    `.agents/skills/fable5-codex/SKILL.md` and `.codex-plugin/plugin.json`.
    Verify the manifest's name and version against the registry. Read this

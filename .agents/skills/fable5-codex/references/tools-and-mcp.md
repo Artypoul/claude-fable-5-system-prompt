@@ -40,10 +40,12 @@ For every explicit Fable 5 trigger using `native_codex`, keep the activation sta
 ordered same-`cwd` chain `search_skills → read_skill → fable-status` (or the
 host's `fable_status` name), with complete stable catalogue data, a matching
 Superpowers read and `status=ready`, `partial=false`, `warning_count=0`, plus
-the exact `fable5-codex@gigma-skills` path and digest. Require
+the selected Fable identity, path and digest. Exactly one enabled Fable entry must
+have `plugin_id` `fable5-codex@fable5` or `fable5-codex@gigma-skills`; two
+active entries or an unknown identity block readiness. Require
 `catalogHashMatchesSearch=true` when the field is exposed; otherwise compare
-the status `catalog_sha256` directly with the search digest. Record the project `cwd`, Fable
-and catalogue digests, selected `superpowers@gigma-skills` identity/path and
+the status `catalog_sha256` directly with the search digest. Record the project `cwd`, selected Fable
+identity, path and digest, catalogue digest, selected `superpowers@gigma-skills` identity/path and
 read digest. Do not begin
 task-specific work while `pending`, and restart the gate when `cwd` or source
 changes. If any step fails, set `FABLE_GATE=partial` and

@@ -1,5 +1,19 @@
 # Fable 5 Codex plugin
 
+Version **1.4.4** checks product decisions, including the product owner's
+proposals, before plan approval and dependent implementation. GPT-6.2 Sol
+Medium handles coding, GPT-6.1 Sol Extra High independently reviews code, and
+GPT-6.2 Astra Medium checks decisions and acceptance evidence and leads repeat
+Fable passes when the product decision changes. The native MCP implementation
+uses the working 1.4.2 baseline.
+
+Version **1.4.2** selects `Artypoul/superpowers` as the canonical GitHub
+instruction source, with no silent fallback to upstream. Immutable pin, full-read,
+lifecycle and reviewer gates remain in place. The fork retains attribution to
+Jesse Vincent and the [upstream project and license](https://github.com/obra/superpowers).
+
+Version **1.4.1** respects individual skill settings, verifies updater health in the selected Codex profile, and supports exactly one Fable installation from the two documented sources.
+
 Version **1.4.0** adds [ChatGPT through GitHub](.agents/skills/fable5-codex/references/chatgpt-github.md): a supported immutable instruction-loading route with full-read, dependency and capability gates. It preserves native MCP behavior and distinguishes GitHub readiness from installation, native activation and task completion. Use the [project instruction](docs/chatgpt-project-instructions.md), [acceptance guide](docs/chatgpt-github-acceptance.md) and [evidence report](docs/chatgpt-github-evidence.md). The second release PR updates both Gigma registry pins to the tested source commit.
 
 Version 1.3.8 adds the read-only `fable-status` MCP tool. It verifies the
@@ -32,7 +46,7 @@ The updater also validates native Git marketplace bookkeeping from newer Codex
 CLI versions without treating it as plugin content or relaxing package checks.
 The plugin includes local read-only MCP tools `search_skills`, `read_skill` and
 `fable-status`.
-They use the enabled Codex catalogue for an explicitly supplied project.
+They use the enabled Codex catalogue for an explicitly supplied project. Native readiness requires exactly one enabled Fable source, either `fable5-codex@fable5` or `fable5-codex@gigma-skills`, with matching search, read and status identity, path and digest. Duplicate or unknown Fable sources block readiness; Superpowers must be `superpowers@gigma-skills`. The standalone updater targets `@fable5`, while Gigma-managed installations use the Gigma update route.
 Node.js 20+ and compatible Codex CLI must be on PATH; the SDK is bundled.
 See [MCP setup, contracts and verification](MCP.md).
 
