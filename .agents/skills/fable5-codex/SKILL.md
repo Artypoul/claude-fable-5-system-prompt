@@ -78,13 +78,15 @@ In `native_codex`, on every `read_skill` page, verify the returned skill ID, `pl
 
 When the task proposes or changes product behavior, have a separate product reviewer check the decision before plan approval and dependent coding. Apply this to decisions proposed by Art and by agents. Give the reviewer the goal, current behavior and evidence, the proposed change, affected normal and edge scenarios, and acceptance criteria. Bring any material discrepancy, concrete consequences and viable choices to Art. Art makes the product decision before dependent work starts.
 
+Before the first implementation edit, agree on the delegation required by the selected workflow. Record the implementation, independent review and product acceptance roles that apply, their scopes and their dependencies in the plan. Reuse authorization that covers those assignments under the current runtime rules. If a required role is still unauthorized, resolve it before writing dependent code. Select an inline workflow only when its entry conditions are met.
+
 When delegation is authorized, configure each new agent explicitly with `fork_turns="none"` and the following model and effort. Apply the same roles to nested assignments.
 
-- Code implementation and fixes use `model="gpt-6.2-sol"` and `reasoning_effort="medium"`. Other execution uses `model="gpt-6.1-terra"` and `reasoning_effort="high"`.
-- Independent code review and other independent review outside the product role use `model="gpt-6.1-sol"` and `reasoning_effort="xhigh"`.
+- Code implementation and fixes use `model="gpt-6.2-sol"` and `reasoning_effort="medium"`. Other execution uses `model="gpt-6.2-sol"` and `reasoning_effort="high"`.
+- Independent code review and other independent review outside the product role use `model="gpt-6.2-astra"` and `reasoning_effort="xhigh"`.
 - Product decision review, final product acceptance and leading a repeat Fable pass use `model="gpt-6.2-astra"` and `reasoning_effort="medium"`.
 
-Parallelize independent areas with disjoint write scopes and separate checks. Settle a common contract before dependent work and keep implementation, tests and fixes with the same executor. Preserve reviewer independence and project gates. If a required model, effort or isolated context is unavailable, report the specific gap and hold the affected stage. Higher-priority instructions and user scope govern every assignment.
+Dispatch ready independent assignments before waiting for any of them to finish. Their write scopes must be disjoint and their checks independent. Settle a common contract before dependent work and keep implementation, tests and fixes with the same executor. Preserve reviewer independence and project gates. If a required model, effort or isolated context is unavailable, report the specific gap and hold the affected stage. Higher-priority instructions and user scope govern every assignment.
 
 After independent code review, Astra verifies the agreed product criteria against current user-scenario evidence. Return implementation defects to the original executor, then recheck affected evidence after current code review. When new facts require reconsidering the product decision, Astra repeats the affected Fable checks through the selected mode.
 

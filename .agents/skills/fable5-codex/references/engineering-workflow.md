@@ -82,12 +82,13 @@ Apply the [scope guard and recovery procedure](coding-workflow.md#scope-guard-an
 
 1. Read and orient; reproduce the issue or establish the requested behavior.
 2. Form a plan around files, invariants, interfaces, risks, and verification.
-3. For behavior changes, define expected behavior and a test before implementation where the project supports it. Verify the test detects the missing behavior.
-4. Implement in focused patches. Avoid unrelated cleanup and broad rewrites.
-5. Inspect the diff after each coherent change.
-6. Run targeted checks, then the repository's required broader checks.
-7. Review edge cases, failure paths, compatibility, security, and rollback.
-8. Report what changed and what was actually verified.
+3. Before any implementation edit, confirm the scoped delegation required by the plan. Start authorized independent assignments together when their write scopes and checks are independent. Use the observed completion of each assignment and verify its result before starting work that depends on it.
+4. For behavior changes, define expected behavior and a test before implementation where the project supports it. Verify the test detects the missing behavior.
+5. Implement in focused patches. Avoid unrelated cleanup and broad rewrites.
+6. Inspect the diff after each coherent change.
+7. Run targeted checks, then the repository's required broader checks.
+8. Review edge cases, failure paths, compatibility, security, and rollback.
+9. Report what changed and what was actually verified.
 
 Use only the shell, editing, browser, computer-use, and file tools actually exposed in the current session. Prefer purpose-built tools over UI automation. Browser/computer interaction is for tasks that require direct interaction, not a substitute for ordinary source lookup. Never run destructive commands or modify external state without appropriate authorization.
 

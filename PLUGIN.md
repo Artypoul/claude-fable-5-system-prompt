@@ -1,11 +1,13 @@
 # Fable 5 Codex plugin
 
-Version **1.4.4** checks product decisions, including the product owner's
-proposals, before plan approval and dependent implementation. GPT-6.2 Sol
-Medium handles coding, GPT-6.1 Sol Extra High independently reviews code, and
-GPT-6.2 Astra Medium checks decisions and acceptance evidence and leads repeat
-Fable passes when the product decision changes. The native MCP implementation
-uses the working 1.4.2 baseline.
+Version **1.4.5** uses GPT-6.2 Sol Medium for coding, GPT-6.2 Sol High for
+other execution, and GPT-6.2 Astra Extra High for independent review. GPT-6.2
+Astra Medium checks product decisions and acceptance evidence and leads repeat
+Fable passes when the product decision changes. Confirm delegation before
+implementation and start independent assignments before waiting for any result.
+
+Version **1.4.4** adds product decision checks before plan approval and
+dependent implementation. Native MCP uses the 1.4.2 baseline.
 
 Version **1.4.2** selects `Artypoul/superpowers` as the canonical GitHub
 instruction source, with no silent fallback to upstream. Immutable pin, full-read,
@@ -66,7 +68,7 @@ not a claim of complete runtime equivalence with the source provider.
 
 ```sh
 python -m unittest discover -s tests -v
-python scripts/evaluate_behavior.py --run-model --model gpt-6.1-terra --reasoning-effort high --judge-model gpt-6.1-sol --judge-reasoning-effort xhigh --output /absolute/path/behavior-results.json
+python scripts/evaluate_behavior.py --run-model --model gpt-6.2-sol --reasoning-effort high --judge-model gpt-6.2-astra --judge-reasoning-effort xhigh --output /absolute/path/behavior-results.json
 ```
 
 The first command runs deterministic integrity, packaging and scenario-checker

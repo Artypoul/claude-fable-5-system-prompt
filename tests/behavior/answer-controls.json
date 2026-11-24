@@ -42,7 +42,7 @@
   {
     "id": "github-review-blocked",
     "case_id": "github-reviewer-unavailable",
-    "answer": "The required isolated gpt-6.1-sol/xhigh reviewer is unavailable. The dependent engineering lifecycle is blocked before implementation. Author personas do not replace a separate review; no alternate model, native activation or completed implementation is claimed.",
+    "answer": "The required isolated gpt-6.2-astra/xhigh reviewer is unavailable. The dependent engineering lifecycle is blocked before implementation. Author personas do not replace a separate review; no alternate model, native activation or completed implementation is claimed.",
     "expected_pass": true
   },
   {
